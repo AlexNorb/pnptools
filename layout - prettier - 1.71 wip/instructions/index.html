@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="expires" content="Tue, 01 Jan 1990 12:00:00 GMT" />
+    <title>Card layout tool</title>
+
+    <link rel="icon" href="favicon.png" type="image/png" />
+    <link rel="stylesheet" href="style.css" />
+    <!-- loader -->
+    <link rel="stylesheet" href="spinkit.css" />
+    <!-- checkbox -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <a href="https://www.pnpbuddy.com">
+          <i class="fa-solid fa-house icon link"></i>
+        </a>
+        <h1>Card layout tool v1.71</h1>
+        <a href="../index.html">
+          <i class="fa-regular fa-circle-left icon link"></i>
+        </a>
+      </div>
+
+      <div class="form-group">
+        <p>
+          Drop or click to select image files, .jpg is recommended but .png also
+          works.<br />
+          1000 JPG images with total size 300mb = few seconds. 100 PNG images
+          with total size 100mb = 30 seconds.<br />
+          You can mix filetype if you have some images that need to be .png due
+          to transparancy, for example if you want rounded corners.
+        </p>
+        <div class="dropzone" id="frontDropzone">
+          <label for="frontImages">Fronts</label>
+          <p>
+            <i class="fa-regular fa-file-image icon" style="color: #000000"></i>
+          </p>
+          <p2 id="fileCount">0 files selected</p2>
+          <input
+            type="file"
+            id="frontImages"
+            accept=".png, .jpg, .jpeg"
+            multiple
+          />
+        </div>
+
+        <div class="dropzone" id="backDropzone">
+          <label for="backImages">Backs</label>
+          <p>
+            <i class="fa-regular fa-file-image icon" style="color: #000000"></i>
+          </p>
+          <p2 id="fileCountBack">0 files selected</p2>
+          <input
+            type="file"
+            id="backImages"
+            accept=".png, .jpg, .jpeg"
+            multiple
+          />
+        </div>
+      </div>
+
+      <!-- mode indicator -->
+      <div class="form-group mode" style="justify-content: space-around">
+        <div style="text-align: center">
+          <img src="mode1.jpg" height="100px" id="mode1" />
+          <h2>No backs</h2>
+        </div>
+        <div style="text-align: center">
+          <img src="mode2.jpg" height="100px" id="mode2" />
+          <h2>Same backs</h2>
+        </div>
+        <div style="text-align: center">
+          <img src="mode3.jpg" height="100px" id="mode3" />
+          <h2>Unique backs</h2>
+        </div>
+        <p>
+          3 modes are possible and will be activated automatically:<br />
+          "No backs" is active if 0 backs are selected. <br />
+          "Same backs" is active if 1 back is selected. <br />
+          "Unique backs" is active if number of backs is same as fronts. They
+          will be paired in the order you've sorted them, for example
+          alphabetically.<br /><br />
+          Tip : If you want same back for all fronts be sure to only select 1
+          back image. This will reduce the filesize because only 1 image is
+          "loaded" into the pdf even if its displayed on all pages. If you have
+          big groups of same backed cards its better to run them each seperatly
+          and later combine the pdf's.
+        </p>
+      </div>
+
+      <div class="form-group">
+        <p>
+          Pick the page size and orientation you want to use. Note that some
+          presets may require certain orientation. If your grid layout and card
+          size dont fit on the page you will get a warning.
+        </p>
+        <div class="box">
+          <h2>Page size:</h2>
+          <input type="radio" id="A4" name="pageSize" value="A4" checked />
+          <label for="A4"><img src="a4.png" alt="A4" /></label>
+          <input
+            type="radio"
+            id="A4Landscape"
+            name="pageSize"
+            value="A4 landscape"
+          />
+          <label for="A4Landscape"
+            ><img src="a4-landscape.png" alt="A4 landscape"
+          /></label>
+          <input type="radio" id="Letter" name="pageSize" value="Letter" />
+          <label for="Letter"><img src="letter.png" alt="Letter" /></label>
+          <input
+            type="radio"
+            id="LetterLandscape"
+            name="pageSize"
+            value="Letter landscape"
+          />
+          <label for="LetterLandscape"
+            ><img src="letter-landscape.png" alt="Letter landscape"
+          /></label>
+        </div>
+
+        <!-- Preset naming menu    -->
+        <div class="box preset">
+          <h2>Select preset loadout:</h2>
+          <select id="preset">
+            <option value="preset1">"Standard card" 63x88mm</option>
+            <option value="preset2">"Mini European" 44x68mm</option>
+            <option value="preset3">
+              "Buttonshy"63x88mm with bleed, must use landscape pages.
+            </option>
+          </select>
+        </div>
+        <p>
+          The preset loadouts are common setups, you still need to pick your
+          page size but all other settings are adjusted. You can ofcourse "fine
+          tune" all the presets to your requirements.
+        </p>
+      </div>
+    </div>
+
+    <div class="container">
+      <h2>Basic settings</h2>
+      <div class="form-group">
+        <p>
+          Specify how you want the grid layout to look, how many rows/columns.
+          Grid is filled top to bottom and left to right (right to left on even
+          pages), flip horizontaly to print double sided.
+        </p>
+        <div class="iconbox">
+          <i class="fa-solid fa-table-cells icon" title="Grid layout"></i>
+        </div>
+        <p>Grid layout</p>
+        <div class="box settings">
+          <label for="rows">Rows</label>
+          <input type="number" id="rows" value="3" />
+          <label for="columns">Columns</label>
+          <input type="number" id="columns" value="3" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <p>
+          All measurements are in millimeters(mm). Card width/height refers to
+          the final card size, bleed is added to that on all sides. Example, you
+          want a card that is 63x88mm with 3mm bleed. Your image files should be
+          69x94mm (or that ratio)
+        </p>
+        <div class="iconbox">
+          <i class="fa-solid fa-ruler-combined icon" title="Measurements"></i>
+        </div>
+        <p>Measurements</p>
+        <div class="box settings">
+          <label for="imageWidth">Card width</label>
+          <input type="number" id="imageWidth" value="63" />
+          <label for="imageHeight">Card height</label>
+          <input type="number" id="imageHeight" value="88" />
+          <label for="bleed">Bleed</label>
+          <input type="number" id="bleed" value="0" />
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <h2>Advanced settings</h2>
+      <div class="form-group">
+        <p>
+          Cut lines are in the style of crosshairs (small cross on each card
+          corner). If you print doublesided i recommend only having crosshairs
+          on one side. Here you can pick if you want them on front/back and you
+          can also customize the line width, total size and the color.
+        </p>
+        <div class="iconbox">
+          <i class="fa-solid fa-crosshairs icon" title="Crosshair settings"></i>
+        </div>
+        <p>Crosshair settings</p>
+        <div class="box settings">
+          <label for="frontCheckbox">Front</label>
+          <input
+            type="checkbox"
+            id="frontCheckbox"
+            name="frontCheckbox"
+            checked
+          />
+          <label for="backCheckbox">Back</label>
+          <input
+            type="checkbox"
+            id="backCheckbox"
+            name="backCheckbox"
+            unchecked
+          />
+          <label for="crosswidth">Line width</label>
+          <input type="number" id="crosswidth" value="0.5" step="0.1" />
+          <label for="crosssize">Size</label>
+          <input type="number" id="crosssize" value="4" step="0.5" />
+          <label for="crosshaircolor">Color</label>
+          <input
+            type="color"
+            id="crosshaircolor"
+            value="#000000"
+            placeholder="Select a color"
+          />
+        </div>
+      </div>
+      <div class="form-group">
+        <p>
+          Border is a great option to add to battle any alignment issue. If
+          border is activated it will shrink the card image for that side and
+          fill the space with a color of your choice. It will also add a few
+          extra mm around the outside of the grid (for alignment issues).
+        </p>
+        <div class="iconbox">
+          <i
+            class="fa-solid fa-border-top-left icon"
+            title="Border settings"
+          ></i>
+        </div>
+        <p>Border settings</p>
+        <div class="box settings">
+          <label for="frontBorderCheckbox">Front</label>
+          <input type="checkbox" id="frontBorderCheckbox" />
+          <label for="backBorderCheckbox">Back</label>
+          <input type="checkbox" id="backBorderCheckbox" />
+          <label for="borderWidth">Border width</label>
+          <input type="number" id="borderWidth" value="3" />
+          <label for="borderColor">Color</label>
+          <input type="color" id="borderColor" value="#ffffff" />
+        </div>
+        <p>
+          Tip : If your card design already have a solid color(or close to)
+          border you can still add border and set the [width: 0]. This will just
+          add an extra border to the edges of the grid and help with
+          alignment.<br /><br />
+          Tip 2 : Personaly i prefer to have the card image with rounded corners
+          if im using a border. You can achive this by rounding the corners of
+          your image and saving it as a .png with transparent background. It
+          will take a bit longer to generate but its worth it. Remember to only
+          select 1 back if you want to use the same for all fronts.
+        </p>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="foot">
+        <p>
+          Click Generate PDF to start the process. As long as you see the green
+          loading circle it should be processing, except if you've gotten an
+          error, for example the grid not fitting on the page.<br />
+          Remember 1000+ .jpg only takes seconds, 100 .png takes about 30sec, so
+          if nothing happens in in a resonable time and you dont see any
+          warnings, just refresh the page, an unknown error might have happened.
+        </p>
+        <button onclick="generatePDF()">Generate PDF</button>
+
+        <div class="sk-circle" id="loader">
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+        </div>
+
+        <a href="survey.html" target="_blank">
+          <button class="survey">Leave feedback and request features</button>
+        </a>
+
+        <a
+          href="https://www.buymeacoffee.com/pnpbuddy"
+          title="Support PnPBuddy by buying me a coffee"
+          ><img
+            src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=pnpbuddy&button_colour=FFDD00&font_colour=000000&font_family=Arial&outline_colour=000000&coffee_colour=ffffff"
+        /></a>
+        <p>
+          Tip : Images stay selected after you've generated a pdf, you can go
+          back and change things and generate again to quickly try different
+          settings.<br /><br />
+          Tip 2 : Please if you have any feedback, issue or want to leave a
+          loadout suggestions use the button above. You can also find link to
+          the Discord or E-mail back on the homepage.
+        </p>
+      </div>
+    </div>
+    <script src="layout_1.71.js"></script>
+    <script src="preset.js"></script>
+  </body>
+</html>

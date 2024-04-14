@@ -1,0 +1,14 @@
+230711-	added landscape page layout. added custom crosshair size. removed these from survey. added coffe to landingpage
+230716- bleed, presets till beta sidan
+230720- cleaned pages size code. changed how to draw border to draw background.
+230722- cleaned crosshair code. prettier the code. working on progress bar. seperated survey into own html.
+230730- BIG UI, help section, mixing filetype ok, single back process change, 
+230807- Fixade await for inläsning av bilder, mobil i rätt ordning. Startade GIT
+231022- a4 paper default "checked"
+
+To do:
+
+Gutterfold
+
+Clean up code
+More preset loadouts

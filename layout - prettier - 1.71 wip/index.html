@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="expires" content="Tue, 01 Jan 1990 12:00:00 GMT" />
+    <title>Card layout tool</title>
+
+    <link rel="icon" href="favicon.png" type="image/png" />
+    <link rel="stylesheet" href="style.css" />
+    <!-- loader -->
+    <link rel="stylesheet" href="spinkit.css" />
+    <!-- font awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <a href="https://www.pnpbuddy.com">
+          <i class="fa-solid fa-house icon link"></i
+        ></a>
+        <h1>Card layout tool v1.71</h1>
+        <a href="./instructions/index.html">
+          <i class="fa-regular fa-circle-question icon link"></i
+        ></a>
+      </div>
+
+      <!-- drop zone -->
+      <div class="form-group">
+        <div class="dropzone" id="frontDropzone">
+          <label for="frontImages">Fronts</label>
+          <p>
+            <i class="fa-regular fa-file-image icon" style="color: #000000"></i>
+          </p>
+          <p2 id="fileCount">0 files selected</p2>
+          <input
+            type="file"
+            id="frontImages"
+            accept=".png, .jpg, .jpeg"
+            multiple
+          />
+        </div>
+
+        <div class="dropzone" id="backDropzone">
+          <label for="backImages">Backs</label>
+          <p>
+            <i class="fa-regular fa-file-image icon" style="color: #000000"></i>
+          </p>
+          <p2 id="fileCountBack">0 files selected</p2>
+          <input
+            type="file"
+            id="backImages"
+            accept=".png, .jpg, .jpeg"
+            multiple
+          />
+        </div>
+      </div>
+
+      <!-- mode indicator -->
+      <div class="form-group mode" style="justify-content: space-around">
+        <div style="text-align: center">
+          <img src="mode1.jpg" height="100px" id="mode1" />
+          <h2>No backs</h2>
+        </div>
+        <div style="text-align: center">
+          <img src="mode2.jpg" height="100px" id="mode2" />
+          <h2>Same backs</h2>
+        </div>
+        <div style="text-align: center">
+          <img src="mode3.jpg" height="100px" id="mode3" />
+          <h2>Unique backs</h2>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="box">
+          <h2>Page size:</h2>
+          <input type="radio" id="A4" name="pageSize" value="A4" checked />
+          <label for="A4"><img src="a4.png" alt="A4" /></label>
+          <input
+            type="radio"
+            id="A4Landscape"
+            name="pageSize"
+            value="A4 landscape"
+          />
+          <label for="A4Landscape"
+            ><img src="a4-landscape.png" alt="A4 landscape"
+          /></label>
+          <input type="radio" id="Letter" name="pageSize" value="Letter" />
+          <label for="Letter"><img src="letter.png" alt="Letter" /></label>
+          <input
+            type="radio"
+            id="LetterLandscape"
+            name="pageSize"
+            value="Letter landscape"
+          />
+          <label for="LetterLandscape"
+            ><img src="letter-landscape.png" alt="Letter landscape"
+          /></label>
+        </div>
+
+        <!-- Preset naming menu    -->
+        <div class="box preset">
+          <h2>Select preset loadout:</h2>
+          <select id="preset">
+            <option value="preset1">"Standard card" 63x88mm</option>
+            <option value="preset2">"Mini European" 44x68mm</option>
+            <option value="preset3">
+              "Buttonshy"63x88mm with bleed, must use landscape pages.
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <h2>Basic settings</h2>
+      <div class="form-group basic">
+        <div class="iconbox">
+          <i class="fa-solid fa-table-cells icon" title="Grid layout"></i>
+        </div>
+        <p>Grid layout</p>
+        <div class="box settings">
+          <label for="rows">Rows</label>
+          <input type="number" id="rows" value="3" />
+          <label for="columns">Columns</label>
+          <input type="number" id="columns" value="3" />
+        </div>
+      </div>
+
+      <div class="form-group basic">
+        <div class="iconbox">
+          <i class="fa-solid fa-ruler-combined icon" title="Measurements"></i>
+        </div>
+        <p>Measurements</p>
+        <div class="box settings">
+          <label for="imageWidth">Card width</label>
+          <input type="number" id="imageWidth" value="63" />
+          <label for="imageHeight">Card height</label>
+          <input type="number" id="imageHeight" value="88" />
+          <label for="bleed">Bleed</label>
+          <input type="number" id="bleed" value="0" />
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <h2>Advanced settings</h2>
+      <div class="form-group advanced">
+        <div class="iconbox">
+          <i class="fa-solid fa-crosshairs icon" title="Crosshair settings"></i>
+        </div>
+        <p>Crosshair settings</p>
+        <div class="box settings">
+          <label for="frontCheckbox">Front</label>
+          <input
+            type="checkbox"
+            id="frontCheckbox"
+            name="frontCheckbox"
+            checked
+          />
+          <label for="backCheckbox">Back</label>
+          <input
+            type="checkbox"
+            id="backCheckbox"
+            name="backCheckbox"
+            unchecked
+          />
+          <label for="crosswidth">Line width</label>
+          <input type="number" id="crosswidth" value="0.5" step="0.1" />
+          <label for="crosssize">Size</label>
+          <input type="number" id="crosssize" value="4" step="0.5" />
+          <label for="crosshaircolor">Color</label>
+          <input
+            type="color"
+            id="crosshaircolor"
+            value="#000000"
+            placeholder="Select a color"
+          />
+        </div>
+      </div>
+      <div class="form-group advanced">
+        <div class="iconbox">
+          <i
+            class="fa-solid fa-border-top-left icon"
+            title="Border settings"
+          ></i>
+        </div>
+        <p>Border settings</p>
+        <div class="box settings">
+          <label for="frontBorderCheckbox">Front</label>
+          <input type="checkbox" id="frontBorderCheckbox" />
+          <label for="backBorderCheckbox">Back</label>
+          <input type="checkbox" id="backBorderCheckbox" />
+          <label for="borderWidth">Border width</label>
+          <input type="number" id="borderWidth" value="3" />
+          <label for="borderColor">Color</label>
+          <input type="color" id="borderColor" value="#ffffff" />
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="foot">
+        <button onclick="generatePDF()">Generate PDF</button>
+
+        <div class="sk-circle" id="loader">
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+        </div>
+
+        <a href="survey.html" target="_blank">
+          <button class="survey">Leave feedback</button>
+        </a>
+
+        <a
+          href="https://www.buymeacoffee.com/pnpbuddy"
+          title="Support PnPBuddy by buying me a coffee"
+          ><img
+            src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=pnpbuddy&button_colour=FFDD00&font_colour=000000&font_family=Arial&outline_colour=000000&coffee_colour=ffffff"
+        /></a>
+      </div>
+    </div>
+    <script src="layout_1.71.js"></script>
+    <script src="preset.js"></script>
+  </body>
+</html>
