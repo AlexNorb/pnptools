@@ -30,6 +30,16 @@ const presets = {
     backBorderCheckbox: false,
     borderWidth: 0,
   },
+  preset4: {
+    rows: 2,
+    columns: 4,
+    imageWidth: 59,
+    imageHeight: 91,
+    bleed: 0,
+    frontBorderCheckbox: false,
+    backBorderCheckbox: false,
+    borderWidth: 0,
+  },
 };
 
 document.getElementById("preset").addEventListener("change", function () {
