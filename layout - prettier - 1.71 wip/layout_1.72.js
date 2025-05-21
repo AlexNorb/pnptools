@@ -1,3 +1,25 @@
+/**
+ * Detects the actual image type from buffer (ignores file extension).
+ * Returns "image/jpeg", "image/png", or null if unsupported.
+ */
+function getImageType(buffer) {
+  const uint8 = new Uint8Array(buffer);
+
+  // JPEG: Starts with 0xFFD8
+  if (uint8[0] === 0xff && uint8[1] === 0xd8) return "image/jpeg";
+
+  // PNG: Starts with 0x89504E47
+  if (
+    uint8[0] === 0x89 &&
+    uint8[1] === 0x50 &&
+    uint8[2] === 0x4e &&
+    uint8[3] === 0x47
+  )
+    return "image/png";
+
+  return null; // Unsupported (WebP, GIF, etc.)
+}
+
 // Define crosshair functions
 function getCrosshairCoordinates(
   x,
@@ -98,10 +120,24 @@ async function readFiles(files) {
   const images = [];
   for (const file of files) {
     const reader = new FileReader();
-    const promise = new Promise((resolve) => {
+    const promise = new Promise((resolve, reject) => {
       reader.onload = function (e) {
-        resolve(e.target.result);
+        const buffer = e.target.result;
+        const realType = getImageType(buffer);
+
+        if (!realType) {
+          reject(new Error(`Unsupported file type: ${file.name}`));
+          return;
+        }
+
+        resolve({
+          buffer, // File data (ArrayBuffer)
+          type: realType, // "image/jpeg" or "image/png"
+          name: file.name, // Original filename (for debugging)
+        });
       };
+      reader.onerror = () =>
+        reject(new Error(`Failed to read file: ${file.name}`));
     });
     reader.readAsArrayBuffer(file);
     images.push(await promise);
@@ -280,12 +316,12 @@ async function createPDF(frontImages, backImages, frontFiles, backFiles) {
       frontYWithBorder -= borderWidth / 2;
     }
 
-    let imageBuffer = frontImages[i];
     let image;
-    if (frontFiles[i].type === "image/png") {
-      image = await pdfDoc.embedPng(imageBuffer);
-    } else if (frontFiles[i].type === "image/jpeg") {
-      image = await pdfDoc.embedJpg(imageBuffer);
+    // NEW CODE (uses real file type):
+    if (frontImages[i].type === "image/png") {
+      image = await pdfDoc.embedPng(frontImages[i].buffer);
+    } else if (frontImages[i].type === "image/jpeg") {
+      image = await pdfDoc.embedJpg(frontImages[i].buffer);
     }
 
     page.drawImage(image, {
@@ -352,7 +388,7 @@ async function createPDF(frontImages, backImages, frontFiles, backFiles) {
 
       //single back stuff
       let singleBackImage;
-      let firstItteration = true;
+      let firstIteration = true;
 
       for (; j < maxJ; j++) {
         let backXWithBorder = x;
@@ -363,25 +399,23 @@ async function createPDF(frontImages, backImages, frontFiles, backFiles) {
           backYWithBorder -= borderWidth / 2;
         }
 
-        //Make sure single back is only embedded once
-        if (firstItteration) {
-          if (backFiles[0].type === "image/png") {
-            singleBackImage = await pdfDoc.embedPng(backImages[0]);
-          } else if (backFiles[0].type === "image/jpeg") {
-            singleBackImage = await pdfDoc.embedJpg(backImages[0]);
+        // Make sure single back is only embedded once
+        if (firstIteration) {
+          if (backImages[0].type === "image/png") {
+            singleBackImage = await pdfDoc.embedPng(backImages[0].buffer);
+          } else if (backImages[0].type === "image/jpeg") {
+            singleBackImage = await pdfDoc.embedJpg(backImages[0].buffer);
           }
-          firstItteration = false;
+          firstIteration = false;
         }
-
-        let imageBuffer = backImages[j];
 
         let image;
         if (singleBack) {
           image = singleBackImage;
-        } else if (backFiles[j].type === "image/png") {
-          image = await pdfDoc.embedPng(imageBuffer);
-        } else if (backFiles[j].type === "image/jpeg") {
-          image = await pdfDoc.embedJpg(imageBuffer);
+        } else if (backImages[j].type === "image/png") {
+          image = await pdfDoc.embedPng(backImages[j].buffer);
+        } else if (backImages[j].type === "image/jpeg") {
+          image = await pdfDoc.embedJpg(backImages[j].buffer);
         }
 
         page.drawImage(image, {
