@@ -126,6 +126,11 @@ async function readFiles(files) {
         const realType = getImageType(buffer);
 
         if (!realType) {
+          // HIDE LOADER and ADDED ALERT HERE
+          loader.style.display = "none"; // Hide loader
+          alert(
+            `Unsupported file type: ${file.name}. Please use JPEG or PNG files.`
+          );
           reject(new Error(`Unsupported file type: ${file.name}`));
           return;
         }
@@ -136,11 +141,24 @@ async function readFiles(files) {
           name: file.name, // Original filename (for debugging)
         });
       };
-      reader.onerror = () =>
+      reader.onerror = () => {
+        // HIDE LOADER and OPTIONAL: Alert for general read errors
+        loader.style.display = "none"; // Hide loader
+        alert(`Failed to read file: ${file.name}.`);
         reject(new Error(`Failed to read file: ${file.name}`));
+      };
     });
     reader.readAsArrayBuffer(file);
-    images.push(await promise);
+    // It's important to await the promise inside the loop if you want to stop processing on the first error.
+    // However, if you want to try and process all files and collect all errors, the structure might need to change slightly.
+    // For now, this will stop on the first error encountered by readFiles.
+    try {
+      images.push(await promise);
+    } catch (error) {
+      // If an error occurred (e.g., unsupported type), stop further processing and re-throw to be caught by generatePDF
+      // The loader is already hidden and alert shown by the promise's reject handler.
+      throw error;
+    }
   }
   return images;
 }
@@ -170,12 +188,31 @@ async function generatePDF() {
     return;
   }
 
-  const [frontImages, backImages] = await Promise.all([
-    readFiles(frontFiles),
-    readFiles(backFiles),
-  ]);
+  try {
+    // Promise.all will ensure both readFiles calls are attempted.
+    // If one fails, Promise.all rejects, and the catch block below is triggered.
+    const [frontImages, backImages] = await Promise.all([
+      readFiles(frontFiles),
+      readFiles(backFiles),
+    ]);
 
-  createPDF(frontImages, backImages, frontFiles, backFiles);
+    // If readFiles was successful for all files, proceed to create the PDF
+    // Assuming createPDF is an async function as in your original code.
+    // If createPDF can also throw errors that should stop the loader,
+    // it should handle its own loader hiding or let this catch block handle it.
+    await createPDF(frontImages, backImages, frontFiles, backFiles);
+
+    // Note: The original createPDF function hides the loader upon successful completion.
+    // If createPDF itself throws an error before it hides the loader,
+    // the catch block below will handle it.
+  } catch (error) {
+    // This catch block handles errors from readFiles (like unsupported type or read failure)
+    // AND any other errors that might occur in the try block above (e.g., from createPDF if not caught internally).
+    console.error("Error during PDF generation process:", error.message);
+    // Ensure loader is hidden if any error occurred during the process.
+    // This is a safeguard, as readFiles should have already hidden it for its specific errors.
+    loader.style.display = "none";
+  }
 }
 
 async function createPDF(frontImages, backImages, frontFiles, backFiles) {
