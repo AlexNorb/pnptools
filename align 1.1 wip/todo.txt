@@ -1,0 +1,29 @@
+TODO for align.js improvement (AI prompt-ready):
+
+1. Validate user inputs:
+    - Ensure that shiftX and shiftY fields are not empty and contain valid numbers.
+    - Check that a PDF file is selected before proceeding.
+    - If any validation fails, show a clear error message to the user and halt execution.
+
+2. Add robust error handling:
+    - Check for missing or invalid DOM elements before accessing their properties.
+    - Wrap asynchronous PDF operations (loading, processing, saving) in try/catch blocks.
+    - On error, display a user-friendly message.
+
+3. Refactor magic numbers and constants:
+    - Replace all instances of the conversion factor 2.83464567 with a named constant (e.g., MM_TO_PT).
+    - Use a more robust method for extracting the file name and extension instead of splitting on ".pdf".
+
+4. Enhance user experience:
+    - Disable UI controls (e.g., buttons, file input) while processing the PDF to prevent duplicate actions.
+    - Provide feedback to the user upon successful completion or if any error occurs (e.g., using alerts or UI notifications).
+
+5. Optimize anchor element usage:
+    - Instead of creating and removing an anchor element for every download, consider reusing or updating an existing anchor in the UI.
+
+6. Modernize code style:
+    - Use const for variables that are never reassigned.
+    - Consider breaking up the function into smaller functions/modules, separating UI logic from PDF processing logic for clarity and maintainability.
+
+Instructions for AI:
+For each item above, update the code in align.js to address the described issues. Make sure to add necessary comments and explanations where changes are made.
