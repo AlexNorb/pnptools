@@ -202,6 +202,9 @@ async function generatePDF() {
     // it should handle its own loader hiding or let this catch block handle it.
     await createPDF(frontImages, backImages, frontFiles, backFiles);
 
+    // console.log("Simulating an error in createPDF...");
+    // throw new Error("Simulated PDF generation error for testing!");
+
     // Note: The original createPDF function hides the loader upon successful completion.
     // If createPDF itself throws an error before it hides the loader,
     // the catch block below will handle it.
@@ -209,6 +212,7 @@ async function generatePDF() {
     // This catch block handles errors from readFiles (like unsupported type or read failure)
     // AND any other errors that might occur in the try block above (e.g., from createPDF if not caught internally).
     console.error("Error during PDF generation process:", error.message);
+    alert("Unexpected error occurred during PDF generation.", error.message);
     // Ensure loader is hidden if any error occurred during the process.
     // This is a safeguard, as readFiles should have already hidden it for its specific errors.
     loader.style.display = "none";
