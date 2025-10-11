@@ -7,46 +7,50 @@ const LayoutToolPDF = {
         return null;
       },
       hexToRgb(hex) {
-        const [r, g, b] = hex.match(/[a-f\d]{2}/gi).map((x) => parseInt(x, 16) / 255);
-        return [r, g, b];
+        // Default to black for invalid input, and remove the '#' prefix
+        const hexString = (hex || '#000000').slice(1);
+        const match = hexString.match(/[a-f\d]{2}/gi);
+
+        // Return black if the hex code is not valid
+        if (!match || match.length !== 3) {
+          return [0, 0, 0];
+        }
+
+        // .map already returns the array we need
+        return match.map((x) => parseInt(x, 16) / 255);
       },
       updateColor(input) {
         const { rgb } = PDFLib;
         const rgbValues = this.hexToRgb(input.value);
-        return rgb(rgbValues[0], rgbValues[1], rgbValues[2]);
+        // Use spread syntax for a cleaner call
+        return rgb(...rgbValues);
       },
     },
 
     async readFiles(files) {
-      const images = [];
-      for (const file of files) {
-        const reader = new FileReader();
-        const promise = new Promise((resolve, reject) => {
-          reader.onload = (e) => {
-            const buffer = e.target.result;
-            const realType = this.utils.getImageType(buffer);
-            if (!realType) {
-              window.LayoutToolUI.ui.showLoader(false);
-              alert(`Unsupported file type: ${file.name}. Please use JPEG or PNG files.`);
-              reject(new Error(`Unsupported file type: ${file.name}`));
-              return;
-            }
-            resolve({ buffer, type: realType, name: file.name });
-          };
-          reader.onerror = () => {
-            window.LayoutToolUI.ui.showLoader(false);
-            alert(`Failed to read file: ${file.name}.`);
-            reject(new Error(`Failed to read file: ${file.name}`));
-          };
+        const filePromises = Array.from(files).map(file => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const buffer = e.target.result;
+                    const realType = this.utils.getImageType(buffer);
+                    if (!realType) {
+                        window.LayoutToolUI.ui.showLoader(false);
+                        alert(`Unsupported file type: ${file.name}. Please use JPEG or PNG files.`);
+                        reject(new Error(`Unsupported file type: ${file.name}`));
+                        return;
+                    }
+                    resolve({ buffer, type: realType, name: file.name });
+                };
+                reader.onerror = () => {
+                    window.LayoutToolUI.ui.showLoader(false);
+                    alert(`Failed to read file: ${file.name}.`);
+                    reject(new Error(`Failed to read file: ${file.name}`));
+                };
+                reader.readAsArrayBuffer(file);
+            });
         });
-        reader.readAsArrayBuffer(file);
-        try {
-          images.push(await promise);
-        } catch (error) {
-          throw error;
-        }
-      }
-      return images;
+        return Promise.all(filePromises);
     },
 
     async generatePDF() {
@@ -70,10 +74,8 @@ const LayoutToolPDF = {
       }
 
       try {
-        const [frontImageBuffers, backImageBuffers] = await Promise.all([
-          this.readFiles(frontFiles),
-          this.readFiles(backFiles),
-        ]);
+        const frontImageBuffers = await this.readFiles(frontFiles);
+        const backImageBuffers = await this.readFiles(backFiles);
         await this.createPDF(frontImageBuffers, backImageBuffers);
       } catch (error) {
         console.error("Error during PDF generation process:", error.message);
@@ -81,6 +83,7 @@ const LayoutToolPDF = {
         window.LayoutToolUI.ui.showLoader(false);
       }
     },
+
 
     async createPDF(frontImages, backImages) {
       const { PDFDocument } = PDFLib;
