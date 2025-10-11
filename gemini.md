@@ -1,0 +1,1 @@
+The agent should not make more than 50 requests per minute.

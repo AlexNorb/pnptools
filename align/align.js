@@ -58,5 +58,4 @@ async function shiftPDFContent() {
     }, 100);
   };
   reader.readAsArrayBuffer(pdfFile);
-  // await fetch("counter.php");
 }
