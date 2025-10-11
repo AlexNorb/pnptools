@@ -25,6 +25,8 @@ document.addEventListener("DOMContentLoaded", () => {
       crosswidth: document.getElementById("crosswidth"),
       crosssize: document.getElementById("crosssize"),
       generatePdfButton: document.getElementById("generatePdfButton"),
+      pageGridBorderCheckbox: document.getElementById("pageGridBorderCheckbox"),
+      cornerRadius: document.getElementById("cornerRadius"),
     },
 
     config: {
@@ -120,6 +122,8 @@ document.addEventListener("DOMContentLoaded", () => {
             backCheckbox,
             frontBorderCheckbox,
             backBorderCheckbox,
+            pageGridBorderCheckbox,
+            cornerRadius,
         } = this.elements;
 
         const settings = {
@@ -135,7 +139,10 @@ document.addEventListener("DOMContentLoaded", () => {
             backCheckbox: backCheckbox.checked,
             frontBorderCheckbox: frontBorderCheckbox.checked,
             backBorderCheckbox: backBorderCheckbox.checked,
+            pageGridBorder: pageGridBorderCheckbox.checked,
+            cornerRadius: parseFloat(cornerRadius.value.replace(",", ".")) * 2.83464567,
             pageSize: document.querySelector('input[name="pageSize"]:checked').value,
+            borderLogic: document.querySelector('input[name="borderLogic"]:checked').value,
         };
 
         settings.imageWidth += settings.bleed * 2;
