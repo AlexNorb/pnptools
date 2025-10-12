@@ -642,6 +642,7 @@ if (typeof importScripts === "function") {
       options.innerBorder,
       withDefault(options.innerBorderHeight, 0)
     );
+    const cornerRadius = withDefault(parseFloat(options.cornerRadius), 0);
     const borderColorFront = toPdfColor(
       withDefault(options.borderColorFront, "#000000")
     );
@@ -663,6 +664,7 @@ if (typeof importScripts === "function") {
     const outerBorderDoc = outerBorder * mmFactor;
     const innerBorderWidthDoc = innerBorderWidth * mmFactor;
     const innerBorderHeightDoc = innerBorderHeight * mmFactor;
+    const cornerRadiusDoc = cornerRadius * mmFactor;
 
     const [pageWidth, pageHeight] = pageFormat;
     const [cardWidthDoc, cardHeightDoc] = [
@@ -880,26 +882,6 @@ if (typeof importScripts === "function") {
         }
       }
 
-      if (outerBorder > 0 || innerBorderWidth > 0 || innerBorderHeight > 0) {
-        page.drawRectangle({
-          x: xOuterFront,
-          y: yOuterFront,
-          width: cardWidthDoc + 2 * outerBorderDoc,
-          height: cardHeightDoc + 2 * outerBorderDoc,
-          color: borderColorFront,
-          rotate: angleFront,
-        });
-
-        page.drawRectangle({
-          x: xOuterBack,
-          y: yOuterBack,
-          width: cardWidthDoc + 2 * outerBorderDoc,
-          height: cardHeightDoc + 2 * outerBorderDoc,
-          color: borderColorBack,
-          rotate: angleBack,
-        });
-      }
-
       page.drawImage(frontImage, {
         x: xInnerFront,
         y: yInnerFront,
@@ -915,6 +897,56 @@ if (typeof importScripts === "function") {
         height: cardHeightDoc - 2 * innerBorderHeightDoc,
         rotate: angleBack,
       });
+
+      if (outerBorder > 0 || innerBorderWidth > 0 || innerBorderHeight > 0) {
+        page.drawRectangle({
+          x: xOuterFront,
+          y: yOuterFront,
+          width: cardWidthDoc + 2 * outerBorderDoc,
+          height: cardHeightDoc + 2 * outerBorderDoc,
+          borderColor: borderColorFront,
+          borderWidth: 2 * innerBorderWidthDoc,
+          rx: 0,
+          ry: 0,
+          rotate: angleFront,
+        });
+
+        page.drawRectangle({
+          x: xOuterBack,
+          y: yOuterBack,
+          width: cardWidthDoc + 2 * outerBorderDoc,
+          height: cardHeightDoc + 2 * outerBorderDoc,
+          borderColor: borderColorBack,
+          borderWidth: 2 * innerBorderWidthDoc,
+          rx: 0,
+          ry: 0,
+          rotate: angleBack,
+        });
+
+        page.drawRectangle({
+          x: xOuterFront,
+          y: yOuterFront,
+          width: cardWidthDoc + 2 * outerBorderDoc,
+          height: cardHeightDoc + 2 * outerBorderDoc,
+          borderColor: borderColorFront,
+          borderWidth: 2 * innerBorderWidthDoc,
+          rx: cornerRadiusDoc,
+          ry: cornerRadiusDoc,
+          rotate: angleFront,
+        });
+
+        page.drawRectangle({
+          x: xOuterBack,
+          y: yOuterBack,
+          width: cardWidthDoc + 2 * outerBorderDoc,
+          height: cardHeightDoc + 2 * outerBorderDoc,
+          borderColor: borderColorBack,
+          borderWidth: 2 * innerBorderWidthDoc,
+          rx: cornerRadiusDoc,
+          ry: cornerRadiusDoc,
+          rotate: angleBack,
+        });
+      }
 
       count++;
 

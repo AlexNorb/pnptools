@@ -24,8 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
       backBorderCheckbox: document.getElementById("backBorderCheckbox"),
       crosswidth: document.getElementById("crosswidth"),
       crosssize: document.getElementById("crosssize"),
-      generatePdfButton: document.getElementById("generatePdfButton"),
       cornerRadius: document.getElementById("cornerRadius"),
+      generatePdfButton: document.getElementById("generatePdfButton"),
       doubleSidedRadio: document.getElementById("doubleSided"),
       foldableRadio: document.getElementById("foldable"),
       doubleSidedModeUI: document.getElementById("doubleSidedModeUI"),
@@ -122,15 +122,25 @@ document.addEventListener("DOMContentLoaded", () => {
         this.elements.borderColor
       );
 
-      this.elements.doubleSidedRadio.addEventListener('change', this.ui.toggleModeUI.bind(this));
-      this.elements.foldableRadio.addEventListener('change', this.ui.toggleModeUI.bind(this));
+      this.elements.doubleSidedRadio.addEventListener(
+        "change",
+        this.ui.toggleModeUI.bind(this)
+      );
+      this.elements.foldableRadio.addEventListener(
+        "change",
+        this.ui.toggleModeUI.bind(this)
+      );
     },
 
     ui: {
       toggleModeUI() {
         const isDoubleSided = LayoutToolUI.elements.doubleSidedRadio.checked;
-        LayoutToolUI.elements.doubleSidedModeUI.style.display = isDoubleSided ? 'block' : 'none';
-        LayoutToolUI.elements.foldableModeUI.style.display = isDoubleSided ? 'none' : 'block';
+        LayoutToolUI.elements.doubleSidedModeUI.style.display = isDoubleSided
+          ? "block"
+          : "none";
+        LayoutToolUI.elements.foldableModeUI.style.display = isDoubleSided
+          ? "none"
+          : "block";
       },
       showLoader(show) {
         LayoutToolUI.elements.loader.style.display = show ? "block" : "none";
@@ -216,15 +226,16 @@ document.addEventListener("DOMContentLoaded", () => {
         crosswidth: parseFloat(crosswidth.value.replace(",", ".")) * 2.83464567,
         crosssize:
           (parseFloat(crosssize.value.replace(",", ".")) * 2.83464567) / 2,
+        cornerRadius:
+          parseFloat(cornerRadius.value.replace(",", ".")) * 2.83464567,
         frontCheckbox: frontCheckbox.checked,
         backCheckbox: backCheckbox.checked,
         frontBorderCheckbox: frontBorderCheckbox.checked,
         backBorderCheckbox: backBorderCheckbox.checked,
-        cornerRadius:
-          parseFloat(cornerRadius.value.replace(",", ".")) * 2.83464567,
         pageSize: document.querySelector('input[name="pageSize"]:checked')
           .value,
-        layoutMode: document.querySelector('input[name="layoutMode"]:checked').value
+        layoutMode: document.querySelector('input[name="layoutMode"]:checked')
+          .value,
       };
 
       settings.imageWidth += settings.bleed * 2;
