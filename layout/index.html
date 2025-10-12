@@ -208,30 +208,16 @@
           <input type="number" id="borderWidth" value="3" />
           <label for="borderColor">Color</label>
           <input type="color" id="borderColor" value="#ffffff" />
-          <br /><br />
-          <label>Border Style:</label>
-          <input
-            type="radio"
-            id="borderLogicPage"
-            name="borderLogic"
-            value="page"
-          />
-          <label
-            for="borderLogicPage"
-            title="Draws a single background color for the entire page. Borders are created by the empty space around the smaller images."
-            >Page Background</label
-          >
-          <input
-            type="radio"
-            id="borderLogicCard"
-            name="borderLogic"
-            value="card"
-            checked
-          />
-          <label for="borderLogicCard" title="Draws a separate, colored border frame for each individual card.">Per-Card Frame</label>
+
           <br><br>
-          <label for="cornerRadius">Corner Radius (mm):</label>
-          <input type="number" id="cornerRadius" value="0" min="0">
+          <label for="cornerRadius">Corner Radius:</label>
+          <select id="cornerRadius">
+            <option value="0">None</option>
+            <option value="3">S (3mm)</option>
+            <option value="5">M (5mm)</option>
+            <option value="8">L (8mm)</option>
+            <option value="10">XL (10mm)</option>
+          </select>
           <br /><br />
           <input type="checkbox" id="pageGridBorderCheckbox" />
           <label for="pageGridBorderCheckbox"

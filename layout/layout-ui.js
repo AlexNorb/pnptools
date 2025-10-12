@@ -142,7 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
             pageGridBorder: pageGridBorderCheckbox.checked,
             cornerRadius: parseFloat(cornerRadius.value.replace(",", ".")) * 2.83464567,
             pageSize: document.querySelector('input[name="pageSize"]:checked').value,
-            borderLogic: document.querySelector('input[name="borderLogic"]:checked').value,
         };
 
         settings.imageWidth += settings.bleed * 2;

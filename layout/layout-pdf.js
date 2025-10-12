@@ -146,16 +146,6 @@ const LayoutToolPDF = {
       let x = (pageWidth - settings.columns * settings.imageWidth) / 2;
       let y = (pageHeight + settings.rows * settings.imageHeight) / 2;
 
-      if (settings.frontBorderCheckbox && settings.borderLogic === "page") {
-        page.drawRectangle({
-          x: x,
-          y: y - settings.rows * settings.imageHeight,
-          width: settings.imageWidth * settings.columns,
-          height: settings.imageHeight * settings.rows,
-          color: window.LayoutToolUI.config.borderColor,
-        });
-      }
-
       const imagesOnThisPage = Math.min(
         frontImages.length - currentImageIndex,
         settings.rows * settings.columns
@@ -168,25 +158,26 @@ const LayoutToolPDF = {
             ? await pdfDoc.embedPng(image.buffer)
             : await pdfDoc.embedJpg(image.buffer);
 
-        if (settings.frontBorderCheckbox && settings.borderLogic === "page") {
-          // For 'page' logic, the image is shrunk and placed on a pre-filled background.
-          let imgWidth = settings.imageWidth;
-          let imgHeight = settings.imageHeight;
-          let imgX = x;
-          let imgY = y;
-          imgWidth -= settings.borderWidth;
-          imgHeight -= settings.borderWidth;
-          imgX += settings.borderWidth / 2;
-          imgY -= settings.borderWidth / 2;
-
+        if (settings.frontBorderCheckbox) {
+          // Draw the shrunk image on top
           page.drawImage(embeddedImage, {
-            x: imgX,
-            y: imgY - imgHeight,
-            width: imgWidth,
-            height: imgHeight,
+            x: x + settings.borderWidth / 2,
+            y: y - settings.imageHeight + settings.borderWidth / 2,
+            width: settings.imageWidth - settings.borderWidth,
+            height: settings.imageHeight - settings.borderWidth,
+          });
+          // Draw the border as a filled rectangle
+          page.drawRectangle({
+            x: x,
+            y: y - settings.imageHeight,
+            width: settings.imageWidth,
+            height: settings.imageHeight,
+            bordercolor: window.LayoutToolUI.config.borderColor,
+            rx: settings.cornerRadius,
+            ry: settings.cornerRadius,
           });
         } else {
-          // For 'card' logic or no border, draw the full-size image first.
+          // No border, just draw the image
           page.drawImage(embeddedImage, {
             x: x,
             y: y - settings.imageHeight,
@@ -199,20 +190,6 @@ const LayoutToolPDF = {
         if ((i + 1) % settings.columns === 0) {
           x = (pageWidth - settings.columns * settings.imageWidth) / 2;
           y -= settings.imageHeight;
-        }
-      }
-
-      // Draw card borders for the entire front page at the end
-      if (settings.frontBorderCheckbox && settings.borderLogic === "card") {
-        let borderX = (pageWidth - settings.columns * settings.imageWidth) / 2;
-        let borderY = (pageHeight + settings.rows * settings.imageHeight) / 2;
-        for (let i = 0; i < imagesOnThisPage; i++) {
-          this._drawCardBorder(page, borderX, borderY, settings);
-          borderX += settings.imageWidth;
-          if ((i + 1) % settings.columns === 0) {
-            borderX = (pageWidth - settings.columns * settings.imageWidth) / 2;
-            borderY -= settings.imageHeight;
-          }
         }
       }
 
@@ -244,16 +221,6 @@ const LayoutToolPDF = {
           settings.imageWidth;
         y = (pageHeight + settings.rows * settings.imageHeight) / 2;
 
-        if (settings.backBorderCheckbox && settings.borderLogic === "page") {
-          page.drawRectangle({
-            x: x - settings.columns * settings.imageWidth + settings.imageWidth,
-            y: y - settings.rows * settings.imageHeight,
-            width: settings.imageWidth * settings.columns,
-            height: settings.imageHeight * settings.rows,
-            color: window.LayoutToolUI.config.borderColor,
-          });
-        }
-
         let singleBackImage;
         if (singleBack) {
           const backImage = backImages[0];
@@ -275,30 +242,32 @@ const LayoutToolPDF = {
                 : await pdfDoc.embedJpg(image.buffer);
           }
 
-          if (settings.backBorderCheckbox && settings.borderLogic === "page") {
-            let imgWidth = settings.imageWidth - settings.borderWidth;
-            let imgHeight = settings.imageHeight - settings.borderWidth;
-            let imgX = x + settings.borderWidth / 2;
-            let imgY = y - settings.borderWidth / 2;
-
+          if (settings.backBorderCheckbox) {
+            // Draw the shrunk image on top
             page.drawImage(embeddedImage, {
-              x: imgX,
-              y: imgY - imgHeight,
-              width: imgWidth,
-              height: imgHeight,
+              x: x + settings.borderWidth / 2,
+              y: y - settings.imageHeight + settings.borderWidth / 2,
+              width: settings.imageWidth - settings.borderWidth,
+              height: settings.imageHeight - settings.borderWidth,
+            });
+            // Draw the border as a filled rectangle
+            page.drawRectangle({
+              x: x,
+              y: y - settings.imageHeight,
+              width: settings.imageWidth,
+              height: settings.imageHeight,
+              bordercolor: window.LayoutToolUI.config.borderColor,
+              rx: settings.cornerRadius,
+              ry: settings.cornerRadius,
             });
           } else {
+            // No border, just draw the image
             page.drawImage(embeddedImage, {
               x: x,
               y: y - settings.imageHeight,
               width: settings.imageWidth,
               height: settings.imageHeight,
             });
-          }
-
-          // For 'card' logic, draw the border frame on top.
-          if (settings.backBorderCheckbox && settings.borderLogic === "card") {
-            this._drawCardBorder(page, x, y, settings);
           }
 
           x -= settings.imageWidth;
@@ -339,19 +308,6 @@ const LayoutToolPDF = {
     link.href = URL.createObjectURL(blob);
     link.download = "output.pdf";
     link.click();
-  },
-
-  _drawCardBorder(page, x, y, settings) {
-    page.drawRectangle({
-      x: x,
-      y: y - settings.imageHeight,
-      width: settings.imageWidth,
-      height: settings.imageHeight,
-      borderColor: window.LayoutToolUI.config.borderColor,
-      borderWidth: settings.borderWidth,
-      rx: settings.cornerRadius,
-      ry: settings.cornerRadius,
-    });
   },
 
   drawCrosshairs(page, x, y, settings) {
