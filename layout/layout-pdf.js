@@ -159,20 +159,21 @@ const LayoutToolPDF = {
             : await pdfDoc.embedJpg(image.buffer);
 
         if (settings.frontBorderCheckbox) {
-          // Draw the shrunk image on top
+          // Draw the shrunk image on bottom
           page.drawImage(embeddedImage, {
             x: x + settings.borderWidth / 2,
             y: y - settings.imageHeight + settings.borderWidth / 2,
             width: settings.imageWidth - settings.borderWidth,
             height: settings.imageHeight - settings.borderWidth,
           });
-          // Draw the border as a filled rectangle
+          // Draw the border as a non-filled rectangle
           page.drawRectangle({
             x: x,
             y: y - settings.imageHeight,
             width: settings.imageWidth,
             height: settings.imageHeight,
-            bordercolor: window.LayoutToolUI.config.borderColor,
+            borderColor: window.LayoutToolUI.config.borderColor,
+            borderWidth: settings.borderWidth,
             rx: settings.cornerRadius,
             ry: settings.cornerRadius,
           });
@@ -243,20 +244,21 @@ const LayoutToolPDF = {
           }
 
           if (settings.backBorderCheckbox) {
-            // Draw the shrunk image on top
+            // Draw the shrunk image on bottom
             page.drawImage(embeddedImage, {
               x: x + settings.borderWidth / 2,
               y: y - settings.imageHeight + settings.borderWidth / 2,
               width: settings.imageWidth - settings.borderWidth,
               height: settings.imageHeight - settings.borderWidth,
             });
-            // Draw the border as a filled rectangle
+            // Draw the border as a non-filled rectangle
             page.drawRectangle({
               x: x,
               y: y - settings.imageHeight,
               width: settings.imageWidth,
               height: settings.imageHeight,
-              bordercolor: window.LayoutToolUI.config.borderColor,
+              borderColor: window.LayoutToolUI.config.borderColor,
+              borderWidth: settings.borderWidth,
               rx: settings.cornerRadius,
               ry: settings.cornerRadius,
             });
