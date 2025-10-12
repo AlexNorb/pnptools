@@ -62,8 +62,7 @@ const LayoutToolPDF = {
         const reader = new FileReader();
         reader.onload = (e) => {
           const dataUrl = e.target.result;
-          const realType = this.utils.getImageType(dataUrl);
-          if (!realType) {
+          if (!dataUrl.startsWith("data:image/png;base64,") && !dataUrl.startsWith("data:image/jpeg;base64,")) {
             alert(`Unsupported file type: ${file.name}. Please use JPEG or PNG files.`);
             reject(new Error(`Unsupported file type: ${file.name}`));
             return;

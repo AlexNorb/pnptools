@@ -9,6 +9,8 @@ const FoldableLayoutUI = {
       'foldable_cardMargin',
       'foldable_cutMargin',
       'foldable_outerBorder',
+      'foldable_innerBorderWidth',
+      'foldable_innerBorderHeight',
       'foldable_borderColorFront',
       'foldable_borderColorBack',
       'foldable_foldLinePreference'
