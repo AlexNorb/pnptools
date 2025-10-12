@@ -28,7 +28,7 @@
         <a href="https://www.pnpbuddy.com">
           <i class="fa-solid fa-house icon link"></i
         ></a>
-        <h1>Card layout tool v1.71</h1>
+        <h1>Card layout tool v2.0</h1>
         <a href="./instructions/index.html">
           <i class="fa-regular fa-circle-question icon link"></i
         ></a>
@@ -81,146 +81,229 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <div class="box">
-          <h2>Page size:</h2>
-          <input type="radio" id="A4" name="pageSize" value="A4" checked />
-          <label for="A4"><img src="a4.png" alt="A4" /></label>
-          <input
-            type="radio"
-            id="A4Landscape"
-            name="pageSize"
-            value="A4 landscape"
-          />
-          <label for="A4Landscape"
-            ><img src="a4-landscape.png" alt="A4 landscape"
-          /></label>
-          <input type="radio" id="Letter" name="pageSize" value="Letter" />
-          <label for="Letter"><img src="letter.png" alt="Letter" /></label>
-          <input
-            type="radio"
-            id="LetterLandscape"
-            name="pageSize"
-            value="Letter landscape"
-          />
-          <label for="LetterLandscape"
-            ><img src="letter-landscape.png" alt="Letter landscape"
-          /></label>
-        </div>
-
-        <!-- Preset naming menu    -->
-        <div class="box preset">
-          <h2>Select preset loadout:</h2>
-          <select id="preset">
-            <option value="preset1">"Standard card" 63x88mm</option>
-            <option value="preset2">"Mini European" 44x68mm</option>
-            <option value="preset3">
-              "Buttonshy"63x88mm with bleed, must use landscape pages.
-            </option>
-            <option value="preset4">
-              "Europan Standard"63x88mm (Dominion)
-            </option>
-          </select>
+      <div class="container">
+        <h2>Layout Mode</h2>
+        <div class="box settings">
+            <input type="radio" id="doubleSided" name="layoutMode" value="doubleSided" checked> 
+            <label for="doubleSided">Double-Sided (Grid)</label>
+            <input type="radio" id="foldable" name="layoutMode" value="foldable"> 
+            <label for="foldable">Single-Page (Foldable)</label>
         </div>
       </div>
     </div>
 
-    <div class="container">
-      <h2>Basic settings</h2>
-      <div class="form-group basic">
-        <div class="iconbox">
-          <i class="fa-solid fa-table-cells icon" title="Grid layout"></i>
-        </div>
-        <p>Grid layout</p>
-        <div class="box settings">
-          <label for="rows">Rows</label>
-          <input type="number" id="rows" value="3" />
-          <label for="columns">Columns</label>
-          <input type="number" id="columns" value="3" />
-        </div>
-      </div>
+    <div id="doubleSidedModeUI">
+        <div class="container">
+            <div class="form-group">
+                <div class="box">
+                <h2>Page size:</h2>
+                <input type="radio" id="A4" name="pageSize" value="A4" checked />
+                <label for="A4"><img src="a4.png" alt="A4" /></label>
+                <input
+                    type="radio"
+                    id="A4Landscape"
+                    name="pageSize"
+                    value="A4 landscape"
+                />
+                <label for="A4Landscape"
+                    ><img src="a4-landscape.png" alt="A4 landscape"
+                /></label>
+                <input type="radio" id="Letter" name="pageSize" value="Letter" />
+                <label for="Letter"><img src="letter.png" alt="Letter" /></label>
+                <input
+                    type="radio"
+                    id="LetterLandscape"
+                    name="pageSize"
+                    value="Letter landscape"
+                />
+                <label for="LetterLandscape"
+                    ><img src="letter-landscape.png" alt="Letter landscape"
+                /></label>
+                </div>
 
-      <div class="form-group basic">
-        <div class="iconbox">
-          <i class="fa-solid fa-ruler-combined icon" title="Measurements"></i>
+                <!-- Preset naming menu    -->
+                <div class="box preset">
+                <h2>Select preset loadout:</h2>
+                <select id="preset">
+                    <option value="preset1">"Standard card" 63x88mm</option>
+                    <option value="preset2">"Mini European" 44x68mm</option>
+                    <option value="preset3">
+                    "Buttonshy"63x88mm with bleed, must use landscape pages.
+                    </option>
+                    <option value="preset4">
+                    "Europan Standard"63x88mm (Dominion)
+                    </option>
+                </select>
+                </div>
+            </div>
+            </div>
+
+            <div class="container">
+            <h2>Basic settings</h2>
+            <div class="form-group basic">
+                <div class="iconbox">
+                <i class="fa-solid fa-table-cells icon" title="Grid layout"></i>
+                </div>
+                <p>Grid layout</p>
+                <div class="box settings">
+                <label for="rows">Rows</label>
+                <input type="number" id="rows" value="3" />
+                <label for="columns">Columns</label>
+                <input type="number" id="columns" value="3" />
+                </div>
+            </div>
+
+            <div class="form-group basic">
+                <div class="iconbox">
+                <i class="fa-solid fa-ruler-combined icon" title="Measurements"></i>
+                </div>
+                <p>Measurements</p>
+                <div class="box settings">
+                <label for="imageWidth">Card width</label>
+                <input type="number" id="imageWidth" value="63" />
+                <label for="imageHeight">Card height</label>
+                <input type="number" id="imageHeight" value="88" />
+                <label for="bleed">Bleed</label>
+                <input type="number" id="bleed" value="0" />
+                </div>
+            </div>
+            </div>
+
+            <div class="container">
+            <h2>Advanced settings</h2>
+            <div class="form-group advanced">
+                <div class="iconbox">
+                <i class="fa-solid fa-crosshairs icon" title="Crosshair settings"></i>
+                </div>
+                <p>Crosshair settings</p>
+                <div class="box settings">
+                <label for="frontCheckbox">Front</label>
+                <input
+                    type="checkbox"
+                    id="frontCheckbox"
+                    name="frontCheckbox"
+                    checked
+                />
+                <label for="backCheckbox">Back</label>
+                <input
+                    type="checkbox"
+                    id="backCheckbox"
+                    name="backCheckbox"
+                    unchecked
+                />
+                <label for="crosswidth">Line width</label>
+                <input type="number" id="crosswidth" value="0.5" step="0.1" />
+                <label for="crosssize">Size</label>
+                <input type="number" id="crosssize" value="4" step="0.5" />
+                <label for="crosshaircolor">Color</label>
+                <input
+                    type="color"
+                    id="crosshaircolor"
+                    value="#000000"
+                    placeholder="Select a color"
+                />
+                </div>
+            </div>
+            <div class="form-group advanced">
+                <div class="iconbox">
+                <i
+                    class="fa-solid fa-border-top-left icon"
+                    title="Border settings"
+                ></i>
+                </div>
+                <p>Border settings</p>
+                <div class="box settings">
+                <label for="frontBorderCheckbox">Front</label>
+                <input type="checkbox" id="frontBorderCheckbox" />
+                <label for="backBorderCheckbox">Back</label>
+                <input type="checkbox" id="backBorderCheckbox" />
+                <label for="borderWidth">Border width</label>
+                <input type="number" id="borderWidth" value="3" />
+                <label for="borderColor">Color</label>
+                <input type="color" id="borderColor" value="#ffffff" />
+
+                <br /><br />
+                <label for="cornerRadius">Corner Radius:</label>
+                <select id="cornerRadius">
+                    <option value="0">None</option>
+                    <option value="3">S (3mm)</option>
+                    <option value="5">M (5mm)</option>
+                    <option value="8">L (8mm)</option>
+                    <option value="10">XL (10mm)</option>
+                </select>
+                <br /><br />
+                </div>
+            </div>
         </div>
-        <p>Measurements</p>
-        <div class="box settings">
-          <label for="imageWidth">Card width</label>
-          <input type="number" id="imageWidth" value="63" />
-          <label for="imageHeight">Card height</label>
-          <input type="number" id="imageHeight" value="88" />
-          <label for="bleed">Bleed</label>
-          <input type="number" id="bleed" value="0" />
-        </div>
-      </div>
     </div>
 
-    <div class="container">
-      <h2>Advanced settings</h2>
-      <div class="form-group advanced">
-        <div class="iconbox">
-          <i class="fa-solid fa-crosshairs icon" title="Crosshair settings"></i>
+    <div id="foldableModeUI" style="display: none;">
+        <div class="container">
+            <div class="form-group">
+                <div class="box">
+                    <h2>Page size:</h2>
+                    <input type="radio" id="foldable_A4" name="foldable_pageSize" value="A4" checked />
+                    <label for="foldable_A4"><img src="a4.png" alt="A4" /></label>
+                    <input type="radio" id="foldable_Letter" name="foldable_pageSize" value="Letter" />
+                    <label for="foldable_Letter"><img src="letter.png" alt="Letter" /></label>
+                </div>
+            </div>
         </div>
-        <p>Crosshair settings</p>
-        <div class="box settings">
-          <label for="frontCheckbox">Front</label>
-          <input
-            type="checkbox"
-            id="frontCheckbox"
-            name="frontCheckbox"
-            checked
-          />
-          <label for="backCheckbox">Back</label>
-          <input
-            type="checkbox"
-            id="backCheckbox"
-            name="backCheckbox"
-            unchecked
-          />
-          <label for="crosswidth">Line width</label>
-          <input type="number" id="crosswidth" value="0.5" step="0.1" />
-          <label for="crosssize">Size</label>
-          <input type="number" id="crosssize" value="4" step="0.5" />
-          <label for="crosshaircolor">Color</label>
-          <input
-            type="color"
-            id="crosshaircolor"
-            value="#000000"
-            placeholder="Select a color"
-          />
+        <div class="container">
+            <h2>Card & Margin Settings (in mm)</h2>
+            <div class="form-group basic">
+                <p>Card Dimensions</p>
+                <div class="box settings">
+                    <label for="foldable_cardWidth">Width</label>
+                    <input type="number" id="foldable_cardWidth" value="63" />
+                    <label for="foldable_cardHeight">Height</label>
+                    <input type="number" id="foldable_cardHeight" value="88" />
+                </div>
+            </div>
+            <div class="form-group basic">
+                <p>Page Margins</p>
+                <div class="box settings">
+                    <label for="foldable_printerMargin">Printer</label>
+                    <input type="number" id="foldable_printerMargin" value="5" />
+                    <label for="foldable_foldingMargin">Folding</label>
+                    <input type="number" id="foldable_foldingMargin" value="5" />
+                </div>
+            </div>
+            <div class="form-group basic">
+                <p>Card Spacing</p>
+                <div class="box settings">
+                    <label for="foldable_cardMargin">Card</label>
+                    <input type="number" id="foldable_cardMargin" value="2" />
+                    <label for="foldable_cutMargin">Cut</label>
+                    <input type="number" id="foldable_cutMargin" value="0" />
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="form-group advanced">
-        <div class="iconbox">
-          <i
-            class="fa-solid fa-border-top-left icon"
-            title="Border settings"
-          ></i>
+        <div class="container">
+            <h2>Advanced Foldable Settings</h2>
+            <div class="form-group advanced">
+                <p>Border</p>
+                <div class="box settings">
+                    <label for="foldable_outerBorder">Outer</label>
+                    <input type="number" id="foldable_outerBorder" value="0" />
+                    <label for="foldable_borderColorFront">Front Color</label>
+                    <input type="color" id="foldable_borderColorFront" value="#000000" />
+                    <label for="foldable_borderColorBack">Back Color</label>
+                    <input type="color" id="foldable_borderColorBack" value="#000000" />
+                </div>
+            </div>
+            <div class="form-group advanced">
+                <p>Layout</p>
+                <div class="box settings">
+                    <label for="foldable_foldLinePreference">Fold</label>
+                    <select id="foldable_foldLinePreference">
+                        <option value="auto">Auto</option>
+                        <option value="vertical">Vertical</option>
+                        <option value="horizontal">Horizontal</option>
+                    </select>
+                </div>
+            </div>
         </div>
-        <p>Border settings</p>
-        <div class="box settings">
-          <label for="frontBorderCheckbox">Front</label>
-          <input type="checkbox" id="frontBorderCheckbox" />
-          <label for="backBorderCheckbox">Back</label>
-          <input type="checkbox" id="backBorderCheckbox" />
-          <label for="borderWidth">Border width</label>
-          <input type="number" id="borderWidth" value="3" />
-          <label for="borderColor">Color</label>
-          <input type="color" id="borderColor" value="#ffffff" />
-
-          <br /><br />
-          <label for="cornerRadius">Corner Radius:</label>
-          <select id="cornerRadius">
-            <option value="0">None</option>
-            <option value="3">S (3mm)</option>
-            <option value="5">M (5mm)</option>
-            <option value="8">L (8mm)</option>
-            <option value="10">XL (10mm)</option>
-          </select>
-          <br /><br />
-        </div>
-      </div>
     </div>
 
     <div class="container">
@@ -256,5 +339,6 @@
     </div>
     <script src="layout-master.js"></script>
     <script src="layout-ui.js"></script>
+    <script src="foldable-layout-ui.js"></script>
   </body>
 </html>

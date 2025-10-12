@@ -1,28 +1,39 @@
-
 const LayoutToolPDF = {
-  worker: null, // To hold the worker instance
+  workers: {},
 
   init() {
-    // Initialize the worker and set up message handling
-    this.worker = new Worker("layout-generator-worker.js");
-    this.worker.onmessage = (event) => {
-      const { status, pdfBytes, error } = event.data;
+    this.workers.doubleSided = new Worker("layout-generator-worker.js");
+    this.workers.foldable = new Worker("foldable-layout-worker.js");
 
-      if (status === 'done') {
-        // PDF is ready, create download link
+    const onWorkerMessage = (event) => {
+      const { status, pdfBytes, error, pdf } = event.data;
+
+      if (error) {
+        console.error("Error from PDF worker:", error);
+        alert(`An error occurred during PDF generation: ${error}`);
+        window.LayoutToolUI.ui.showLoader(false);
+        return;
+      }
+
+      if (pdf) { // Message from foldable worker
+        const blob = new Blob([pdf.pdfBytes], { type: "application/pdf" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "output.pdf";
+        link.click();
+        window.LayoutToolUI.ui.showLoader(false);
+      } else if (status === 'done') { // Message from double-sided worker
         const blob = new Blob([pdfBytes], { type: "application/pdf" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = "output.pdf";
         link.click();
         window.LayoutToolUI.ui.showLoader(false);
-      } else if (status === 'error') {
-        // Handle errors from the worker
-        console.error("Error from PDF worker:", error);
-        alert(`An error occurred during PDF generation: ${error}`);
-        window.LayoutToolUI.ui.showLoader(false);
       }
     };
+
+    this.workers.doubleSided.onmessage = onWorkerMessage;
+    this.workers.foldable.onmessage = onWorkerMessage;
   },
 
   utils: {
@@ -50,14 +61,104 @@ const LayoutToolPDF = {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
-          const buffer = e.target.result;
-          const realType = this.utils.getImageType(buffer);
+          const dataUrl = e.target.result;
+          const realType = this.utils.getImageType(dataUrl);
           if (!realType) {
             alert(`Unsupported file type: ${file.name}. Please use JPEG or PNG files.`);
             reject(new Error(`Unsupported file type: ${file.name}`));
             return;
           }
-          // Pass the buffer directly, the worker will handle embedding
+          resolve(dataUrl);
+        };
+        reader.onerror = () => {
+          reject(new Error(`Failed to read file: ${file.name}`));
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+    return Promise.all(filePromises);
+  },
+
+  async generatePDF() {
+    window.LayoutToolUI.ui.showLoader(true);
+
+    const layoutMode = document.querySelector('input[name="layoutMode"]:checked').value;
+
+    const { frontImages, backImages } = window.LayoutToolUI.elements;
+    const frontFiles = frontImages.files;
+    const backFiles = backImages.files;
+
+    if (frontFiles.length < 1) {
+      alert("Error: No front images selected.");
+      window.LayoutToolUI.ui.showLoader(false);
+      return;
+    }
+
+    try {
+        if (layoutMode === 'doubleSided') {
+            const singleBack = backFiles.length === 1;
+            const noBack = backFiles.length === 0;
+            if (frontFiles.length !== backFiles.length && !singleBack && !noBack) {
+                alert("Error: Number of backs must be 0, 1, or the same as fronts.");
+                window.LayoutToolUI.ui.showLoader(false);
+                return;
+            }
+
+            const frontImageBuffers = await this.readFilesAsArrayBuffer(frontFiles);
+            const backImageBuffers = await this.readFilesAsArrayBuffer(backFiles);
+            const settings = window.LayoutToolUI.getSettings();
+            const config = {
+                borderColor: this.utils.hexToRgb(document.getElementById('borderColor').value),
+                crosshairColor: this.utils.hexToRgb(document.getElementById('crosshaircolor').value)
+            };
+
+            const buffers = [...frontImageBuffers.map(f => f.buffer), ...backImageBuffers.map(b => b.buffer)];
+            this.workers.doubleSided.postMessage({ 
+                frontImages: frontImageBuffers, 
+                backImages: backImageBuffers, 
+                settings,
+                config
+            }, buffers);
+
+        } else if (layoutMode === 'foldable') {
+            const frontImageUrls = await this.readFiles(frontFiles);
+            const backImageUrls = await this.readFiles(backFiles);
+
+            let cards = [];
+            for(let i = 0; i < frontImageUrls.length; i++) {
+                const front = frontImageUrls[i];
+                const back = backImageUrls.length === 1 ? backImageUrls[0] : backImageUrls[i] || frontImageUrls[i];
+                cards.push({ front, back });
+            }
+
+            const options = window.FoldableLayoutUI.getSettings();
+
+            this.workers.foldable.postMessage({ 
+                generatePdf: {
+                    cards: cards,
+                    options: options
+                }
+            });
+        }
+    } catch (error) {
+      console.error("Error during PDF preparation:", error.message);
+      alert(`An unexpected error occurred: ${error.message}`);
+      window.LayoutToolUI.ui.showLoader(false);
+    }
+  },
+
+  async readFilesAsArrayBuffer(files) {
+    const filePromises = Array.from(files).map((file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const buffer = e.target.result;
+          const realType = this.utils.getImageType(new Uint8Array(buffer));
+          if (!realType) {
+            alert(`Unsupported file type: ${file.name}. Please use JPEG or PNG files.`);
+            reject(new Error(`Unsupported file type: ${file.name}`));
+            return;
+          }
           resolve({ buffer, type: realType, name: file.name });
         };
         reader.onerror = () => {
@@ -67,56 +168,6 @@ const LayoutToolPDF = {
       });
     });
     return Promise.all(filePromises);
-  },
-
-  async generatePDF() {
-    window.LayoutToolUI.ui.showLoader(true);
-
-    const { frontImages, backImages } = window.LayoutToolUI.elements;
-    const frontFiles = frontImages.files;
-    const backFiles = backImages.files;
-
-    const singleBack = backFiles.length === 1;
-    const noBack = backFiles.length === 0;
-
-    if (frontFiles.length < 1) {
-      alert("Error: No front images selected.");
-      window.LayoutToolUI.ui.showLoader(false);
-      return;
-    }
-    if (frontFiles.length !== backFiles.length && !singleBack && !noBack) {
-      alert("Error: Number of backs must be 0, 1, or the same as fronts.");
-      window.LayoutToolUI.ui.showLoader(false);
-      return;
-    }
-
-    try {
-      // 1. Read files and get settings
-      const frontImageBuffers = await this.readFiles(frontFiles);
-      const backImageBuffers = await this.readFiles(backFiles);
-      const settings = window.LayoutToolUI.getSettings();
-      
-      // Prepare a simplified config object for the worker
-      const config = {
-          borderColor: this.utils.hexToRgb(document.getElementById('borderColor').value),
-          crosshairColor: this.utils.hexToRgb(document.getElementById('crosshaircolor').value)
-      };
-
-      // 2. Send data to the worker
-      // The buffers are transferred, not copied, for performance.
-      const buffers = [...frontImageBuffers.map(f => f.buffer), ...backImageBuffers.map(b => b.buffer)];
-      this.worker.postMessage({ 
-          frontImages: frontImageBuffers, 
-          backImages: backImageBuffers, 
-          settings,
-          config
-        }, buffers);
-
-    } catch (error) {
-      console.error("Error during PDF preparation:", error.message);
-      alert(`An unexpected error occurred: ${error.message}`);
-      window.LayoutToolUI.ui.showLoader(false);
-    }
   },
 };
 
