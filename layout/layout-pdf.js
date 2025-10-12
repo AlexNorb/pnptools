@@ -92,22 +92,26 @@ const LayoutToolPDF = {
     }
   },
 
-  _drawPageGridBorder(page, settings) {
-    const { rows, columns, imageWidth, imageHeight } = settings;
-    const { width: pageWidth, height: pageHeight } = page.getSize();
-
-    const gridWidth = columns * imageWidth;
-    const gridHeight = rows * imageHeight;
-    const x = (pageWidth - gridWidth) / 2;
-    const y = (pageHeight - gridHeight) / 2;
-
+  _drawImageBorder(page, x, y, settings) {
     page.drawRectangle({
-      x: x - 5,
-      y: y - 5,
-      width: gridWidth + 10,
-      height: gridHeight + 10,
-      borderWidth: 10,
+      x: x,
+      y: y - settings.imageHeight,
+      width: settings.imageWidth,
+      height: settings.imageHeight,
       borderColor: window.LayoutToolUI.config.borderColor,
+      borderWidth: settings.borderWidth,
+      rx: 0,
+      ry: 0,
+    });
+    page.drawRectangle({
+      x: x,
+      y: y - settings.imageHeight,
+      width: settings.imageWidth,
+      height: settings.imageHeight,
+      borderColor: window.LayoutToolUI.config.borderColor,
+      borderWidth: settings.borderWidth,
+      rx: settings.cornerRadius,
+      ry: settings.cornerRadius,
     });
   },
 
@@ -167,16 +171,7 @@ const LayoutToolPDF = {
             height: settings.imageHeight - settings.borderWidth,
           });
           // Draw the border as a non-filled rectangle
-          page.drawRectangle({
-            x: x,
-            y: y - settings.imageHeight,
-            width: settings.imageWidth,
-            height: settings.imageHeight,
-            borderColor: window.LayoutToolUI.config.borderColor,
-            borderWidth: settings.borderWidth,
-            rx: settings.cornerRadius,
-            ry: settings.cornerRadius,
-          });
+          this._drawImageBorder(page, x, y, settings);
         } else {
           // No border, just draw the image
           page.drawImage(embeddedImage, {
@@ -252,16 +247,7 @@ const LayoutToolPDF = {
               height: settings.imageHeight - settings.borderWidth,
             });
             // Draw the border as a non-filled rectangle
-            page.drawRectangle({
-              x: x,
-              y: y - settings.imageHeight,
-              width: settings.imageWidth,
-              height: settings.imageHeight,
-              borderColor: window.LayoutToolUI.config.borderColor,
-              borderWidth: settings.borderWidth,
-              rx: settings.cornerRadius,
-              ry: settings.cornerRadius,
-            });
+            this._drawImageBorder(page, x, y, settings);
           } else {
             // No border, just draw the image
             page.drawImage(embeddedImage, {
