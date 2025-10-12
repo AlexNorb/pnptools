@@ -144,9 +144,7 @@ const LayoutToolPDF = {
     let currentImageIndex = 0;
     while (currentImageIndex < frontImages.length) {
       page = pdfDoc.addPage([pageWidth, pageHeight]);
-      if (settings.pageGridBorder) {
-        this._drawPageGridBorder(page, settings);
-      }
+
       let x = (pageWidth - settings.columns * settings.imageWidth) / 2;
       let y = (pageHeight + settings.rows * settings.imageHeight) / 2;
 
@@ -209,9 +207,7 @@ const LayoutToolPDF = {
       // Back page
       if (!noBack) {
         page = pdfDoc.addPage([pageWidth, pageHeight]);
-        if (settings.pageGridBorder) {
-          this._drawPageGridBorder(page, settings);
-        }
+
         x =
           (pageWidth + settings.columns * settings.imageWidth) / 2 -
           settings.imageWidth;
