@@ -14,7 +14,6 @@ const FoldableLayoutUI = {
       "foldable_borderColorBack",
       "foldable_foldLinePreference",
       "foldable_cornerRadius",
-      "foldable_cutterOffset",
     ];
 
     ids.forEach((id) => {
