@@ -94,9 +94,8 @@ const LayoutToolPDF = {
   async generatePDF() {
     window.LayoutToolUI.ui.showLoader(true);
 
-    const layoutMode = document.querySelector(
-      'input[name="layoutMode"]:checked'
-    ).value;
+    const settings = window.LayoutToolUI.getSettings();
+    const layoutMode = settings.layoutMode;
 
     const { frontImages, backImages } = window.LayoutToolUI.elements;
     const frontFiles = frontImages.files;
@@ -118,10 +117,8 @@ const LayoutToolPDF = {
           return;
         }
 
-        // Use readFiles to get DataURLs, not readFilesAsArrayBuffer
         const frontImageUrls = await this.readFiles(frontFiles);
         const backImageUrls = await this.readFiles(backFiles);
-        const settings = window.LayoutToolUI.getSettings();
         const config = {
           borderColor: this.utils.hexToRgb(
             document.getElementById("borderColor").value
@@ -131,7 +128,6 @@ const LayoutToolPDF = {
           ),
         };
 
-        // Post the URLs directly. No transferable objects needed for strings.
         this.workers.doubleSided.postMessage({
           frontImages: frontImageUrls,
           backImages: backImageUrls,
@@ -152,12 +148,10 @@ const LayoutToolPDF = {
           cards.push({ front, back });
         }
 
-        const options = window.FoldableLayoutUI.getSettings();
-
         this.workers.foldable.postMessage({
           generatePdf: {
             cards: cards,
-            options: options,
+            options: settings,
           },
         });
       }
