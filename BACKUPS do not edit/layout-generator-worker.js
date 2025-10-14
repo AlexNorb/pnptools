@@ -7,7 +7,6 @@ importScripts(
 onmessage = async (event) => {
   const { frontImages, backImages, settings, config } = event.data;
   try {
-    // The worker now expects frontImages and backImages to be arrays of DataURLs.
     const pdfBytes = await createPDF(frontImages, backImages, settings, config);
     // Sends the generated PDF bytes back to the main thread.
     // The second argument [pdfBytes.buffer] is a "transferable object",
@@ -109,31 +108,6 @@ async function createPDF(frontImages, backImages, settings, config) {
   const pdfDoc = await PDFDocument.create();
   let page;
 
-  // --- Start of Refactored Code ---
-
-  // 1. Deduplication Look-Up Table (LUT) to cache embedded images.
-  const deduplicationLUT = {};
-
-  // 2. Helper function to embed an image only if it hasn't been seen before.
-  const getOrEmbedImage = async (imageAsDataUrl) => {
-    if (!deduplicationLUT[imageAsDataUrl]) {
-      let embeddedImage;
-      if (imageAsDataUrl.startsWith("data:image/png;base64,")) {
-        embeddedImage = await pdfDoc.embedPng(imageAsDataUrl);
-      } else if (imageAsDataUrl.startsWith("data:image/jpeg;base64,")) {
-        embeddedImage = await pdfDoc.embedJpg(imageAsDataUrl);
-      }
-      // Store the embedded image promise in the LUT
-      if(embeddedImage) {
-        deduplicationLUT[imageAsDataUrl] = embeddedImage;
-      }
-    }
-    return deduplicationLUT[imageAsDataUrl];
-  };
-
-  // --- End of Refactored Code ---
-
-
   const pageSizes = {
     A4: [595.28, 841.89],
     Letter: [612, 792],
@@ -165,11 +139,11 @@ async function createPDF(frontImages, backImages, settings, config) {
     );
 
     for (let i = 0; i < imagesOnThisPage; i++) {
-      const imageUrl = frontImages[currentImageIndex + i];
-      // Use the helper function to get a cached or new embedded image
-      const embeddedImage = await getOrEmbedImage(imageUrl);
-
-      if (!embeddedImage) continue; // Skip if image format is not supported
+      const image = frontImages[currentImageIndex + i];
+      const embeddedImage =
+        image.type === "image/png"
+          ? await pdfDoc.embedPng(image.buffer)
+          : await pdfDoc.embedJpg(image.buffer);
 
       if (settings.frontBorderCheckbox) {
         page.drawImage(embeddedImage, {
@@ -217,9 +191,11 @@ async function createPDF(frontImages, backImages, settings, config) {
 
       let singleBackImage;
       if (singleBack) {
-        const backImageUrl = backImages[0];
-        // Use the helper function for the single back image
-        singleBackImage = await getOrEmbedImage(backImageUrl);
+        const backImage = backImages[0];
+        singleBackImage =
+          backImage.type === "image/png"
+            ? await pdfDoc.embedPng(backImage.buffer)
+            : await pdfDoc.embedJpg(backImage.buffer);
       }
 
       for (let i = 0; i < imagesOnThisPage; i++) {
@@ -227,12 +203,12 @@ async function createPDF(frontImages, backImages, settings, config) {
         if (singleBack) {
           embeddedImage = singleBackImage;
         } else {
-          const imageUrl = backImages[currentImageIndex + i];
-           // Use the helper function for multiple back images
-          embeddedImage = await getOrEmbedImage(imageUrl);
+          const image = backImages[currentImageIndex + i];
+          embeddedImage =
+            image.type === "image/png"
+              ? await pdfDoc.embedPng(image.buffer)
+              : await pdfDoc.embedJpg(image.buffer);
         }
-        
-        if (!embeddedImage) continue;
 
         if (settings.backBorderCheckbox) {
           page.drawImage(embeddedImage, {
@@ -281,6 +257,5 @@ async function createPDF(frontImages, backImages, settings, config) {
     currentImageIndex += imagesOnThisPage;
   }
 
-  // Save with object streams enabled for better compression
-  return await pdfDoc.save({ useObjectStreams: true });
+  return await pdfDoc.save();
 }

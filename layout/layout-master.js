@@ -118,8 +118,9 @@ const LayoutToolPDF = {
           return;
         }
 
-        const frontImageBuffers = await this.readFilesAsArrayBuffer(frontFiles);
-        const backImageBuffers = await this.readFilesAsArrayBuffer(backFiles);
+        // Use readFiles to get DataURLs, not readFilesAsArrayBuffer
+        const frontImageUrls = await this.readFiles(frontFiles);
+        const backImageUrls = await this.readFiles(backFiles);
         const settings = window.LayoutToolUI.getSettings();
         const config = {
           borderColor: this.utils.hexToRgb(
@@ -130,19 +131,13 @@ const LayoutToolPDF = {
           ),
         };
 
-        const buffers = [
-          ...frontImageBuffers.map((f) => f.buffer),
-          ...backImageBuffers.map((b) => b.buffer),
-        ];
-        this.workers.doubleSided.postMessage(
-          {
-            frontImages: frontImageBuffers,
-            backImages: backImageBuffers,
-            settings,
-            config,
-          },
-          buffers
-        );
+        // Post the URLs directly. No transferable objects needed for strings.
+        this.workers.doubleSided.postMessage({
+          frontImages: frontImageUrls,
+          backImages: backImageUrls,
+          settings,
+          config,
+        });
       } else if (layoutMode === "foldable") {
         const frontImageUrls = await this.readFiles(frontFiles);
         const backImageUrls = await this.readFiles(backFiles);
@@ -171,31 +166,6 @@ const LayoutToolPDF = {
       alert(`An unexpected error occurred: ${error.message}`);
       window.LayoutToolUI.ui.showLoader(false);
     }
-  },
-
-  async readFilesAsArrayBuffer(files) {
-    const filePromises = Array.from(files).map((file) => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const buffer = e.target.result;
-          const realType = this.utils.getImageType(new Uint8Array(buffer));
-          if (!realType) {
-            alert(
-              `Unsupported file type: ${file.name}. Please use JPEG or PNG files.`
-            );
-            reject(new Error(`Unsupported file type: ${file.name}`));
-            return;
-          }
-          resolve({ buffer, type: realType, name: file.name });
-        };
-        reader.onerror = () => {
-          reject(new Error(`Failed to read file: ${file.name}`));
-        };
-        reader.readAsArrayBuffer(file);
-      });
-    });
-    return Promise.all(filePromises);
   },
 };
 

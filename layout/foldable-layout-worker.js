@@ -627,7 +627,7 @@ if (typeof importScripts === "function") {
     const cardWidth = options.cardWidth;
     const cardHeight = options.cardHeight;
 
-    const cardMargin = withDefault(options.cardMargin, 2);
+    const cardMargin = withDefault(options.cardMargin, 0);
     const cutMargin = withDefault(options.cutMargin, 0);
     const foldingMargin = withDefault(options.foldingMargin, 5);
     const printerMargin = withDefault(options.printerMargin, 5);

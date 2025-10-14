@@ -304,8 +304,8 @@
           <p>Card Spacing</p>
           <div class="box settings">
             <label for="foldable_cardMargin">Card</label>
-            <input type="number" id="foldable_cardMargin" value="2" />
-            <label for="foldable_cutMargin">Cut</label>
+            <input type="number" id="foldable_cardMargin" value="0" />
+            <label for="foldable_cutMargin">Bleed</label>
             <input type="number" id="foldable_cutMargin" value="0" />
           </div>
         </div>
@@ -315,17 +315,23 @@
         <div class="form-group advanced">
           <p>Border</p>
           <div class="box settings">
-            <label for="foldable_outerBorder">Outer</label>
-            <input type="number" id="foldable_outerBorder" value="0" />
-            <label for="foldable_innerBorder">Inner</label>
+            <label for="foldable_innerBorder">Border width</label>
             <input type="number" id="foldable_innerBorder" value="0" />
-            <label for="foldable_borderColorFront">Front Color</label>
+            <label for="foldable_cornerRadius">Corner Radius</label>
+            <select id="foldable_cornerRadius">
+              <option value="0">None</option>
+              <option value="3">S (3mm)</option>
+              <option value="5">M (5mm)</option>
+              <option value="8">L (8mm)</option>
+              <option value="10">XL (10mm)</option>
+            </select>
+            <label for="foldable_borderColorFront">Front</label>
             <input
               type="color"
               id="foldable_borderColorFront"
               value="#000000"
             />
-            <label for="foldable_borderColorBack">Back Color</label>
+            <label for="foldable_borderColorBack">Back</label>
             <input type="color" id="foldable_borderColorBack" value="#000000" />
           </div>
         </div>
@@ -337,14 +343,6 @@
               <option value="auto">Auto</option>
               <option value="vertical">Vertical</option>
               <option value="horizontal">Horizontal</option>
-            </select>
-            <label for="foldable_cornerRadius">Corner Radius</label>
-            <select id="foldable_cornerRadius">
-              <option value="0">None</option>
-              <option value="3">S (3mm)</option>
-              <option value="5">M (5mm)</option>
-              <option value="8">L (8mm)</option>
-              <option value="10">XL (10mm)</option>
             </select>
           </div>
         </div>
