@@ -195,6 +195,22 @@ input[name="borderLogic"] + label:hover {
   background-color: #e0eaf3;
 }
 
+/* Style for layoutMode radio button labels */
+input[name="layoutMode"] + label {
+  cursor: pointer;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 0 5px;
+  background-color: #f0f0f0;
+}
+
+input[name="layoutMode"]:checked + label,
+input[name="layoutMode"] + label:hover {
+  border-color: #3e97eb;
+  background-color: #e0eaf3;
+}
+
 button:hover {
   background-color: #286e2b;
 }
