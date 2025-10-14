@@ -1,8 +1,6 @@
 # UI Documentation for the "Layout" Tool
 
-This document provides a detailed breakdown of the user interface for the "Layout" tool. It is intended to assist a UI developer in reconstructing the interface based on the existing HTML structure, JavaScript behavior, and CSS styling.
-
-As I do not have access to the commit history, I am unable to provide a changelog.
+This document provides a detailed breakdown of the user interface for the "Layout" tool. It is intended to assist a UI developer in reconstructing the interface based on the existing HTML structure, JavaScript behavior
 
 ## Overall Structure
 
@@ -66,10 +64,12 @@ The layout is responsive and uses a container-based design to group related elem
 
 - **HTML:** A `div` with the class `foot`.
 - **Content:**
+
   - A "Generate PDF" button.
-  - A "Leave feedback" button.
+
   - A "Buy me a coffee" link with an image.
   - A loader animation (a `div` with the class `sk-circle`), which is hidden by default.
+
 - **Behavior:**
   - The "Generate PDF" button triggers the `generatePDF` function in `layout-pdf.js`.
   - The loader is shown when the PDF generation process starts.
@@ -170,18 +170,3 @@ The UI's interactivity is primarily handled by two JavaScript files:
   - **`getSettings()`:** Collects all the settings from the double-sided UI to be used for PDF generation.
 - **`foldable-layout-ui.js`:** Manages the foldable mode UI.
   - **`getSettings()`:** Collects all the settings from the foldable UI.
-
-## 9. Styling (`style.css`)
-
-The look and feel of the application are defined in `style.css`.
-
-- **Layout:**
-  - A `container` class is used for the main content blocks, providing a consistent width, padding, and a subtle shadow.
-  - Flexbox is used extensively for alignment and spacing within the `header`, `form-group`, and `foot` elements.
-- **Controls:**
-  - Buttons, inputs, and dropdowns have a consistent style with rounded corners and hover effects.
-  - Radio buttons for page size are hidden, and their corresponding `label` (containing an `img`) is styled to show the selection.
-- **Dropzones:**
-  - Have a dashed border that changes color on hover to indicate they are interactive.
-- **Icons:**
-  - Font Awesome is used for icons, providing a clean and modern look.

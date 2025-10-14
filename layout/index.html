@@ -8,7 +8,7 @@
     <meta http-equiv="expires" content="Tue, 01 Jan 1990 12:00:00 GMT" />
     <title>Card layout tool</title>
 
-    <link rel="icon" href="favicon.png" type="image/png" />
+    <link rel="icon" href="assets/favicon.png" type="image/png" />
     <link rel="stylesheet" href="style.css" />
     <!-- loader -->
     <link rel="stylesheet" href="spinkit.css" />
@@ -68,15 +68,15 @@
       <!-- mode indicator -->
       <div class="form-group mode" style="justify-content: space-around">
         <div style="text-align: center">
-          <img src="mode1.jpg" height="100px" id="mode1" />
+          <img src="assets/mode1.jpg" height="100px" id="mode1" />
           <h2>No backs</h2>
         </div>
         <div style="text-align: center">
-          <img src="mode2.jpg" height="100px" id="mode2" />
+          <img src="assets/mode2.jpg" height="100px" id="mode2" />
           <h2>Same backs</h2>
         </div>
         <div style="text-align: center">
-          <img src="mode3.jpg" height="100px" id="mode3" />
+          <img src="assets/mode3.jpg" height="100px" id="mode3" />
           <h2>Unique backs</h2>
         </div>
       </div>
@@ -109,7 +109,7 @@
           <div class="box">
             <h2>Page size:</h2>
             <input type="radio" id="A4" name="pageSize" value="A4" checked />
-            <label for="A4"><img src="a4.png" alt="A4" /></label>
+            <label for="A4"><img src="assets/a4.png" alt="A4" /></label>
             <input
               type="radio"
               id="A4Landscape"
@@ -117,10 +117,12 @@
               value="A4 landscape"
             />
             <label for="A4Landscape"
-              ><img src="a4-landscape.png" alt="A4 landscape"
+              ><img src="assets/a4-landscape.png" alt="A4 landscape"
             /></label>
             <input type="radio" id="Letter" name="pageSize" value="Letter" />
-            <label for="Letter"><img src="letter.png" alt="Letter" /></label>
+            <label for="Letter"
+              ><img src="assets/letter.png" alt="Letter"
+            /></label>
             <input
               type="radio"
               id="LetterLandscape"
@@ -128,7 +130,7 @@
               value="Letter landscape"
             />
             <label for="LetterLandscape"
-              ><img src="letter-landscape.png" alt="Letter landscape"
+              ><img src="assets/letter-landscape.png" alt="Letter landscape"
             /></label>
           </div>
 
@@ -263,7 +265,9 @@
               value="A4"
               checked
             />
-            <label for="foldable_A4"><img src="a4.png" alt="A4" /></label>
+            <label for="foldable_A4"
+              ><img src="assets/a4.png" alt="A4"
+            /></label>
             <input
               type="radio"
               id="foldable_Letter"
@@ -271,7 +275,7 @@
               value="Letter"
             />
             <label for="foldable_Letter"
-              ><img src="letter.png" alt="Letter"
+              ><img src="assets/letter.png" alt="Letter"
             /></label>
           </div>
         </div>
@@ -365,10 +369,6 @@
           <div class="sk-circle-dot"></div>
           <div class="sk-circle-dot"></div>
         </div>
-
-        <a href="survey.html" target="_blank">
-          <button class="survey">Leave feedback</button>
-        </a>
 
         <a
           href="https://www.buymeacoffee.com/pnpbuddy"

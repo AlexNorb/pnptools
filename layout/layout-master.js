@@ -15,14 +15,16 @@ const LayoutToolPDF = {
         return;
       }
 
-      if (pdf) { // Message from foldable worker
+      if (pdf) {
+        // Message from foldable worker
         const blob = new Blob([pdf.pdfBytes], { type: "application/pdf" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = "output.pdf";
         link.click();
         window.LayoutToolUI.ui.showLoader(false);
-      } else if (status === 'done') { // Message from double-sided worker
+      } else if (status === "done") {
+        // Message from double-sided worker
         const blob = new Blob([pdfBytes], { type: "application/pdf" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
@@ -40,7 +42,13 @@ const LayoutToolPDF = {
     getImageType(buffer) {
       const uint8 = new Uint8Array(buffer);
       if (uint8[0] === 0xff && uint8[1] === 0xd8) return "image/jpeg";
-      if (uint8[0] === 0x89 && uint8[1] === 0x50 && uint8[2] === 0x4e && uint8[3] === 0x47) return "image/png";
+      if (
+        uint8[0] === 0x89 &&
+        uint8[1] === 0x50 &&
+        uint8[2] === 0x4e &&
+        uint8[3] === 0x47
+      )
+        return "image/png";
       return null;
     },
     hexToRgb(hex) {
@@ -62,8 +70,13 @@ const LayoutToolPDF = {
         const reader = new FileReader();
         reader.onload = (e) => {
           const dataUrl = e.target.result;
-          if (!dataUrl.startsWith("data:image/png;base64,") && !dataUrl.startsWith("data:image/jpeg;base64,")) {
-            alert(`Unsupported file type: ${file.name}. Please use JPEG or PNG files.`);
+          if (
+            !dataUrl.startsWith("data:image/png;base64,") &&
+            !dataUrl.startsWith("data:image/jpeg;base64,")
+          ) {
+            alert(
+              `Unsupported file type: ${file.name}. Please use JPEG or PNG files.`
+            );
             reject(new Error(`Unsupported file type: ${file.name}`));
             return;
           }
@@ -81,7 +94,9 @@ const LayoutToolPDF = {
   async generatePDF() {
     window.LayoutToolUI.ui.showLoader(true);
 
-    const layoutMode = document.querySelector('input[name="layoutMode"]:checked').value;
+    const layoutMode = document.querySelector(
+      'input[name="layoutMode"]:checked'
+    ).value;
 
     const { frontImages, backImages } = window.LayoutToolUI.elements;
     const frontFiles = frontImages.files;
@@ -94,51 +109,63 @@ const LayoutToolPDF = {
     }
 
     try {
-        if (layoutMode === 'doubleSided') {
-            const singleBack = backFiles.length === 1;
-            const noBack = backFiles.length === 0;
-            if (frontFiles.length !== backFiles.length && !singleBack && !noBack) {
-                alert("Error: Number of backs must be 0, 1, or the same as fronts.");
-                window.LayoutToolUI.ui.showLoader(false);
-                return;
-            }
-
-            const frontImageBuffers = await this.readFilesAsArrayBuffer(frontFiles);
-            const backImageBuffers = await this.readFilesAsArrayBuffer(backFiles);
-            const settings = window.LayoutToolUI.getSettings();
-            const config = {
-                borderColor: this.utils.hexToRgb(document.getElementById('borderColor').value),
-                crosshairColor: this.utils.hexToRgb(document.getElementById('crosshaircolor').value)
-            };
-
-            const buffers = [...frontImageBuffers.map(f => f.buffer), ...backImageBuffers.map(b => b.buffer)];
-            this.workers.doubleSided.postMessage({ 
-                frontImages: frontImageBuffers, 
-                backImages: backImageBuffers, 
-                settings,
-                config
-            }, buffers);
-
-        } else if (layoutMode === 'foldable') {
-            const frontImageUrls = await this.readFiles(frontFiles);
-            const backImageUrls = await this.readFiles(backFiles);
-
-            let cards = [];
-            for(let i = 0; i < frontImageUrls.length; i++) {
-                const front = frontImageUrls[i];
-                const back = backImageUrls.length === 1 ? backImageUrls[0] : backImageUrls[i] || frontImageUrls[i];
-                cards.push({ front, back });
-            }
-
-            const options = window.FoldableLayoutUI.getSettings();
-
-            this.workers.foldable.postMessage({ 
-                generatePdf: {
-                    cards: cards,
-                    options: options
-                }
-            });
+      if (layoutMode === "doubleSided") {
+        const singleBack = backFiles.length === 1;
+        const noBack = backFiles.length === 0;
+        if (frontFiles.length !== backFiles.length && !singleBack && !noBack) {
+          alert("Error: Number of backs must be 0, 1, or the same as fronts.");
+          window.LayoutToolUI.ui.showLoader(false);
+          return;
         }
+
+        const frontImageBuffers = await this.readFilesAsArrayBuffer(frontFiles);
+        const backImageBuffers = await this.readFilesAsArrayBuffer(backFiles);
+        const settings = window.LayoutToolUI.getSettings();
+        const config = {
+          borderColor: this.utils.hexToRgb(
+            document.getElementById("borderColor").value
+          ),
+          crosshairColor: this.utils.hexToRgb(
+            document.getElementById("crosshaircolor").value
+          ),
+        };
+
+        const buffers = [
+          ...frontImageBuffers.map((f) => f.buffer),
+          ...backImageBuffers.map((b) => b.buffer),
+        ];
+        this.workers.doubleSided.postMessage(
+          {
+            frontImages: frontImageBuffers,
+            backImages: backImageBuffers,
+            settings,
+            config,
+          },
+          buffers
+        );
+      } else if (layoutMode === "foldable") {
+        const frontImageUrls = await this.readFiles(frontFiles);
+        const backImageUrls = await this.readFiles(backFiles);
+
+        let cards = [];
+        for (let i = 0; i < frontImageUrls.length; i++) {
+          const front = frontImageUrls[i];
+          const back =
+            backImageUrls.length === 1
+              ? backImageUrls[0]
+              : backImageUrls[i] || frontImageUrls[i];
+          cards.push({ front, back });
+        }
+
+        const options = window.FoldableLayoutUI.getSettings();
+
+        this.workers.foldable.postMessage({
+          generatePdf: {
+            cards: cards,
+            options: options,
+          },
+        });
+      }
     } catch (error) {
       console.error("Error during PDF preparation:", error.message);
       alert(`An unexpected error occurred: ${error.message}`);
@@ -154,7 +181,9 @@ const LayoutToolPDF = {
           const buffer = e.target.result;
           const realType = this.utils.getImageType(new Uint8Array(buffer));
           if (!realType) {
-            alert(`Unsupported file type: ${file.name}. Please use JPEG or PNG files.`);
+            alert(
+              `Unsupported file type: ${file.name}. Please use JPEG or PNG files.`
+            );
             reject(new Error(`Unsupported file type: ${file.name}`));
             return;
           }

@@ -164,21 +164,21 @@ document.addEventListener("DOMContentLoaded", () => {
       updateModeIndicator() {
         const { mode1, mode2, mode3, frontImages, backImages } =
           LayoutToolUI.elements;
-        mode1.src = "mode1.jpg";
-        mode2.src = "mode2.jpg";
-        mode3.src = "mode3.jpg";
+        mode1.src = "assets/mode1.jpg";
+        mode2.src = "assets/mode2.jpg";
+        mode3.src = "assets/mode3.jpg";
         const fileCountBack = backImages.files.length;
         const fileCount = frontImages.files.length;
         if (fileCountBack === 0) {
-          mode1.src = "mode1on.jpg";
+          mode1.src = "assets/mode1on.jpg";
         } else if (fileCountBack === 1) {
-          mode2.src = "mode2on.jpg";
+          mode2.src = "assets/mode2on.jpg";
         } else if (fileCountBack === fileCount) {
-          mode3.src = "mode3on.jpg";
+          mode3.src = "assets/mode3on.jpg";
         } else {
-          mode1.src = "mode1error.jpg";
-          mode2.src = "mode2error.jpg";
-          mode3.src = "mode3error.jpg";
+          mode1.src = "assets/mode1error.jpg";
+          mode2.src = "assets/mode2error.jpg";
+          mode3.src = "assets/mode3error.jpg";
         }
       },
       updateFileCount(fileInput, countElement, isBack = false) {
