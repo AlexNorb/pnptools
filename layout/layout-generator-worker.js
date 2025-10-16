@@ -3,19 +3,26 @@ importScripts(
   "https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib@2.4.1/dist/pdf-lib.min.js"
 );
 
+const reportProgress = (done, all) => {
+  postMessage({
+    state: "progress",
+    data: { done, all, progress: Math.round((done * 100) / all) },
+  });
+};
+
+const reportSaving = () => {
+  postMessage({ state: "saving" });
+};
+
 // Listens for messages from the main thread.
 onmessage = async (event) => {
   const { frontImages, backImages, settings, config } = event.data;
   try {
-    // The worker now expects frontImages and backImages to be arrays of DataURLs.
-    const pdfBytes = await createPDF(frontImages, backImages, settings, config);
-    // Sends the generated PDF bytes back to the main thread.
-    // The second argument [pdfBytes.buffer] is a "transferable object",
-    // which transfers ownership of the data to the main thread for better performance.
-    postMessage({ status: "done", pdfBytes: pdfBytes }, [pdfBytes.buffer]);
+    // The createPDF function will now handle sending the final message
+    await createPDF(frontImages, backImages, settings, config);
   } catch (error) {
     // Sends an error message back to the main thread if something goes wrong.
-    postMessage({ status: "error", error: error.message });
+    postMessage({ state: "error", error: error.message });
   }
 };
 
@@ -105,16 +112,14 @@ function drawCrosshairs(page, x, y, settings, config) {
 }
 
 async function createPDF(frontImages, backImages, settings, config) {
+  const totalImages = frontImages.length;
+  reportProgress(0, totalImages);
+
   const { PDFDocument } = PDFLib;
   const pdfDoc = await PDFDocument.create();
   let page;
 
-  // --- Start of Refactored Code ---
-
-  // 1. Deduplication Look-Up Table (LUT) to cache embedded images.
   const deduplicationLUT = {};
-
-  // 2. Helper function to embed an image only if it hasn't been seen before.
   const getOrEmbedImage = async (imageAsDataUrl) => {
     if (!deduplicationLUT[imageAsDataUrl]) {
       let embeddedImage;
@@ -123,16 +128,12 @@ async function createPDF(frontImages, backImages, settings, config) {
       } else if (imageAsDataUrl.startsWith("data:image/jpeg;base64,")) {
         embeddedImage = await pdfDoc.embedJpg(imageAsDataUrl);
       }
-      // Store the embedded image promise in the LUT
-      if(embeddedImage) {
+      if (embeddedImage) {
         deduplicationLUT[imageAsDataUrl] = embeddedImage;
       }
     }
     return deduplicationLUT[imageAsDataUrl];
   };
-
-  // --- End of Refactored Code ---
-
 
   const pageSizes = {
     A4: [595.28, 841.89],
@@ -153,23 +154,21 @@ async function createPDF(frontImages, backImages, settings, config) {
   const noBack = backImages.length === 0;
 
   let currentImageIndex = 0;
-  while (currentImageIndex < frontImages.length) {
+  while (currentImageIndex < totalImages) {
     page = pdfDoc.addPage([pageWidth, pageHeight]);
 
     let x = (pageWidth - settings.columns * settings.imageWidth) / 2;
     let y = (pageHeight + settings.rows * settings.imageHeight) / 2;
 
     const imagesOnThisPage = Math.min(
-      frontImages.length - currentImageIndex,
+      totalImages - currentImageIndex,
       settings.rows * settings.columns
     );
 
     for (let i = 0; i < imagesOnThisPage; i++) {
       const imageUrl = frontImages[currentImageIndex + i];
-      // Use the helper function to get a cached or new embedded image
       const embeddedImage = await getOrEmbedImage(imageUrl);
-
-      if (!embeddedImage) continue; // Skip if image format is not supported
+      if (!embeddedImage) continue;
 
       if (settings.frontBorderCheckbox) {
         page.drawImage(embeddedImage, {
@@ -218,7 +217,6 @@ async function createPDF(frontImages, backImages, settings, config) {
       let singleBackImage;
       if (singleBack) {
         const backImageUrl = backImages[0];
-        // Use the helper function for the single back image
         singleBackImage = await getOrEmbedImage(backImageUrl);
       }
 
@@ -228,7 +226,6 @@ async function createPDF(frontImages, backImages, settings, config) {
           embeddedImage = singleBackImage;
         } else {
           const imageUrl = backImages[currentImageIndex + i];
-           // Use the helper function for multiple back images
           embeddedImage = await getOrEmbedImage(imageUrl);
         }
         
@@ -279,8 +276,22 @@ async function createPDF(frontImages, backImages, settings, config) {
       }
     }
     currentImageIndex += imagesOnThisPage;
+    reportProgress(currentImageIndex, totalImages);
   }
 
-  // Save with object streams enabled for better compression
-  return await pdfDoc.save({ useObjectStreams: true });
+  reportSaving();
+  const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
+
+  postMessage(
+    {
+      state: "done",
+      pdfBytes: pdfBytes,
+      data: {
+        images: totalImages,
+        pages: pdfDoc.getPageCount(),
+        bytes: pdfBytes.byteLength,
+      },
+    },
+    [pdfBytes.buffer]
+  );
 }

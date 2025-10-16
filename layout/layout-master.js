@@ -6,32 +6,49 @@ const LayoutToolPDF = {
     this.workers.foldable = new Worker("foldable-layout-worker.js");
 
     const onWorkerMessage = (event) => {
-      const { status, pdfBytes, error, pdf } = event.data;
+      const { state, status, pdfBytes, error, pdf, data } = event.data;
 
       if (error) {
         console.error("Error from PDF worker:", error);
         alert(`An error occurred during PDF generation: ${error}`);
-        window.LayoutToolUI.ui.showLoader(false);
+        window.LayoutToolUI.ui.toggleProgressUI(false);
         return;
       }
 
-      if (pdf) {
-        // Message from foldable worker
-        const blob = new Blob([pdf.pdfBytes], { type: "application/pdf" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "output.pdf";
-        link.click();
-        window.LayoutToolUI.ui.showLoader(false);
-      } else if (status === "done") {
-        // Message from double-sided worker
-        const blob = new Blob([pdfBytes], { type: "application/pdf" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "output.pdf";
-        link.click();
-        window.LayoutToolUI.ui.showLoader(false);
+      // Handle progress reporting
+      if (state === "progress") {
+        window.LayoutToolUI.ui.updateProgress(data);
+        return; // Don't do anything else
       }
+
+      if (state === "saving") {
+        window.LayoutToolUI.ui.updateStatus("Saving PDF...");
+        return;
+      }
+
+      // Handle completion and download
+      let finalPdfBytes = null;
+      if (state === "done" && pdfBytes) {
+        // New message format from double-sided worker
+        finalPdfBytes = pdfBytes;
+      } else if (status === "done" && pdfBytes) {
+        // Old message format from double-sided worker (for safety)
+        finalPdfBytes = pdfBytes;
+      } else if (pdf && pdf.pdfBytes) {
+        // Message format from foldable worker
+        finalPdfBytes = pdf.pdfBytes;
+      }
+
+      if (finalPdfBytes) {
+        const blob = new Blob([finalPdfBytes], { type: "application/pdf" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "output.pdf";
+        link.click();
+        window.LayoutToolUI.ui.toggleProgressUI(false);
+      }
+
+      // The foldable worker also sends a `state: 'done'` message without bytes, which we can just ignore here.
     };
 
     this.workers.doubleSided.onmessage = onWorkerMessage;
@@ -92,7 +109,7 @@ const LayoutToolPDF = {
   },
 
   async generatePDF() {
-    window.LayoutToolUI.ui.showLoader(true);
+    window.LayoutToolUI.ui.toggleProgressUI(true);
 
     const settings = window.LayoutToolUI.getSettings();
     const layoutMode = settings.layoutMode;
@@ -103,7 +120,7 @@ const LayoutToolPDF = {
 
     if (frontFiles.length < 1) {
       alert("Error: No front images selected.");
-      window.LayoutToolUI.ui.showLoader(false);
+      window.LayoutToolUI.ui.toggleProgressUI(false);
       return;
     }
 
@@ -113,7 +130,7 @@ const LayoutToolPDF = {
         const noBack = backFiles.length === 0;
         if (frontFiles.length !== backFiles.length && !singleBack && !noBack) {
           alert("Error: Number of backs must be 0, 1, or the same as fronts.");
-          window.LayoutToolUI.ui.showLoader(false);
+          window.LayoutToolUI.ui.toggleProgressUI(false);
           return;
         }
 
@@ -135,6 +152,14 @@ const LayoutToolPDF = {
           config,
         });
       } else if (layoutMode === "foldable") {
+        const singleBack = backFiles.length === 1;
+        const noBack = backFiles.length === 0;
+        if (frontFiles.length !== backFiles.length && !singleBack && !noBack) {
+          alert("Error: Number of backs must be 0, 1, or the same as fronts.");
+          window.LayoutToolUI.ui.toggleProgressUI(false);
+          return;
+        }
+
         const frontImageUrls = await this.readFiles(frontFiles);
         const backImageUrls = await this.readFiles(backFiles);
 
@@ -158,7 +183,7 @@ const LayoutToolPDF = {
     } catch (error) {
       console.error("Error during PDF preparation:", error.message);
       alert(`An unexpected error occurred: ${error.message}`);
-      window.LayoutToolUI.ui.showLoader(false);
+      window.LayoutToolUI.ui.toggleProgressUI(false);
     }
   },
 };

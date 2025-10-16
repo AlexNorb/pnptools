@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Layout Tool</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind (No custom colors here, handled by CSS variables) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles using CSS variables for dynamic theme switching */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+        /* NEW MUTED COLOR PALETTE */
+
+        /* 1. LIGHT MODE (Soft Tones on White) */
+        :root {
+            /* Muted Accents */
+            --color-primary: #6A7BCC;       /* Soft Blue (Action/Callout) */
+            --color-secondary: #C794C7;     /* Soft Magenta (Containers/Borders/Accent) */
+            --color-highlight: #6FD9C4;     /* Soft Cyan (Success/Active) */
+            
+            /* General Colors */
+            --color-background-main: #FFFFFF; 
+            --color-content-bg: #FFFFFF;    
+            
+            /* Text Colors */
+            --color-text-default: #1A1A1A;  /* Near Black */
+            --color-text-secondary: #929FDB; /* Muted light blue/gray */
+        }
+
+        /* 2. DARK MODE (Dusty Accents on Dark Gray) */
+        body.dark {
+            /* Muted Accents (Role inversion for better dark mode contrast) */
+            --color-primary: #6FD9C4;       /* Soft Cyan (Action/Callout) */
+            --color-secondary: #C794C7;     /* Soft Magenta (Containers/Borders/Accent) */
+            --color-highlight: #6A7BCC;     /* Soft Blue (Success/Active) */
+            
+            /* General Colors */
+            --color-background-main: #121212; /* Deep Dark Grey */
+            --color-content-bg: #1A1A1A;    /* Slightly lighter dark grey */
+
+            /* Text Colors */
+            --color-text-default: #EAEAEA;  /* Off White */
+            --color-text-secondary: #99AAB5; /* Muted light gray/blue */
+        }
+
+        /* Apply dynamic colors to base elements */
+        body {
+            background-color: var(--color-background-main);
+            color: var(--color-text-default);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Form Container (Card) */
+        .form-container {
+            background-color: var(--color-content-bg);
+            transition: background-color 0.3s;
+        }
+
+        /* Input Styles (Text/Number/Select) */
+        .input-style {
+            background-color: var(--color-content-bg);
+            color: var(--color-text-default);
+            border-color: var(--color-secondary); /* Default border color */
+        }
+        .input-style:focus {
+            border-color: var(--color-primary);
+            outline: none;
+            /* Using a subtler focus ring */
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 30%, transparent); 
+        }
+
+        /* --- 3-Choice Segmented Control Styling --- */
+        .segment-control {
+            background-color: color-mix(in srgb, var(--color-background-main) 50%, var(--color-content-bg) 50%);
+            border: 1px solid color-mix(in srgb, var(--color-secondary) 50%, transparent);
+        }
+        .segment-button {
+            color: var(--color-text-default); 
+            background-color: transparent;
+            transition: all 0.2s ease;
+        }
+        .segment-button.active {
+            background-color: var(--color-primary); 
+            /* Ensure maximum contrast on the primary action color */
+            color: var(--color-background-main); 
+
+            /* Reduced shadow for less playful look */
+            box-shadow: 0 1px 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
+            z-index: 10;
+            transform: scale(1.00); /* Removed scale hover effect */
+        }
+
+        /* --- Color Input Styling --- */
+        .color-input-style {
+            width: 100%;
+            height: 48px;
+            padding: 0;
+            border: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            overflow: hidden; 
+        }
+        .color-input-style::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .color-input-style::-webkit-color-swatch {
+            border-radius: 0.5rem;
+            border: 2px solid var(--color-secondary);
+            transition: all 0.2s ease;
+        }
+        .color-input-style:focus::-webkit-color-swatch {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 30%, transparent);
+            outline: none;
+        }
+        
+        /* --- Drop Zone Styling --- */
+        .drop-zone {
+            border: 2px dashed var(--color-secondary);
+            background-color: var(--color-content-bg);
+            transition: all 0.2s ease;
+        }
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: var(--color-primary); 
+            /* Subtle hover effect */
+            background-color: color-mix(in srgb, var(--color-content-bg) 95%, var(--color-primary) 5%);
+        }
+
+        /* Toggle Switch Styling */
+        .toggle-switch-bg {
+            transition: background-color 0.3s;
+        }
+        .toggle-switch-dot {
+            transition: transform 0.3s, background-color 0.3s;
+        }
+        .toggle-label input:checked + .toggle-switch-bg {
+            background-color: var(--color-primary);
+        }
+        .toggle-label input:checked + .toggle-switch-bg .toggle-switch-dot {
+            transform: translateX(1.5rem);
+        }
+
+        /* Collapsible Section Backgrounds - ADJUSTED TO 10% TINT */
+        .basic-bg {
+            border-color: var(--color-highlight); 
+            background-color: color-mix(in srgb, var(--color-content-bg) 90%, var(--color-highlight) 10%);
+        }
+        .advanced-bg {
+            border-color: var(--color-secondary); 
+            background-color: color-mix(in srgb, var(--color-content-bg) 90%, var(--color-secondary) 10%);
+        }
+
+        /* Message Box Background - ADJUSTED TO 10% TINT */
+        .message-success {
+             background-color: color-mix(in srgb, var(--color-highlight) 10%, transparent); 
+             color: var(--color-text-default);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 flex items-center justify-center font-sans">
+
+    <!-- Form Container -->
+    <div class="form-container w-full max-w-lg p-6 sm:p-10 rounded-3xl shadow-2xl shadow-gray-200/50">
+        
+        <!-- Theme Toggle -->
+        <div class="flex justify-end mb-4">
+            <label class="toggle-label relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="theme-toggle" class="sr-only peer" onclick="toggleTheme()">
+                <div class="toggle-switch-bg w-14 h-8 bg-gray-300 rounded-full peer-checked:bg-primary/50 transition duration-300">
+                    <span class="toggle-switch-dot absolute top-1 left-1 bg-white w-6 h-6 rounded-full flex items-center justify-center text-xl">
+                         <!-- Light/Dark Icons -->
+                         <span id="light-icon" class="text-yellow-500">☀️</span>
+                         <span id="dark-icon" class="hidden text-gray-700">🌙</span>
+                    </span>
+                </div>
+            </label>
+        </div>
+
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <div class="text-3xl mb-2" style="color: var(--color-primary);" role="img" aria-label="Tool Icon">⚙️</div>
+            <h1 class="text-3xl font-extrabold" style="color: var(--color-primary);">Configuration Portal</h1>
+            <p class="text-sm" style="color: var(--color-text-secondary);">Setup your files, bag mode, and page size preferences.</p>
+        </header>
+
+        <!-- Form Fields -->
+        <form class="space-y-8" id="uploadForm">
+            
+            <!-- WRAPPER for File Inputs -->
+            <div class="flex gap-4"> 
+
+                <!-- SECTION 1: Primary File Input (Front) -->
+                <div id="front-file-section" class="flex-1">
+                    <label class="block text-sm font-medium" style="color: var(--color-text-default);">
+                        Primary File(s)
+                    </label>
+                    <input type="file" id="front-file-input" name="front-file" required multiple accept=".jpg,.jpeg,.png"
+                           class="hidden" onchange="updateFileName('front-file-input', 'front-file-name', 'Primary')">
+                    
+                    <!-- Drop Zone Structure -->
+                    <div class="drop-zone h-36 border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer text-center"
+                         onclick="document.getElementById('front-file-input').click()"
+                         ondragover="event.preventDefault(); this.classList.add('drag-over');"
+                         ondragleave="this.classList.remove('drag-over');"
+                         ondrop="event.preventDefault(); this.classList.remove('drag-over'); handleFileDrop(event, 'front-file-input', 'front-file-name', 'Primary');">
+                        
+                        <!-- File Icon Placeholder -->
+                        <div class="w-8 h-8 mb-2 text-2xl" style="color: var(--color-primary);">📂</div>
+                        
+                        <p class="text-sm font-semibold">
+                            Upload Front Images
+                        </p>
+                        <p id="front-file-name" class="text-xs mt-1" style="color: var(--color-text-secondary);">
+                            Select your .jpg or .png files here.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: Secondary File Input (Back) -->
+                <div id="back-file-section" class="flex-1">
+                    <label class="block text-sm font-medium" style="color: var(--color-text-default);">
+                        Secondary File(s)
+                    </label>
+                    <input type="file" id="back-file-input" name="back-file" required multiple accept=".jpg,.jpeg,.png"
+                           class="hidden" onchange="updateFileName('back-file-input', 'back-file-name', 'Secondary')">
+                    
+                    <!-- Drop Zone Structure -->
+                    <div class="drop-zone h-36 border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer text-center"
+                         onclick="document.getElementById('back-file-input').click()"
+                         ondragover="event.preventDefault(); this.classList.add('drag-over');"
+                         ondragleave="this.classList.remove('drag-over');"
+                         ondrop="event.preventDefault(); this.classList.remove('drag-over'); handleFileDrop(event, 'back-file-input', 'back-file-name', 'Secondary');">
+                        
+                        <!-- File Icon Placeholder -->
+                        <div class="w-8 h-8 mb-2 text-2xl" style="color: var(--color-primary);">📄</div>
+                        
+                        <p class="text-sm font-semibold">
+                            Upload Back Images
+                        </p>
+                        <p id="back-file-name" class="text-xs mt-1" style="color: var(--color-text-secondary);">
+                            Select your .jpg or .png files here.
+                        </p>
+                    </div>
+                </div>
+            </div> <!-- END File Input Wrapper -->
+
+            <!-- SECTION 3: Bag Mode Selector -->
+            <div id="mode-selector-section">
+                <label class="block text-sm font-medium mb-2" style="color: var(--color-text-default);">
+                    Bagging Mode
+                </label>
+                <!-- Hidden input to store the selected value -->
+                <input type="hidden" id="bag-mode-value" name="bag-mode" value="no-bags">
+                
+                <!-- Segmented Control Container -->
+                <div class="segment-control flex p-1 rounded-xl shadow-inner w-full" 
+                     style="box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                    <button type="button" class="segment-button active flex-1 py-2 px-4 rounded-lg font-medium" data-mode="no-bags" onclick="setSegmentMode('bag-mode-value', 'no-bags', this)">
+                        No Bags
+                    </button>
+                    <button type="button" class="segment-button flex-1 py-2 px-4 rounded-lg font-medium" data-mode="same-bags" onclick="setSegmentMode('bag-mode-value', 'same-bags', this)">
+                        Same Bags
+                    </button>
+                    <button type="button" class="segment-button flex-1 py-2 px-4 rounded-lg font-medium" data-mode="unique-bags" onclick="setSegmentMode('bag-mode-value', 'unique-bags', this)">
+                        Unique Bags
+                    </button>
+                </div>
+            </div>
+
+            <!-- SECTION 4: Page Size Selection -->
+            <div id="page-size-section">
+                <label for="page-size-select" class="block text-sm font-medium mb-2" style="color: var(--color-text-default);">
+                    Page Output Size
+                </label>
+                <select id="page-size-select" name="page-size" required onchange="handlePageSizeChange()"
+                        class="input-style w-full p-3 border-2 rounded-xl transition duration-200 ease-in-out appearance-none cursor-pointer">
+                    <option value="a4-portrait">A4 Portrait (Vertical)</option>
+                    <option value="a4-landscape">A4 Landscape (Horizontal)</option>
+                    <option value="letter-portrait">Letter Portrait (Vertical)</option>
+                    <option value="letter-landscape">Letter Landscape (Horizontal)</option>
+                    <option value="custom">Custom Size...</option>
+                </select>
+
+                <!-- Custom Size Inputs (Initially Hidden) -->
+                <div id="custom-size-fields" class="mt-4 space-y-4 hidden">
+                    <p class="text-xs" style="color: var(--color-text-secondary);">Enter dimensions in millimeters (mm).</p>
+                    <div class="flex space-x-4">
+                        <div class="flex-1">
+                            <label for="custom-width" class="block text-xs font-medium mb-1" style="color: var(--color-text-secondary);">Width (mm)</label>
+                            <input type="number" id="custom-width" name="custom-width" placeholder="E.g., 210" min="1" disabled
+                                class="input-style w-full p-3 border-2 rounded-xl transition duration-200 ease-in-out">
+                        </div>
+                        <div class="flex-1">
+                            <label for="custom-height" class="block text-xs font-medium mb-1" style="color: var(--color-text-secondary);">Height (mm)</label>
+                            <input type="number" id="custom-height" name="custom-height" placeholder="E.g., 297" min="1" disabled
+                                class="input-style w-full p-3 border-2 rounded-xl transition duration-200 ease-in-out">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SECTION 5: New Dropdown Menu -->
+            <div id="new-dropdown-section">
+                <label for="new-option-select" class="block text-sm font-medium mb-2" style="color: var(--color-text-default);">
+                    Select an Option (Placeholder Menu)
+                </label>
+                <select id="new-option-select" name="new-option-select" required
+                        class="input-style w-full p-3 border-2 rounded-xl transition duration-200 ease-in-out appearance-none cursor-pointer">
+                    <option value="" disabled selected>Choose your configuration setting</option>
+                    <option value="opt-a">Option Alpha</option>
+                    <option value="opt-b">Option Beta</option>
+                    <option value="opt-c">Option Gamma</option>
+                </select>
+            </div>
+
+            <!-- SECTION 6: Basic Settings (Collapsible) - Highlight Theme (Cyan) -->
+            <div id="basic-settings-container" class="rounded-xl border basic-bg">
+                
+                <!-- Header/Toggle Button -->
+                <button type="button" class="collapsible-header w-full p-4 flex justify-between items-center text-left font-semibold" onclick="toggleCollapsible('basic-settings-content')">
+                    <span class="text-lg flex items-center">
+                        Basic Settings <span id="basic-summary" class="text-sm font-normal ml-2" style="color: var(--color-text-secondary);"></span>
+                    </span>
+                    <span id="basic-settings-indicator" class="text-xl font-bold transition duration-300 transform rotate-0 block" style="color: var(--color-text-secondary);">›</span>
+                </button>
+                
+                <!-- Content (Initially Hidden) -->
+                <div id="basic-settings-content" class="collapsible-content p-4 pt-0 hidden" style="max-height: 0;">
+                    <div class="space-y-6">
+                        
+                        <!-- Grid Layout -->
+                        <div>
+                            <p class="text-sm font-medium mb-2">Grid Layout</p>
+                            <div class="flex space-x-4">
+                                <!-- Rows Input -->
+                                <div class="flex-1">
+                                    <label for="grid-rows" class="block text-xs font-medium mb-1" style="color: var(--color-text-secondary);">Rows</label>
+                                    <input type="number" id="grid-rows" name="grid-rows" placeholder="3" value="3" min="1" required
+                                        class="input-style w-full p-3 border-2 rounded-xl transition duration-200 ease-in-out" 
+                                        style="border-color: var(--color-highlight);" oninput="updateBasicSummary()">
+                                </div>
+                                <!-- Columns Input -->
+                                <div class="flex-1">
+                                    <label for="grid-columns" class="block text-xs font-medium mb-1" style="color: var(--color-text-secondary);">Columns</label>
+                                    <input type="number" id="grid-columns" name="grid-columns" placeholder="3" value="3" min="1" required
+                                        class="input-style w-full p-3 border-2 rounded-xl transition duration-200 ease-in-out" 
+                                        style="border-color: var(--color-highlight);" oninput="updateBasicSummary()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Measurement Settings -->
+                        <div>
+                            <p class="text-sm font-medium mb-2">Measurement (mm)</p>
+                            <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                                <!-- Card Width Input -->
+                                <div>
+                                    <label for="card-width" class="block text-xs font-medium mb-1" style="color: var(--color-text-secondary);">Card Width (mm)</label>
+                                    <input type="number" id="card-width" name="card-width" placeholder="85.6" value="85.6" step="0.1" min="1" required
+                                        class="input-style w-full p-3 border-2 rounded-xl transition duration-200 ease-in-out" 
+                                        style="border-color: var(--color-highlight);" oninput="updateBasicSummary()">
+                                </div>
+                                <!-- Card Height Input -->
+                                <div>
+                                    <label for="card-height" class="block text-xs font-medium mb-1" style="color: var(--color-text-secondary);">Card Height (mm)</label>
+                                    <input type="number" id="card-height" name="card-height" placeholder="53.98" value="53.98" step="0.1" min="1" required
+                                        class="input-style w-full p-3 border-2 rounded-xl transition duration-200 ease-in-out" 
+                                        style="border-color: var(--color-highlight);" oninput="updateBasicSummary()">
+                                </div>
+                                <!-- Lead Input -->
+                                <div>
+                                    <label for="lead-measurement" class="block text-xs font-medium mb-1" style="color: var(--color-text-secondary);">Lead (mm)</label>
+                                    <input type="number" id="lead-measurement" name="lead-measurement" placeholder="3.0" value="3.0" step="0.1" min="0" required
+                                        class="input-style w-full p-3 border-2 rounded-xl transition duration-200 ease-in-out" 
+                                        style="border-color: var(--color-highlight);" oninput="updateBasicSummary()">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 7: Advanced Settings (Collapsible) - Secondary Accent Theme (Magenta) -->
+            <div id="advanced-settings-container" class="rounded-xl border advanced-bg">
+                
+                <!-- Header/Toggle Button -->
+                <button type="button" class="collapsible-header w-full p-4 flex justify-between items-center text-left font-semibold" onclick="toggleCollapsible('advanced-settings-content')">
+                    <span class="text-lg flex items-center">
+                        Advanced Settings <span id="advanced-summary" class="text-sm font-normal ml-2" style="color: var(--color-text-secondary);"></span>
+                    </span>
+                    <span id="advanced-settings-indicator" class="text-xl font-bold transition duration-300 transform rotate-0 block" style="color: var(--color-text-secondary);">›</span>
+                </button>
+                
+                <!-- Content (Initially Hidden) -->
+                <div id="advanced-settings-content" class="collapsible-content p-4 pt-0 hidden" style="max-height: 0;">
+                    <div class="space-y-6">
+                        
+                        <!-- Crossfire Settings -->
+                        <div id="crossfire-settings">
+                            <p class="text-sm font-medium mb-4">Crossfire Settings</p>
+                            
+                            <!-- Front Crossfire Mode Selector -->
+                            <div class="mb-4">
+                                <label class="block text-xs font-medium mb-1" style="color: var(--color-text-default);">Front Mode</label>
+                                <input type="hidden" id="crossfire-front-mode" name="crossfire-front-mode" value="Off">
+                                <div class="segment-control flex p-1 rounded-xl shadow-inner w-full" style="box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                                    <button type="button" class="segment-button active flex-1 py-2 px-4 rounded-lg font-medium" data-mode="Off" onclick="setSegmentMode('crossfire-front-mode', 'Off', this)">
+                                        Off
+                                    </button>
+                                    <button type="button" class="segment-button flex-1 py-2 px-4 rounded-lg font-medium" data-mode="Cross" onclick="setSegmentMode('crossfire-front-mode', 'Cross', this)">
+                                        Cross
+                                    </button>
+                                    <button type="button" class="segment-button flex-1 py-2 px-4 rounded-lg font-medium" data-mode="Edge" onclick="setSegmentMode('crossfire-front-mode', 'Edge', this)">
+                                        Edge
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Back Crossfire Mode Selector -->
+                            <div class="mb-6">
+                                <label class="block text-xs font-medium mb-1" style="color: var(--color-text-default);">Back Mode</label>
+                                <input type="hidden" id="crossfire-back-mode" name="crossfire-back-mode" value="Off">
+                                <div class="segment-control flex p-1 rounded-xl shadow-inner w-full" style="box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                                    <button type="button" class="segment-button active flex-1 py-2 px-4 rounded-lg font-medium" data-mode="Off" onclick="setSegmentMode('crossfire-back-mode', 'Off', this)">
+                                        Off
+                                    </button>
+                                    <button type="button" class="segment-button flex-1 py-2 px-4 rounded-lg font-medium" data-mode="Cross" onclick="setSegmentMode('crossfire-back-mode', 'Cross', this)">
+                                        Cross
+                                    </button>
+                                    <button type="button" class="segment-button flex-1 py-2 px-4 rounded-lg font-medium" data-mode="Edge" onclick="setSegmentMode('crossfire-back-mode', 'Edge', this)">
+                                        Edge
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Line Width and Color Inputs -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <!-- Line Width Input -->
+                                <div>
+                                    <label for="crossfire-line-width" class="block text-xs font-medium mb-1" style="color: var(--color-text-secondary);">Line Width (px)</label>
+                                    <input type="number" id="crossfire-line-width" name="crossfire-line-width" placeholder="1" value="1" min="0.1" step="0.1"
+                                        class="input-style w-full p-3 border-2 rounded-xl transition duration-200 ease-in-out">
+                                </div>
+                                <!-- Color Input -->
+                                <div>
+                                    <label for="crossfire-color" class="block text-xs font-medium mb-1" style="color: var(--color-text-secondary);">Color</label>
+                                    <input type="color" id="crossfire-color" name="crossfire-color" value="#FF0000"
+                                        class="color-input-style" 
+                                        onchange="updateAdvancedSummary()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Border Settings -->
+                        <div id="border-settings">
+                            <p class="text-sm font-medium mb-4">Border Settings</p>
+                            
+                            <!-- Border Mode Selectors -->
+                            <div class="space-y-4 mb-6">
+                                <!-- Front Border Mode Selector -->
+                                <div>
+                                    <label class="block text-xs font-medium mb-1" style="color: var(--color-text-default);">Front Border Mode</label>
+                                    <input type="hidden" id="border-front-mode" name="border-front-mode" value="Off">
+                                    <div class="segment-control flex p-1 rounded-xl shadow-inner w-full" style="box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                                        <button type="button" class="segment-button active flex-1 py-2 px-4 rounded-lg font-medium" data-mode="Off" onclick="setSegmentMode('border-front-mode', 'Off', this)">
+                                            Off
+                                        </button>
+                                        <button type="button" class="segment-button flex-1 py-2 px-4 rounded-lg font-medium" data-mode="Square" onclick="setSegmentMode('border-front-mode', 'Square', this)">
+                                            Square
+                                        </button>
+                                        <button type="button" class="segment-button flex-1 py-2 px-4 rounded-lg font-medium" data-mode="Round" onclick="setSegmentMode('border-front-mode', 'Round', this)">
+                                            Round
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Back Border Mode Selector -->
+                                <div>
+                                    <label class="block text-xs font-medium mb-1" style="color: var(--color-text-default);">Back Border Mode</label>
+                                    <input type="hidden" id="border-back-mode" name="border-back-mode" value="Off">
+                                    <div class="segment-control flex p-1 rounded-xl shadow-inner w-full" style="box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                                        <button type="button" class="segment-button active flex-1 py-2 px-4 rounded-lg font-medium" data-mode="Off" onclick="setSegmentMode('border-back-mode', 'Off', this)">
+                                            Off
+                                        </button>
+                                        <button type="button" class="segment-button flex-1 py-2 px-4 rounded-lg font-medium" data-mode="Square" onclick="setSegmentMode('border-back-mode', 'Square', this)">
+                                            Square
+                                        </button>
+                                        <button type="button" class="segment-button flex-1 py-2 px-4 rounded-lg font-medium" data-mode="Round" onclick="setSegmentMode('border-back-mode', 'Round', this)">
+                                            Round
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Border Width and Color Inputs -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <!-- Border Width Input -->
+                                <div>
+                                    <label for="border-width" class="block text-xs font-medium mb-1" style="color: var(--color-text-secondary);">Border Width (px)</label>
+                                    <input type="number" id="border-width" name="border-width" placeholder="0" value="0" min="0" step="0.1"
+                                        class="input-style w-full p-3 border-2 rounded-xl transition duration-200 ease-in-out">
+                                </div>
+                                <!-- Border Color Input -->
+                                <div>
+                                    <label for="border-color" class="block text-xs font-medium mb-1" style="color: var(--color-text-secondary);">Color</label>
+                                    <input type="color" id="border-color" name="border-color" value="#000000"
+                                        class="color-input-style" 
+                                        onchange="updateAdvancedSummary()">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Submit Button Wrapper -->
+            <div class="pt-4 space-y-3">
+                
+                <!-- UPDATED Copy Settings Button -->
+                <button type="button" id="copy-settings-button"
+                        class="w-full py-3 px-6 text-lg font-semibold rounded-xl text-white transition duration-300 ease-in-out transform hover:scale-[1.01] shadow-md"
+                        style="background-color: var(--color-secondary); color: var(--color-background-main);"
+                        onclick="copySettingsUrlToClipboard()">
+                    Copy Ultra-Short Settings URL
+                </button>
+
+                <!-- Original Submit Button - Subtler Shadow -->
+                <button type="submit" id="submit-button"
+                        class="w-full py-3 px-6 text-lg font-semibold rounded-xl text-white transition duration-300 ease-in-out transform hover:scale-[1.01] shadow-md"
+                        style="background-color: var(--color-primary); color: var(--color-background-main); box-shadow: 0 4px 6px color-mix(in srgb, var(--color-primary) 30%, transparent);">
+                    Upload & Configure
+                </button>
+            </div>
+            
+            <!-- Message Box -->
+            <div id="message-box" class="hidden p-4 rounded-xl font-medium" 
+                 style="color: var(--color-text-default);"></div>
+
+        </form>
+    </div>
+
+    <script>
+        // --- THEME TOGGLE LOGIC (Unchanged) ---
+
+        const themeToggle = document.getElementById('theme-toggle');
+        const lightIcon = document.getElementById('light-icon');
+        const darkIcon = document.getElementById('dark-icon');
+        const body = document.body;
+        
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            let isDark = false;
+            
+            if (savedTheme === 'dark') {
+                isDark = true;
+            } else if (savedTheme === 'light') {
+                isDark = false;
+            } else if (savedTheme === null && prefersDark) {
+                isDark = true;
+            }
+
+            applyTheme(isDark);
+        }
+
+        function applyTheme(isDark) {
+            if (isDark) {
+                body.classList.add('dark');
+                themeToggle.checked = true;
+                lightIcon.classList.add('hidden');
+                darkIcon.classList.remove('hidden');
+            } else {
+                body.classList.remove('dark');
+                themeToggle.checked = false;
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = body.classList.contains('dark');
+            const newIsDark = !isDark;
+            
+            applyTheme(newIsDark);
+            localStorage.setItem('theme', newIsDark ? 'dark' : 'light');
+        }
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (localStorage.getItem('theme') === null) {
+                applyTheme(e.matches);
+            }
+        });
+
+        // --- Shared Utility Functions (Unchanged) ---
+        
+        function updateFileName(inputId, nameId, label) {
+            const input = document.getElementById(inputId);
+            const nameSpan = document.getElementById(nameId);
+            const fileCount = input.files.length;
+            
+            if (fileCount > 0) {
+                const fileText = fileCount === 1 ? input.files[0].name : `${fileCount} files selected.`;
+                nameSpan.textContent = fileText;
+                nameSpan.style.color = 'var(--color-text-default)';
+                nameSpan.classList.add('font-medium', 'text-sm');
+                nameSpan.title = fileCount > 1 ? `${fileCount} ${label} files` : input.files[0].name;
+            } else {
+                nameSpan.textContent = `Select your .jpg or .png files here.`;
+                nameSpan.style.color = 'var(--color-text-secondary)';
+                nameSpan.classList.remove('font-medium', 'text-sm');
+                nameSpan.title = '';
+            }
+        }
+
+        function handleFileDrop(event, inputId, nameId, label) {
+            const input = document.getElementById(inputId);
+            if (event.dataTransfer.files) {
+                input.files = event.dataTransfer.files;
+                updateFileName(inputId, nameId, label);
+            }
+        }
+
+        // --- Collapsible Logic (Unchanged) ---
+
+        function toggleCollapsible(contentId) {
+            const content = document.getElementById(contentId);
+            const indicatorId = contentId.replace('-content', '-indicator');
+            const indicator = document.getElementById(indicatorId);
+
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                // Use scrollHeight + padding buffer for smooth expansion
+                content.style.maxHeight = content.scrollHeight + 32 + "px"; 
+                if(indicator) indicator.classList.add('rotate-90');
+            } else {
+                content.style.maxHeight = '0';
+                setTimeout(() => {
+                    content.classList.add('hidden');
+                }, 300); 
+                if(indicator) indicator.classList.remove('rotate-90');
+            }
+        }
+        
+        
+        // --- Segmented Control Logic (Unchanged) ---
+
+        function setSegmentMode(inputId, mode, clickedButton) {
+            const inputElement = document.getElementById(inputId);
+            if (inputElement) {
+                inputElement.value = mode;
+                
+                if (clickedButton) {
+                    const controlContainer = clickedButton.closest('.segment-control');
+                    const buttons = controlContainer.querySelectorAll('.segment-button');
+                    buttons.forEach(btn => btn.classList.remove('active'));
+                    clickedButton.classList.add('active');
+                }
+                
+                if (inputId.startsWith('crossfire-') || inputId.startsWith('border-')) {
+                    updateAdvancedSummary(); 
+                }
+            }
+        }
+        
+        // Function to update the visual state of a segmented control based on its hidden input value (used during URL load)
+        function updateSegmentVisualsOnLoad(inputId) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const mode = input.value;
+
+            const segmentControlElement = input.nextElementSibling;
+            
+            if (!segmentControlElement || !segmentControlElement.classList.contains('segment-control')) {
+                console.warn(`Could not find visual segment control for input: ${inputId}. Structure changed?`);
+                return;
+            }
+
+            const buttons = segmentControlElement.querySelectorAll('.segment-button');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-mode') === mode) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+
+        // --- Page Size Logic (Unchanged) ---
+        
+        function handlePageSizeChange() {
+            const selectElement = document.getElementById('page-size-select');
+            const customFields = document.getElementById('custom-size-fields');
+            const widthInput = document.getElementById('custom-width');
+            const heightInput = document.getElementById('custom-height');
+            
+            const isCustom = selectElement.value === 'custom';
+
+            if (isCustom) {
+                customFields.classList.remove('hidden');
+                widthInput.disabled = false;
+                heightInput.disabled = false;
+                widthInput.setAttribute('required', 'required');
+                heightInput.setAttribute('required', 'required');
+            } else {
+                customFields.classList.add('hidden');
+                widthInput.disabled = true;
+                heightInput.disabled = true;
+                widthInput.removeAttribute('required');
+                heightInput.removeAttribute('required');
+            }
+        }
+
+        // --- Summary Logic (Unchanged) ---
+
+        function updateBasicSummary() {
+            const rows = document.getElementById('grid-rows').value || '3';
+            const cols = document.getElementById('grid-columns').value || '3';
+            const cW = (parseFloat(document.getElementById('card-width').value) || 0).toFixed(1);
+            const cH = (parseFloat(document.getElementById('card-height').value) || 0).toFixed(1);
+            const lead = (parseFloat(document.getElementById('lead-measurement').value) || 0).toFixed(1);
+
+            const summary = `Grid: ${rows}x${cols} | Card: ${cW}x${cH}mm | Lead: ${lead}mm`;
+            document.getElementById('basic-summary').textContent = `(${summary})`;
+        }
+
+        function updateAdvancedSummary() {
+            // Crossfire Summary 
+            const cfFMode = document.getElementById('crossfire-front-mode').value;
+            const cfBMode = document.getElementById('crossfire-back-mode').value;
+            const cfWidth = (parseFloat(document.getElementById('crossfire-line-width').value) || 0).toFixed(1);
+            const cfColor = document.getElementById('crossfire-color').value.toUpperCase();
+
+            let cfStatus = [];
+            if (cfFMode !== 'Off') cfStatus.push(`F:${cfFMode}`);
+            if (cfBMode !== 'Off') cfStatus.push(`B:${cfBMode}`);
+            
+            const crossfireSummary = cfStatus.length > 0 ? 
+                `CF: ${cfStatus.join(' / ')} (${cfWidth}px, ${cfColor})` :
+                `CF: Off`;
+
+            // Border Summary
+            const bFMode = document.getElementById('border-front-mode').value;
+            const bBMode = document.getElementById('border-back-mode').value;
+            const bWidth = (parseFloat(document.getElementById('border-width').value) || 0).toFixed(1);
+            const bColor = document.getElementById('border-color').value.toUpperCase();
+
+            let borderStatus = [];
+            if (bFMode !== 'Off') borderStatus.push(`F:${bFMode}`);
+            if (bBMode !== 'Off') borderStatus.push(`B:${bBMode}`);
+
+            const borderSummary = borderStatus.length > 0 ?
+                `Border: ${borderStatus.join(' / ')} (${bWidth}px, ${bColor})` :
+                `Border: Off`;
+
+
+            document.getElementById('advanced-summary').textContent = `(${crossfireSummary} | ${borderSummary})`;
+        }
+
+        // --- Copy Settings URL Logic (Unchanged) ---
+
+        /**
+         * Helper to collect all relevant form data into a structured object using MINIMAL keys.
+         */
+        function collectFormSettings() {
+            const pageSize = document.getElementById('page-size-select').value;
+            
+            const settings = {
+                'm': document.getElementById('bag-mode-value').value, 
+                'p': {
+                    's': pageSize,
+                    'w': pageSize === 'custom' ? (parseFloat(document.getElementById('custom-width').value) || 0) : null,
+                    'h': pageSize === 'custom' ? (parseFloat(document.getElementById('custom-height').value) || 0) : null
+                },
+                'o': document.getElementById('new-option-select').value,
+                'b': {
+                    'r': parseInt(document.getElementById('grid-rows').value),
+                    'c': parseInt(document.getElementById('grid-columns').value),
+                    'W': parseFloat(document.getElementById('card-width').value),
+                    'H': parseFloat(document.getElementById('card-height').value),
+                    'l': parseFloat(document.getElementById('lead-measurement').value)
+                },
+                'a': {
+                    'x': {
+                        'f': document.getElementById('crossfire-front-mode').value,
+                        'b': document.getElementById('crossfire-back-mode').value,
+                        'w': parseFloat(document.getElementById('crossfire-line-width').value),
+                        'c': document.getElementById('crossfire-color').value
+                    },
+                    'z': {
+                        'f': document.getElementById('border-front-mode').value,
+                        'b': document.getElementById('border-back-mode').value,
+                        'w': parseFloat(document.getElementById('border-width').value),
+                        'c': document.getElementById('border-color').value
+                    }
+                }
+            };
+
+            // Sanitize
+            if (pageSize !== 'custom') {
+                 delete settings.p.w; 
+                 delete settings.p.h; 
+            }
+
+            return settings;
+        }
+
+
+        // Main function to create and copy the URL (Unchanged logic)
+        function copySettingsUrlToClipboard() {
+            const settings = collectFormSettings();
+            const jsonText = JSON.stringify(settings); 
+            
+            // 1. Base64 encode the JSON string
+            const encodedConfig = btoa(jsonText);
+            
+            // 2. Build the new URL with the config parameter
+            const url = new URL(window.location.href);
+            url.search = '';
+            url.searchParams.set('config', encodedConfig);
+            
+            const fullUrl = url.toString();
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(fullUrl)
+                    .then(() => {
+                        showMessage('Ultra-Short Configuration URL copied to clipboard!', 'success');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy using clipboard API:', err);
+                        copyTextFallback(fullUrl);
+                    });
+            } else {
+                copyTextFallback(fullUrl);
+            }
+        }
+
+        // Fallback method (Unchanged)
+        function copyTextFallback(text) {
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = text;
+            tempTextArea.style.position = 'fixed'; 
+            tempTextArea.style.opacity = '0';
+            document.body.appendChild(tempTextArea);
+            tempTextArea.focus();
+            tempTextArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showMessage('Configuration URL copied to clipboard (using fallback)!', 'success');
+                } else {
+                    throw new Error('Fallback copy failed.');
+                }
+            } catch (err) {
+                console.error('Error copying text:', err);
+                showMessage('Failed to copy URL. Please copy the console output manually.', 'error');
+                console.log("Configuration URL (Manual Copy):\n", text);
+            } finally {
+                document.body.removeChild(tempTextArea);
+            }
+        }
+        
+        // --- Load Settings from URL Logic (Unchanged) ---
+        
+        function setInputValue(id, value) {
+             const element = document.getElementById(id);
+             if (element && value !== null && value !== undefined) {
+                 element.value = value;
+             }
+        }
+
+        /**
+         * Helper to apply settings back to the form using MINIMAL keys.
+         */
+        function applySettingsToForm(settings) {
+            try {
+                // Load settings using single-character keys:
+                setInputValue('page-size-select', settings.p.s);
+                setInputValue('new-option-select', settings.o); 
+                setInputValue('bag-mode-value', settings.m);
+
+                setInputValue('grid-rows', settings.b.r); 
+                setInputValue('grid-columns', settings.b.c); 
+                setInputValue('card-width', settings.b.W); 
+                setInputValue('card-height', settings.b.H); 
+                setInputValue('lead-measurement', settings.b.l); 
+
+                setInputValue('crossfire-front-mode', settings.a.x.f); 
+                setInputValue('crossfire-back-mode', settings.a.x.b); 
+                setInputValue('crossfire-line-width', settings.a.x.w); 
+                setInputValue('crossfire-color', settings.a.x.c); 
+
+                setInputValue('border-front-mode', settings.a.z.f); 
+                setInputValue('border-back-mode', settings.a.z.b); 
+                setInputValue('border-width', settings.a.z.w); 
+                setInputValue('border-color', settings.a.z.c); 
+
+                // Custom Page Size
+                if (settings.p.s === 'custom') { 
+                    setInputValue('custom-width', settings.p.w); 
+                    setInputValue('custom-height', settings.p.h); 
+                }
+                
+                // 3. Manually trigger updates for selects/segments that need UI changes
+                handlePageSizeChange(); 
+                
+                updateSegmentVisualsOnLoad('bag-mode-value');
+                updateSegmentVisualsOnLoad('crossfire-front-mode');
+                updateSegmentVisualsOnLoad('crossfire-back-mode');
+                updateSegmentVisualsOnLoad('border-front-mode');
+                updateSegmentVisualsOnLoad('border-back-mode');
+
+                // 4. Update all summaries
+                updateBasicSummary();
+                updateAdvancedSummary();
+
+                showMessage('Settings successfully loaded from URL!', 'success');
+                
+            } catch (error) {
+                console.error("Error applying settings from URL (Short Keys failed to map):", error);
+                showMessage('Could not load configuration from URL. Invalid or corrupted settings.', 'error');
+            }
+        }
+
+        function loadSettingsFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedConfig = urlParams.get('config');
+
+            if (encodedConfig) {
+                try {
+                    const jsonString = atob(encodedConfig);
+                    const settings = JSON.parse(jsonString);
+                    applySettingsToForm(settings);
+                } catch (e) {
+                    console.error("Error decoding or parsing URL config:", e);
+                    showMessage('Configuration in URL is corrupted or unreadable.', 'error');
+                }
+            }
+        }
+
+        // --- Form Submission Logic (Unchanged) ---
+
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const frontFileCount = document.getElementById('front-file-input').files.length;
+            const backFileCount = document.getElementById('back-file-input').files.length;
+            const bagMode = document.getElementById('bag-mode-value').value;
+            const pageSize = document.getElementById('page-size-select').value;
+            const newOption = document.getElementById('new-option-select').value;
+            
+            // Basic Settings Values
+            const gridRows = document.getElementById('grid-rows').value;
+            const gridColumns = document.getElementById('grid-columns').value;
+            const cardWidth = document.getElementById('card-width').value;
+            const cardHeight = document.getElementById('card-height').value;
+            const leadMeasurement = document.getElementById('lead-measurement').value;
+
+            // Simple validation
+            if (frontFileCount === 0 || backFileCount === 0) {
+                showMessage('Please select files for both Primary and Secondary File sections.', 'error');
+                return;
+            }
+            if (pageSize === 'custom') {
+                const w = document.getElementById('custom-width').value;
+                const h = document.getElementById('custom-height').value;
+                if (!w || !h || parseInt(w) <= 0 || parseInt(h) <= 0) {
+                     showMessage('Please enter valid custom width and height (mm) in Page Output Size.', 'error');
+                     return;
+                }
+            }
+            if (!newOption) {
+                showMessage('Please select an option from the new dropdown menu.', 'error');
+                return;
+            }
+            if (!gridRows || !gridColumns || !cardWidth || !cardHeight || !leadMeasurement) {
+                 showMessage('Please complete all Grid Layout and Measurement fields in Basic Settings.', 'error');
+                return;
+            }
+
+            // If validation passes, show success message and configuration summary
+            const settings = collectFormSettings();
+            const summary = `Files Ready (Primary: ${frontFileCount}, Secondary: ${backFileCount} | Mode: ${bagMode}, Size: ${pageSize}).`;
+            const summary2 = `Basic: ${settings.b.r}x${settings.b.c}, Card: ${settings.b.W}x${settings.b.H}mm.`;
+
+
+            showMessage(`Success! Configuration validated. ${summary} ${summary2}`, 'success');
+
+            const submitButton = document.getElementById('submit-button');
+            submitButton.textContent = 'Configuration Complete!';
+            submitButton.style.backgroundColor = 'var(--color-highlight)'; 
+            submitButton.style.color = 'var(--color-text-default)';
+            submitButton.style.boxShadow = `0 4px 6px color-mix(in srgb, var(--color-highlight) 30%, transparent)`;
+            
+            setTimeout(() => {
+                 document.getElementById('message-box').classList.add('hidden');
+                 submitButton.textContent = 'Upload & Configure';
+                 submitButton.style.backgroundColor = 'var(--color-primary)';
+                 submitButton.style.color = 'var(--color-background-main)'; 
+                 submitButton.style.boxShadow = `0 4px 6px color-mix(in srgb, var(--color-primary) 30%, transparent)`;
+            }, 4000);
+        });
+
+        function showMessage(text, type) {
+            const msgBox = document.getElementById('message-box');
+            msgBox.textContent = text;
+            msgBox.classList.remove('hidden');
+            
+            if (type === 'success') {
+                msgBox.classList.add('message-success');
+                msgBox.style.backgroundColor = `color-mix(in srgb, var(--color-highlight) 10%, transparent)`; // Used CSS variable mix
+                msgBox.style.color = 'var(--color-text-default)';
+            } else {
+                // Use a standard, universally contrasting error color (Red) mixed with content BG
+                msgBox.classList.remove('message-success');
+                msgBox.style.backgroundColor = 'color-mix(in srgb, #FF6347 10%, var(--color-content-bg) 90%)'; 
+                msgBox.style.color = '#FF6347';
+            }
+        }
+        
+        // Initial setup on load
+        document.addEventListener('DOMContentLoaded', () => {
+             initializeTheme();
+             loadSettingsFromUrl(); 
+
+             // 3. Initialize/Update summaries and page size state based on final form values
+             handlePageSizeChange(); 
+             updateBasicSummary();
+             updateAdvancedSummary();
+        });
+    </script>
+</body>
+</html>
+
