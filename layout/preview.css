@@ -78,26 +78,18 @@ h1 {
 
 .draggable-row,
 .fixed-row {
+  display: flex; /* Use Flexbox for layout */
   overflow-x: auto;
   overflow-y: hidden;
-  white-space: nowrap;
   padding-bottom: 0.5rem;
   margin-bottom: 0.5rem;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.draggable-row::-webkit-scrollbar,
-.fixed-row::-webkit-scrollbar {
-  display: none;
+  padding-left: 0.5rem; /* Add some start padding */
 }
 
 .pair-column {
-  display: inline-block;
   margin-right: 1rem;
-  vertical-align: top;
-  white-space: normal;
   width: 150px; /* Fixed width for the column */
+  flex-shrink: 0; /* Prevent columns from shrinking */
 }
 
 /* --- Image Preview Sections --- */
@@ -120,7 +112,7 @@ h1 {
 
 .fixed-section {
   border: 2px solid #a0aec0;
-  justify-content: center;
+  justify-content: flex-start; /* ALIGNMENT FIX */
 }
 
 /* --- Section Controls (Drag handle, copies, delete) --- */
