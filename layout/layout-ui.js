@@ -19,6 +19,10 @@ document.addEventListener("DOMContentLoaded", () => {
       mode1: document.getElementById("mode1"),
       mode2: document.getElementById("mode2"),
       mode3: document.getElementById("mode3"),
+      // Previewer
+      usePreviewer: document.getElementById("usePreviewer"),
+      legacyUploadUI: document.getElementById("legacyUploadUI"),
+      previewerContainer: document.getElementById("previewerContainer"),
       // Grid Layout
       preset: document.getElementById("preset"),
       rows: document.getElementById("rows"),
@@ -117,9 +121,21 @@ document.addEventListener("DOMContentLoaded", () => {
         "change",
         this.ui.toggleModeUI.bind(this)
       );
+
+      this.elements.usePreviewer.addEventListener("change", this.ui.togglePreviewer.bind(this));
     },
 
     ui: {
+      togglePreviewer() {
+          const isChecked = LayoutToolUI.elements.usePreviewer.checked;
+          LayoutToolUI.elements.legacyUploadUI.style.display = isChecked ? "none" : "block";
+          LayoutToolUI.elements.previewerContainer.style.display = isChecked ? "block" : "none";
+
+          if (isChecked) {
+              // When showing the previewer, tell the master script to read files and send them to the iframe
+              window.LayoutToolPDF.sendDataToPreviewer();
+          }
+      },
       toggleModeUI() {
         const isDoubleSided = LayoutToolUI.elements.doubleSidedRadio.checked;
         LayoutToolUI.elements.doubleSidedModeUI.style.display = isDoubleSided
