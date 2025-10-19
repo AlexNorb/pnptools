@@ -81,16 +81,6 @@ body {
   font-size: 1.3rem;
 }
 
-.form-group.mode img {
-  border: none;
-  border-radius: 5px;
-  margin: 0px auto;
-}
-
-/* .form-group.mode img.show-border {
-  border: solid rgb(62, 151, 235) 5px;
-} */
-
 .form-group input[type="number"] {
   width: 50px;
   height: 26px;
@@ -160,22 +150,6 @@ select:hover {
 
 input[type="radio"] {
   display: none;
-}
-
-input[type="radio"] + label img {
-  cursor: pointer;
-  border: 2px solid transparent;
-  width: 4rem;
-  height: 4rem;
-  margin-right: 10px;
-}
-
-input[type="radio"]:checked + label img,
-input[type="radio"] + label img:hover {
-  border: 2px solid #3e97eb;
-  border-radius: 10px;
-  margin-right: 10px;
-  background-color: #3e97eb;
 }
 
 /* Style for the new border logic labels */
