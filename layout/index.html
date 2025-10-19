@@ -61,21 +61,20 @@
       <!-- mode indicator -->
       <div class="form-group mode" style="justify-content: space-around">
         <div style="text-align: center">
-          <img src="assets/mode1.jpg" height="100px" id="mode1" />
-          <h2>No backs</h2>
+          <div id="mode1" class="mode-indicator inactive">
+            <h2>No backs</h2>
+          </div>
         </div>
         <div style="text-align: center">
-          <img src="assets/mode2.jpg" height="100px" id="mode2" />
-          <h2>Same backs</h2>
+          <div id="mode2" class="mode-indicator inactive">
+            <h2>Same backs</h2>
+          </div>
         </div>
         <div style="text-align: center">
-          <img src="assets/mode3.jpg" height="100px" id="mode3" />
-          <h2>Unique backs</h2>
+          <div id="mode3" class="mode-indicator inactive">
+            <h2>Unique backs</h2>
+          </div>
         </div>
-      </div>
-
-      <div class="container">
-        <h2>Layout Mode</h2>
         <div class="box settings">
           <input
             type="radio"
@@ -101,45 +100,18 @@
         <div class="form-group">
           <div class="box">
             <h2>Page size:</h2>
-            <input type="radio" id="A4" name="pageSize" value="A4" checked />
-            <label for="A4"><img src="assets/a4.png" alt="A4" /></label>
-            <input
-              type="radio"
-              id="A4Landscape"
-              name="pageSize"
-              value="A4 landscape"
-            />
-            <label for="A4Landscape"
-              ><img src="assets/a4-landscape.png" alt="A4 landscape"
-            /></label>
-            <input type="radio" id="Letter" name="pageSize" value="Letter" />
-            <label for="Letter"
-              ><img src="assets/letter.png" alt="Letter"
-            /></label>
-            <input
-              type="radio"
-              id="LetterLandscape"
-              name="pageSize"
-              value="Letter landscape"
-            />
-            <label for="LetterLandscape"
-              ><img src="assets/letter-landscape.png" alt="Letter landscape"
-            /></label>
+            <select id="pageSize" name="pageSize">
+              <option value="A4" selected>A4</option>
+              <option value="A4 landscape">A4 landscape</option>
+              <option value="Letter">Letter</option>
+              <option value="Letter landscape">Letter landscape</option>
+            </select>
           </div>
 
           <!-- Preset naming menu    -->
           <div class="box preset">
             <h2>Select preset loadout:</h2>
-            <select id="preset">
-              <option value="preset1">"Standard card" 63x88mm</option>
-              <option value="preset2">"Mini European" 44x68mm</option>
-              <option value="preset3">
-                "Buttonshy"63x88mm with bleed, must use landscape pages.
-              </option>
-              <option value="preset4">
-                "Europan Standard"63x88mm (Dominion)
-              </option>
-            </select>
+            <select id="preset"></select>
           </div>
         </div>
       </div>
@@ -251,25 +223,17 @@
         <div class="form-group">
           <div class="box">
             <h2>Page size:</h2>
-            <input
-              type="radio"
-              id="foldable_A4"
-              name="foldable_pageSize"
-              value="A4"
-              checked
-            />
-            <label for="foldable_A4"
-              ><img src="assets/a4.png" alt="A4"
-            /></label>
-            <input
-              type="radio"
-              id="foldable_Letter"
-              name="foldable_pageSize"
-              value="Letter"
-            />
-            <label for="foldable_Letter"
-              ><img src="assets/letter.png" alt="Letter"
-            /></label>
+            <select id="foldable_pageSize" name="foldable_pageSize">
+              <option value="A4" selected>A4</option>
+              <option value="Letter">Letter</option>
+            </select>
+          </div>
+          <p>Page Margins</p>
+          <div class="box settings">
+            <label for="foldable_printerMargin">Printer</label>
+            <input type="number" id="foldable_printerMargin" value="5" />
+            <label for="foldable_foldingMargin">Folding</label>
+            <input type="number" id="foldable_foldingMargin" value="5" />
           </div>
         </div>
       </div>
@@ -282,15 +246,6 @@
             <input type="number" id="foldable_cardWidth" value="63" />
             <label for="foldable_cardHeight">Height</label>
             <input type="number" id="foldable_cardHeight" value="88" />
-          </div>
-        </div>
-        <div class="form-group basic">
-          <p>Page Margins</p>
-          <div class="box settings">
-            <label for="foldable_printerMargin">Printer</label>
-            <input type="number" id="foldable_printerMargin" value="5" />
-            <label for="foldable_foldingMargin">Folding</label>
-            <input type="number" id="foldable_foldingMargin" value="5" />
           </div>
         </div>
         <div class="form-group basic">

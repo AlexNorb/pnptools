@@ -23,6 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
       preset: document.getElementById("preset"),
       rows: document.getElementById("rows"),
       columns: document.getElementById("columns"),
+      pageSize: document.getElementById("pageSize"),
+      foldable_pageSize: document.getElementById("foldable_pageSize"),
       imageWidth: document.getElementById("imageWidth"),
       imageHeight: document.getElementById("imageHeight"),
       bleed: document.getElementById("bleed"),
@@ -59,51 +61,12 @@ document.addEventListener("DOMContentLoaded", () => {
     config: {
       crosshairColor: null,
       borderColor: null,
-      presets: {
-        preset1: {
-          rows: 3,
-          columns: 3,
-          imageWidth: 63,
-          imageHeight: 88,
-          bleed: 0,
-          frontBorderCheckbox: false,
-          backBorderCheckbox: false,
-          borderWidth: 3,
-        },
-        preset2: {
-          rows: 4,
-          columns: 4,
-          imageWidth: 44,
-          imageHeight: 68,
-          bleed: 0,
-          frontBorderCheckbox: false,
-          backBorderCheckbox: false,
-          borderWidth: 0,
-        },
-        preset3: {
-          rows: 2,
-          columns: 3,
-          imageWidth: 63,
-          imageHeight: 88,
-          bleed: 3,
-          frontBorderCheckbox: false,
-          backBorderCheckbox: false,
-          borderWidth: 0,
-        },
-        preset4: {
-          rows: 2,
-          columns: 4,
-          imageWidth: 59,
-          imageHeight: 91,
-          bleed: 0,
-          frontBorderCheckbox: false,
-          backBorderCheckbox: false,
-          borderWidth: 0,
-        },
-      },
+      presets: {},
     },
 
-    init() {
+    async init() {
+      await this.ui.loadPresets.bind(this)();
+
       this.elements.generatePdfButton.addEventListener(
         "click",
         window.LayoutToolPDF.generatePDF.bind(window.LayoutToolPDF)
@@ -167,11 +130,13 @@ document.addEventListener("DOMContentLoaded", () => {
           : "block";
       },
       toggleProgressUI(show) {
-        LayoutToolUI.elements.progressContainer.style.display = show ? "block" : "none";
+        LayoutToolUI.elements.progressContainer.style.display = show
+          ? "block"
+          : "none";
         if (!show) {
-            // Reset progress bar on hide
-            LayoutToolUI.ui.updateProgress({progress: 0, done: 0, all: 0});
-            LayoutToolUI.ui.updateStatus('');
+          // Reset progress bar on hide
+          LayoutToolUI.ui.updateProgress({ progress: 0, done: 0, all: 0 });
+          LayoutToolUI.ui.updateStatus("");
         }
       },
       updateProgress(data) {
@@ -188,39 +153,113 @@ document.addEventListener("DOMContentLoaded", () => {
         LayoutToolUI.elements.progressStatus.textContent = statusText;
       },
       applyPreset() {
-        const selectedPreset = LayoutToolUI.elements.preset.value;
-        if (selectedPreset) {
-          const presetValues = LayoutToolUI.config.presets[selectedPreset];
-          LayoutToolUI.elements.rows.value = presetValues.rows;
-          LayoutToolUI.elements.columns.value = presetValues.columns;
-          LayoutToolUI.elements.imageWidth.value = presetValues.imageWidth;
-          LayoutToolUI.elements.imageHeight.value = presetValues.imageHeight;
-          LayoutToolUI.elements.bleed.value = presetValues.bleed;
-          LayoutToolUI.elements.frontBorderCheckbox.checked =
-            presetValues.frontBorderCheckbox;
-          LayoutToolUI.elements.backBorderCheckbox.checked =
-            presetValues.backBorderCheckbox;
-          LayoutToolUI.elements.borderWidth.value = presetValues.borderWidth;
+        // First, re-enable all form elements to reset the UI state
+        for (const key in LayoutToolUI.elements) {
+          const element = LayoutToolUI.elements[key];
+          element.disabled = false;
+          if (element.tagName.toLowerCase() === 'select') {
+            for (const option of element.options) {
+              option.disabled = false;
+            }
+          }
+        }
+
+        const selectedPresetKey = LayoutToolUI.elements.preset.value;
+        const presetData = LayoutToolUI.config.presets[selectedPresetKey];
+
+        if (!presetData) return;
+
+        const settings = presetData.settings;
+        const disabled = presetData.disabled || {};
+
+        for (const key in settings) {
+          const element = LayoutToolUI.elements[key];
+          const value = settings[key];
+
+          if (element) {
+            // Standard element handling
+            if (element.type === "checkbox" || element.type === "radio") {
+              element.checked = value;
+            } else {
+              element.value = value;
+            }
+          }
+        }
+
+        // Handle disabling elements
+        for (const keyToDisable in disabled) {
+          const value = disabled[keyToDisable];
+          const elementToDisable = LayoutToolUI.elements[keyToDisable];
+
+          if (elementToDisable) {
+            if (value === true) {
+              elementToDisable.disabled = true;
+            } else if (Array.isArray(value)) {
+              if (elementToDisable.tagName.toLowerCase() === 'select') {
+                for (const option of elementToDisable.options) {
+                  if (value.includes(option.value)) {
+                    option.disabled = true;
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      async loadPresets() {
+        try {
+          const response = await fetch("presets.json");
+          const presets = await response.json();
+          LayoutToolUI.config.presets = presets;
+
+          const presetSelect = LayoutToolUI.elements.preset;
+          presetSelect.innerHTML = ""; // Clear existing options
+
+          // Add a default "Select a preset" option
+          const defaultOption = new Option("Select a preset...", "");
+          defaultOption.disabled = true;
+          defaultOption.selected = true;
+          presetSelect.add(defaultOption);
+
+          for (const key in presets) {
+            const option = new Option(presets[key].name, key);
+            presetSelect.add(option);
+          }
+        } catch (error) {
+          console.error("Failed to load or parse presets.json:", error);
         }
       },
       updateModeIndicator() {
         const { mode1, mode2, mode3, frontImages, backImages } =
           LayoutToolUI.elements;
-        mode1.src = "assets/mode1.jpg";
-        mode2.src = "assets/mode2.jpg";
-        mode3.src = "assets/mode3.jpg";
+
+        // Reset all to inactive
+        mode1.classList.remove('active', 'error');
+        mode2.classList.remove('active', 'error');
+        mode3.classList.remove('active', 'error');
+        mode1.classList.add('inactive');
+        mode2.classList.add('inactive');
+        mode3.classList.add('inactive');
+
         const fileCountBack = backImages.files.length;
         const fileCount = frontImages.files.length;
+
         if (fileCountBack === 0) {
-          mode1.src = "assets/mode1on.jpg";
+          mode1.classList.remove('inactive');
+          mode1.classList.add('active');
         } else if (fileCountBack === 1) {
-          mode2.src = "assets/mode2on.jpg";
+          mode2.classList.remove('inactive');
+          mode2.classList.add('active');
         } else if (fileCountBack === fileCount) {
-          mode3.src = "assets/mode3on.jpg";
+          mode3.classList.remove('inactive');
+          mode3.classList.add('active');
         } else {
-          mode1.src = "assets/mode1error.jpg";
-          mode2.src = "assets/mode2error.jpg";
-          mode3.src = "assets/mode3error.jpg";
+          mode1.classList.remove('inactive');
+          mode2.classList.remove('inactive');
+          mode3.classList.remove('inactive');
+          mode1.classList.add('error');
+          mode2.classList.add('error');
+          mode3.classList.add('error');
         }
       },
       updateFileCount(fileInput, countElement, isBack = false) {
@@ -284,9 +323,7 @@ document.addEventListener("DOMContentLoaded", () => {
       settings.imageWidth += settings.bleed * 2;
       settings.imageHeight += settings.bleed * 2;
 
-      settings.pageSize = document.querySelector(
-        'input[name="pageSize"]:checked'
-      ).value;
+      settings.pageSize = this.elements.pageSize.value;
 
       return settings;
     },
@@ -328,9 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      settings.pageSize = document.querySelector(
-        'input[name="foldable_pageSize"]:checked'
-      ).value;
+      settings.pageSize = document.getElementById("foldable_pageSize").value;
 
       for (const key in settings) {
         if (

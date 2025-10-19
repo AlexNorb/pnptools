@@ -298,3 +298,29 @@ i {
 .icon.link:hover {
   color: #3e97eb;
 }
+
+.mode-indicator {
+  width: 100px;
+  height: 100px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  margin: 0 auto;
+  align-content: center;
+  transition: all 0.3s ease;
+}
+
+.mode-indicator.inactive {
+  background-color: #f0f0f0;
+}
+
+.mode-indicator.active {
+  background-color: #4caf50; /* Green */
+  border-color: #4caf50;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+
+.mode-indicator.error {
+  background-color: #f44336; /* Red */
+  border-color: #f44336;
+  box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+}
