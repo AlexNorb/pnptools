@@ -27,42 +27,40 @@
         <h1>Card layout tool v2.0</h1>
       </div>
 
+      <!-- drop zone -->
+      <div class="form-group">
+        <div class="dropzone" id="frontDropzone">
+          <label for="frontImages">Fronts</label>
+          <p>
+            <i class="fa-regular fa-file-image icon" style="color: #000000"></i>
+          </p>
+          <p2 id="fileCount">0 files selected</p2>
+          <input
+            type="file"
+            id="frontImages"
+            accept=".png, .jpg, .jpeg"
+            multiple
+          />
+        </div>
+
+        <div class="dropzone" id="backDropzone">
+          <label for="backImages">Backs</label>
+          <p>
+            <i class="fa-regular fa-file-image icon" style="color: #000000"></i>
+          </p>
+          <p2 id="fileCountBack">0 files selected</p2>
+          <input
+            type="file"
+            id="backImages"
+            accept=".png, .jpg, .jpeg"
+            multiple
+          />
+        </div>
+      </div>
+
       <div class="form-group">
           <input type="checkbox" id="usePreviewer" style="margin-left: 1rem;"/>
           <label for="usePreviewer">Use Advanced Image Preview</label>
-      </div>
-
-      <div id="legacyUploadUI">
-        <!-- drop zone -->
-        <div class="form-group">
-          <div class="dropzone" id="frontDropzone">
-            <label for="frontImages">Fronts</label>
-            <p>
-              <i class="fa-regular fa-file-image icon" style="color: #000000"></i>
-            </p>
-            <p2 id="fileCount">0 files selected</p2>
-            <input
-              type="file"
-              id="frontImages"
-              accept=".png, .jpg, .jpeg"
-              multiple
-            />
-          </div>
-
-          <div class="dropzone" id="backDropzone">
-            <label for="backImages">Backs</label>
-            <p>
-              <i class="fa-regular fa-file-image icon" style="color: #000000"></i>
-            </p>
-            <p2 id="fileCountBack">0 files selected</p2>
-            <input
-              type="file"
-              id="backImages"
-              accept=".png, .jpg, .jpeg"
-              multiple
-            />
-          </div>
-        </div>
       </div>
 
       <div id="previewerContainer" style="display: none;">

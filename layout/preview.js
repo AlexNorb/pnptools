@@ -24,6 +24,16 @@
               state.backs = data.backs || [];
               state.copies = state.fronts.map(() => 1); // Reset copies on new data
               updateUI();
+          } else if (type === 'append-images') {
+              // Append new images to the existing state
+              if (data.imageType === 'fronts' && data.images) {
+                  state.fronts.push(...data.images);
+                  // Add copy counts for the new images
+                  state.copies.push(...data.images.map(() => 1));
+              } else if (data.imageType === 'backs' && data.images) {
+                  state.backs.push(...data.images);
+              }
+              updateUI();
           } else if (type === 'get-preview-data') {
               // Parent is requesting the final data. Compile and send it back.
               const finalData = compileFinalData();

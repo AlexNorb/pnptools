@@ -118,6 +118,28 @@ const LayoutToolPDF = {
       }
   },
 
+  async appendDataToPreviewer(files, imageType) {
+      if (!files || files.length === 0) return;
+
+      try {
+          const newImageUrls = await this.readFiles(files);
+          const previewerFrame = document.getElementById('previewerFrame');
+
+          if (previewerFrame && previewerFrame.contentWindow) {
+              previewerFrame.contentWindow.postMessage({
+                  type: 'append-images',
+                  data: {
+                      imageType: imageType,
+                      images: newImageUrls
+                  }
+              }, '*');
+          }
+      } catch (error) {
+          console.error("Error reading files for previewer append:", error);
+          alert("Could not read new files for the previewer. Please check the console.");
+      }
+  },
+
   getPreviewData() {
       return new Promise((resolve, reject) => {
           this.pdfResponsePromise = { resolve, reject };

@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
       mode3: document.getElementById("mode3"),
       // Previewer
       usePreviewer: document.getElementById("usePreviewer"),
-      legacyUploadUI: document.getElementById("legacyUploadUI"),
       previewerContainer: document.getElementById("previewerContainer"),
       // Grid Layout
       preset: document.getElementById("preset"),
@@ -75,21 +74,32 @@ document.addEventListener("DOMContentLoaded", () => {
         "click",
         window.LayoutToolPDF.generatePDF.bind(window.LayoutToolPDF)
       );
-      this.elements.frontImages.addEventListener("change", () => {
+
+      this.elements.frontImages.addEventListener("change", (event) => {
         this.ui.updateModeIndicator();
         this.ui.updateFileCount(
           this.elements.frontImages,
           this.elements.fileCount
         );
+        // If previewer is active, append the new files
+        if (this.elements.usePreviewer.checked) {
+            window.LayoutToolPDF.appendDataToPreviewer(event.target.files, 'fronts');
+        }
       });
-      this.elements.backImages.addEventListener("change", () => {
+
+      this.elements.backImages.addEventListener("change", (event) => {
         this.ui.updateModeIndicator();
         this.ui.updateFileCount(
           this.elements.backImages,
           this.elements.fileCountBack,
           true
         );
+        // If previewer is active, append the new files
+        if (this.elements.usePreviewer.checked) {
+            window.LayoutToolPDF.appendDataToPreviewer(event.target.files, 'backs');
+        }
       });
+
       this.elements.preset.addEventListener(
         "change",
         this.ui.applyPreset.bind(this)
@@ -128,11 +138,10 @@ document.addEventListener("DOMContentLoaded", () => {
     ui: {
       togglePreviewer() {
           const isChecked = LayoutToolUI.elements.usePreviewer.checked;
-          LayoutToolUI.elements.legacyUploadUI.style.display = isChecked ? "none" : "block";
           LayoutToolUI.elements.previewerContainer.style.display = isChecked ? "block" : "none";
 
           if (isChecked) {
-              // When showing the previewer, tell the master script to read files and send them to the iframe
+              // When showing the previewer for the first time, send all current files
               window.LayoutToolPDF.sendDataToPreviewer();
           }
       },
