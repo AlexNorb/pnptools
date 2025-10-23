@@ -59,12 +59,23 @@
       </div>
 
       <div class="form-group">
-          <input type="checkbox" id="usePreviewer" style="margin-left: 1rem;"/>
-          <label for="usePreviewer">Use Advanced Image Preview</label>
+        <input type="checkbox" id="usePreviewer" style="margin-left: 1rem" />
+        <label for="usePreviewer">Use Advanced Image Preview</label>
       </div>
 
-      <div id="previewerContainer" style="display: none;">
-        <iframe id="previewerFrame" src="preview.html" style="width: 100%; height: 800px; border: 1px solid #ccc; border-radius: 1rem; margin-top: 1rem;"></iframe>
+      <div id="previewerContainer" style="display: none">
+        <iframe
+          id="previewerFrame"
+          src="preview.html"
+          style="
+            width: 100%;
+            height: 850px;
+            border: 1px solid #ccc;
+            border-radius: 1rem;
+            margin-top: 1rem;
+            overflow-y: hidden;
+          "
+        ></iframe>
       </div>
 
       <!-- mode indicator -->

@@ -298,3 +298,11 @@ i {
   border-color: #f44336;
   box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
 }
+
+#previewerContainer {
+  pointer-events: none;
+}
+
+#previewerFrame {
+  pointer-events: auto;
+}
