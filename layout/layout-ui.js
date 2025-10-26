@@ -24,6 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
       previewerContainer: document.getElementById("previewerContainer"),
       // Grid Layout
       preset: document.getElementById("preset"),
+      presetName: document.getElementById("presetName"),
+      savePresetButton: document.getElementById("savePresetButton"),
       rows: document.getElementById("rows"),
       columns: document.getElementById("columns"),
       pageSize: document.getElementById("pageSize"),
@@ -89,6 +91,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const settings = this.ui.getRawSettings();
         this.storage.save("layoutTool.lastUsedSettings", settings);
         window.LayoutToolPDF.generatePDF.bind(window.LayoutToolPDF)();
+      });
+
+      this.elements.savePresetButton.addEventListener("click", () => {
+        const name = this.elements.presetName.value;
+        if (!name) {
+          alert("Please enter a name for the preset.");
+          return;
+        }
+        const settings = this.ui.getRawGridSettings();
+        this.storage.saveUserPreset(name, settings);
+        this.ui.loadPresets(); // Reload presets to include the new one
+        this.elements.presetName.value = "";
       });
 
       this.elements.frontImages.addEventListener("change", (event) => {
@@ -285,6 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const settings = {};
         for (const key in LayoutToolUI.elements) {
           const element = LayoutToolUI.elements[key];
+          if (element.type === 'file') continue;
           if (element.type === "checkbox" || element.type === "radio") {
             settings[key] = element.checked;
           } else if (element.id) {
@@ -294,12 +309,35 @@ document.addEventListener("DOMContentLoaded", () => {
         return settings;
       },
 
+      getRawGridSettings() {
+        const settings = {};
+        const gridElementIds = [
+          "rows", "columns", "pageSize", "pageWidth", "pageHeight",
+          "imageWidth", "imageHeight", "bleed", "borderWidth", "crosshaircolor",
+          "borderColor", "frontCheckbox", "backCheckbox", "frontBorderCheckbox",
+          "backBorderCheckbox", "crosswidth", "crosssize", "cornerRadius"
+        ];
+
+        gridElementIds.forEach(id => {
+          const element = LayoutToolUI.elements[id];
+          if (element) {
+            if (element.type === "checkbox") {
+              settings[id] = element.checked;
+            } else {
+              settings[id] = element.value;
+            }
+          }
+        });
+        return settings;
+      },
+
       applySettings(settings) {
         for (const key in settings) {
           const element = LayoutToolUI.elements[key];
           const value = settings[key];
 
           if (element) {
+            if (element.type === 'file') continue;
             if (element.type === "checkbox" || element.type === "radio") {
               element.checked = value;
             } else {
@@ -308,14 +346,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Special handling for elements that affect others
             if (key === "pageSize" || key === "foldable_pageSize") {
-              this.updatePageSizeInputs(
+              this.ui.updatePageSizeInputs(
                 element,
                 LayoutToolUI.elements[key.replace("Size", "Width")],
                 LayoutToolUI.elements[key.replace("Size", "Height")]
               );
             }
             if (key === "doubleSided" || key === "foldable") {
-              this.toggleModeUI();
+              this.ui.toggleModeUI();
             }
           }
         }
@@ -324,8 +362,9 @@ document.addEventListener("DOMContentLoaded", () => {
       async loadPresets() {
         try {
           const response = await fetch("presets.json");
-          const presets = await response.json();
-          LayoutToolUI.config.presets = presets;
+          const defaultPresets = await response.json();
+          const userPresets = LayoutToolUI.storage.loadUserPresets() || {};
+          LayoutToolUI.config.presets = { ...defaultPresets, ...userPresets };
 
           const presetSelect = LayoutToolUI.elements.preset;
           presetSelect.innerHTML = ""; // Clear existing options
@@ -336,12 +375,12 @@ document.addEventListener("DOMContentLoaded", () => {
           defaultOption.selected = true;
           presetSelect.add(defaultOption);
 
-          for (const key in presets) {
-            const option = new Option(presets[key].name, key);
+          for (const key in LayoutToolUI.config.presets) {
+            const option = new Option(LayoutToolUI.config.presets[key].name, key);
             presetSelect.add(option);
           }
         } catch (error) {
-          console.error("Failed to load or parse presets.json:", error);
+          console.error("Failed to load or parse presets:", error);
         }
       },
       updateModeIndicator() {
@@ -410,6 +449,17 @@ document.addEventListener("DOMContentLoaded", () => {
           console.error(`Error loading from localStorage: ${error}`);
           return null;
         }
+      },
+
+      saveUserPreset(name, settings) {
+        const userPresets = this.loadUserPresets() || {};
+        const presetKey = `user_${Date.now()}`;
+        userPresets[presetKey] = { name, settings };
+        this.save("layoutTool.userPresets", userPresets);
+      },
+
+      loadUserPresets() {
+        return this.load("layoutTool.userPresets");
       },
     },
 
