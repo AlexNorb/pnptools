@@ -177,10 +177,16 @@
           </div>
           <p>Measurements</p>
           <div class="box settings">
+            <select id="cardSize" name="cardSize">
+                <option value="Poker" selected>Poker (63x88mm)</option>
+                <option value="Bridge">Bridge (57x88mm)</option>
+                <option value="Tarot">Tarot (70x120mm)</option>
+                <option value="Custom">Custom</option>
+            </select>
             <label for="imageWidth">Card width</label>
-            <input type="number" id="imageWidth" value="63" />
+            <input type="number" id="imageWidth" value="63" disabled/>
             <label for="imageHeight">Card height</label>
-            <input type="number" id="imageHeight" value="88" />
+            <input type="number" id="imageHeight" value="88" disabled/>
             <label for="bleed">Bleed</label>
             <input type="number" id="bleed" value="0" />
           </div>
@@ -299,10 +305,16 @@
         <div class="form-group basic">
           <p>Card Dimensions</p>
           <div class="box settings">
+            <select id="foldable_cardSize" name="foldable_cardSize">
+                <option value="Poker" selected>Poker (63x88mm)</option>
+                <option value="Bridge">Bridge (57x88mm)</option>
+                <option value="Tarot">Tarot (70x120mm)</option>
+                <option value="Custom">Custom</option>
+            </select>
             <label for="foldable_cardWidth">Width</label>
-            <input type="number" id="foldable_cardWidth" value="63" />
+            <input type="number" id="foldable_cardWidth" value="63" disabled/>
             <label for="foldable_cardHeight">Height</label>
-            <input type="number" id="foldable_cardHeight" value="88" />
+            <input type="number" id="foldable_cardHeight" value="88" disabled/>
           </div>
         </div>
         <div class="form-group basic">

@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
       pageSize: document.getElementById("pageSize"),
       pageWidth: document.getElementById("pageWidth"),
       pageHeight: document.getElementById("pageHeight"),
+      cardSize: document.getElementById("cardSize"),
       imageWidth: document.getElementById("imageWidth"),
       imageHeight: document.getElementById("imageHeight"),
       bleed: document.getElementById("bleed"),
@@ -49,6 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
       foldable_pageSize: document.getElementById("foldable_pageSize"),
       foldable_pageWidth: document.getElementById("foldable_pageWidth"),
       foldable_pageHeight: document.getElementById("foldable_pageHeight"),
+      foldable_cardSize: document.getElementById("foldable_cardSize"),
       foldable_cardWidth: document.getElementById("foldable_cardWidth"),
       foldable_cardHeight: document.getElementById("foldable_cardHeight"),
       foldable_printerMargin: document.getElementById("foldable_printerMargin"),
@@ -77,6 +79,11 @@ document.addEventListener("DOMContentLoaded", () => {
         "A4 Landscape": { width: 297, height: 210 },
         "Letter Portrait": { width: 215.9, height: 279.4 },
         "Letter Landscape": { width: 279.4, height: 215.9 },
+      },
+      cardSizesInMM: {
+        "Poker": { width: 63, height: 88 },
+        "Bridge": { width: 57, height: 88 },
+        "Tarot": { width: 70, height: 120 },
       },
     },
 
@@ -189,6 +196,22 @@ document.addEventListener("DOMContentLoaded", () => {
         )
       );
 
+      this.elements.cardSize.addEventListener("change", () =>
+        this.ui.updateCardSizeInputs(
+          this.elements.cardSize,
+          this.elements.imageWidth,
+          this.elements.imageHeight
+        )
+      );
+
+      this.elements.foldable_cardSize.addEventListener("change", () =>
+        this.ui.updateCardSizeInputs(
+          this.elements.foldable_cardSize,
+          this.elements.foldable_cardWidth,
+          this.elements.foldable_cardHeight
+        )
+      );
+
       this.elements.usePreviewer.addEventListener("change", this.ui.togglePreviewer.bind(this));
     },
 
@@ -210,6 +233,25 @@ document.addEventListener("DOMContentLoaded", () => {
           heightInput.disabled = true;
         }
       },
+
+      updateCardSizeInputs(dropdown, widthInput, heightInput) {
+        const selectedSize = dropdown.value;
+        const customSize = "Custom";
+
+        if (selectedSize === customSize) {
+          widthInput.disabled = false;
+          heightInput.disabled = false;
+        } else {
+          const dimensions = LayoutToolUI.config.cardSizesInMM[selectedSize];
+          if (dimensions) {
+            widthInput.value = dimensions.width;
+            heightInput.value = dimensions.height;
+          }
+          widthInput.disabled = true;
+          heightInput.disabled = true;
+        }
+      },
+
       togglePreviewer() {
           const isChecked = LayoutToolUI.elements.usePreviewer.checked;
           LayoutToolUI.elements.previewerContainer.style.display = isChecked ? "block" : "none";
