@@ -80,10 +80,16 @@ document.addEventListener("DOMContentLoaded", () => {
     async init() {
       await this.ui.loadPresets.bind(this)();
 
-      this.elements.generatePdfButton.addEventListener(
-        "click",
-        window.LayoutToolPDF.generatePDF.bind(window.LayoutToolPDF)
-      );
+      const lastUsedSettings = this.storage.load("layoutTool.lastUsedSettings");
+      if (lastUsedSettings) {
+        this.ui.applySettings.call(this, lastUsedSettings);
+      }
+
+      this.elements.generatePdfButton.addEventListener("click", () => {
+        const settings = this.ui.getRawSettings();
+        this.storage.save("layoutTool.lastUsedSettings", settings);
+        window.LayoutToolPDF.generatePDF.bind(window.LayoutToolPDF)();
+      });
 
       this.elements.frontImages.addEventListener("change", (event) => {
         this.ui.updateModeIndicator();
@@ -274,6 +280,47 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
       },
+
+      getRawSettings() {
+        const settings = {};
+        for (const key in LayoutToolUI.elements) {
+          const element = LayoutToolUI.elements[key];
+          if (element.type === "checkbox" || element.type === "radio") {
+            settings[key] = element.checked;
+          } else if (element.id) {
+            settings[element.id] = element.value;
+          }
+        }
+        return settings;
+      },
+
+      applySettings(settings) {
+        for (const key in settings) {
+          const element = LayoutToolUI.elements[key];
+          const value = settings[key];
+
+          if (element) {
+            if (element.type === "checkbox" || element.type === "radio") {
+              element.checked = value;
+            } else {
+              element.value = value;
+            }
+
+            // Special handling for elements that affect others
+            if (key === "pageSize" || key === "foldable_pageSize") {
+              this.updatePageSizeInputs(
+                element,
+                LayoutToolUI.elements[key.replace("Size", "Width")],
+                LayoutToolUI.elements[key.replace("Size", "Height")]
+              );
+            }
+            if (key === "doubleSided" || key === "foldable") {
+              this.toggleModeUI();
+            }
+          }
+        }
+      },
+
       async loadPresets() {
         try {
           const response = await fetch("presets.json");
@@ -342,6 +389,26 @@ document.addEventListener("DOMContentLoaded", () => {
           countElement.textContent = `${fileCount} file${
             fileCount !== 1 ? "s" : ""
           } selected`;
+        }
+      },
+    },
+
+    storage: {
+      save(key, data) {
+        try {
+          localStorage.setItem(key, JSON.stringify(data));
+        } catch (error) {
+          console.error(`Error saving to localStorage: ${error}`);
+        }
+      },
+
+      load(key) {
+        try {
+          const data = localStorage.getItem(key);
+          return data ? JSON.parse(data) : null;
+        } catch (error) {
+          console.error(`Error loading from localStorage: ${error}`);
+          return null;
         }
       },
     },
