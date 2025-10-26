@@ -135,13 +135,9 @@ async function createPDF(frontImages, backImages, settings, config) {
     return deduplicationLUT[imageAsDataUrl];
   };
 
-  const pageSizes = {
-    A4: [595.28, 841.89],
-    Letter: [612, 792],
-    "A4 landscape": [841.89, 595.28],
-    "Letter landscape": [792, 612],
-  };
-  const [pageWidth, pageHeight] = pageSizes[settings.pageSize];
+  const mmToPt = 72 / 25.4;
+  const pageWidth = settings.pageWidth * mmToPt;
+  const pageHeight = settings.pageHeight * mmToPt;
 
   if (
     settings.columns * settings.imageWidth > pageWidth ||
@@ -209,9 +205,7 @@ async function createPDF(frontImages, backImages, settings, config) {
 
     if (!noBack) {
       page = pdfDoc.addPage([pageWidth, pageHeight]);
-      x =
-        (pageWidth + settings.columns * settings.imageWidth) / 2 -
-        settings.imageWidth;
+      x = (pageWidth + settings.columns * settings.imageWidth) / 2 - settings.imageWidth;
       y = (pageHeight + settings.rows * settings.imageHeight) / 2;
 
       let singleBackImage;
@@ -250,26 +244,19 @@ async function createPDF(frontImages, backImages, settings, config) {
 
         x -= settings.imageWidth;
         if ((i + 1) % settings.columns === 0) {
-          x =
-            (pageWidth + settings.columns * settings.imageWidth) / 2 -
-            settings.imageWidth;
+          x = (pageWidth + settings.columns * settings.imageWidth) / 2 - settings.imageWidth;
           y -= settings.imageHeight;
         }
       }
 
       if (settings.backCheckbox) {
-        let crosshairX =
-          (pageWidth + settings.columns * settings.imageWidth) / 2 -
-          settings.imageWidth;
-        let crosshairY =
-          (pageHeight + settings.rows * settings.imageHeight) / 2;
+        let crosshairX = (pageWidth + settings.columns * settings.imageWidth) / 2 - settings.imageWidth;
+        let crosshairY = (pageHeight + settings.rows * settings.imageHeight) / 2;
         for (let i = 0; i < imagesOnThisPage; i++) {
           drawCrosshairs(page, crosshairX, crosshairY, settings, config);
           crosshairX -= settings.imageWidth;
           if ((i + 1) % settings.columns === 0) {
-            crosshairX =
-              (pageWidth + settings.columns * settings.imageWidth) / 2 -
-              settings.imageWidth;
+            crosshairX = (pageWidth + settings.columns * settings.imageWidth) / 2 - settings.imageWidth;
             crosshairY -= settings.imageHeight;
           }
         }
