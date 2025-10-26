@@ -375,8 +375,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const response = await fetch("presets.json");
           const defaultPresets = await response.json();
           const userPresets = LayoutToolUI.storage.loadUserPresets() || {};
-          LayoutToolUI.config.presets = { ...defaultPresets, ...userPresets };
-
+          
           const presetSelect = LayoutToolUI.elements.preset;
           presetSelect.innerHTML = ""; // Clear existing options
 
@@ -386,10 +385,24 @@ document.addEventListener("DOMContentLoaded", () => {
           defaultOption.selected = true;
           presetSelect.add(defaultOption);
 
-          for (const key in LayoutToolUI.config.presets) {
-            const option = new Option(LayoutToolUI.config.presets[key].name, key);
+          for (const key in defaultPresets) {
+            const option = new Option(defaultPresets[key].name, key);
             presetSelect.add(option);
           }
+
+          if (Object.keys(userPresets).length > 0) {
+            const divider = new Option("---- Custom Presets ----", "");
+            divider.disabled = true;
+            presetSelect.add(divider);
+          }
+
+          for (const key in userPresets) {
+            const option = new Option(userPresets[key].name, key);
+            presetSelect.add(option);
+          }
+
+          LayoutToolUI.config.presets = { ...defaultPresets, ...userPresets };
+
         } catch (error) {
           console.error("Failed to load or parse presets:", error);
         }
