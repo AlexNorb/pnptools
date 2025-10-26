@@ -2,6 +2,8 @@
   "preset1": {
     "name": "Standard card 63x88mm",
     "settings": {
+      "pageSize": "A4 Portrait",
+      "cardSize": "Poker",
       "rows": 3,
       "columns": 3,
       "imageWidth": 63,
@@ -15,6 +17,8 @@
   "preset2": {
     "name": "Mini European 44x68mm",
     "settings": {
+      "pageSize": "A4 Portrait",
+      "cardSize": "Custom",
       "rows": 4,
       "columns": 4,
       "imageWidth": 44,
@@ -28,8 +32,9 @@
   "preset3": {
     "name": "Buttonshy 63x88mm with bleed",
     "settings": {
+      "pageSize": "Letter Landscape",
+      "cardSize": "Poker",
       "rows": 2,
-      "pageSize": "Letter landscape",
       "columns": 3,
       "imageWidth": 63,
       "imageHeight": 88,
@@ -41,12 +46,14 @@
       "backCheckbox": false
     },
     "disabled": {
-      "pageSize": ["A4", "Letter"]
+      "pageSize": ["A4 Portrait", "Letter Portrait"]
     }
   },
   "preset4": {
     "name": "Europan Standard 59x91mm (Dominion)",
     "settings": {
+      "pageSize": "A4 Portrait",
+      "cardSize": "Custom",
       "rows": 2,
       "columns": 4,
       "imageWidth": 59,
@@ -61,6 +68,7 @@
     "name": "TEMPLATE (Copy to create new presets)",
     "settings": {
       "pageSize": "A4",
+      "cardSize": "Poker",
       "rows": 3,
       "columns": 3,
       "imageWidth": 63,

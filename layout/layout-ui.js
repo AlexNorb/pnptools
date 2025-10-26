@@ -81,9 +81,9 @@ document.addEventListener("DOMContentLoaded", () => {
         "Letter Landscape": { width: 279.4, height: 215.9 },
       },
       cardSizesInMM: {
-        "Poker": { width: 63, height: 88 },
-        "Bridge": { width: 57, height: 88 },
-        "Tarot": { width: 70, height: 120 },
+        Poker: { width: 63, height: 88 },
+        Bridge: { width: 57, height: 88 },
+        Tarot: { width: 70, height: 120 },
       },
     },
 
@@ -92,11 +92,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const lastUsedSettings = this.storage.load("layoutTool.lastUsedSettings");
       if (lastUsedSettings) {
-        this.ui.applySettings.call(this, lastUsedSettings);
+        if (lastUsedSettings.preset) {
+          this.elements.preset.value = lastUsedSettings.preset;
+          this.ui.applyPreset.call(this); // Apply the preset first
+        }
+        this.ui.applySettings.call(this, lastUsedSettings); // Then apply the user's modifications
       }
 
       this.elements.generatePdfButton.addEventListener("click", () => {
-        const settings = this.ui.getRawSettings();
+        const settings = this.ui.getRawSettings.call(this);
         this.storage.save("layoutTool.lastUsedSettings", settings);
         window.LayoutToolPDF.generatePDF.bind(window.LayoutToolPDF)();
       });
@@ -131,7 +135,10 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         // If previewer is active, append the new files
         if (this.elements.usePreviewer.checked) {
-            window.LayoutToolPDF.appendDataToPreviewer(event.target.files, 'fronts');
+          window.LayoutToolPDF.appendDataToPreviewer(
+            event.target.files,
+            "fronts"
+          );
         }
       });
 
@@ -144,7 +151,10 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         // If previewer is active, append the new files
         if (this.elements.usePreviewer.checked) {
-            window.LayoutToolPDF.appendDataToPreviewer(event.target.files, 'backs');
+          window.LayoutToolPDF.appendDataToPreviewer(
+            event.target.files,
+            "backs"
+          );
         }
       });
 
@@ -212,7 +222,10 @@ document.addEventListener("DOMContentLoaded", () => {
         )
       );
 
-      this.elements.usePreviewer.addEventListener("change", this.ui.togglePreviewer.bind(this));
+      this.elements.usePreviewer.addEventListener(
+        "change",
+        this.ui.togglePreviewer.bind(this)
+      );
     },
 
     ui: {
@@ -253,13 +266,15 @@ document.addEventListener("DOMContentLoaded", () => {
       },
 
       togglePreviewer() {
-          const isChecked = LayoutToolUI.elements.usePreviewer.checked;
-          LayoutToolUI.elements.previewerContainer.style.display = isChecked ? "block" : "none";
+        const isChecked = LayoutToolUI.elements.usePreviewer.checked;
+        LayoutToolUI.elements.previewerContainer.style.display = isChecked
+          ? "block"
+          : "none";
 
-          if (isChecked) {
-              // When showing the previewer for the first time, send all current files
-              window.LayoutToolPDF.sendDataToPreviewer();
-          }
+        if (isChecked) {
+          // When showing the previewer for the first time, send all current files
+          window.LayoutToolPDF.sendDataToPreviewer();
+        }
       },
       toggleModeUI() {
         const isDoubleSided = LayoutToolUI.elements.doubleSidedRadio.checked;
@@ -298,7 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
         for (const key in LayoutToolUI.elements) {
           const element = LayoutToolUI.elements[key];
           element.disabled = false;
-          if (element.tagName.toLowerCase() === 'select') {
+          if (element.tagName.toLowerCase() === "select") {
             for (const option of element.options) {
               option.disabled = false;
             }
@@ -313,11 +328,29 @@ document.addEventListener("DOMContentLoaded", () => {
         const settings = presetData.settings;
         const disabled = presetData.disabled || {};
 
+        // Handle dropdowns first
+        if (settings.pageSize) {
+          this.elements.pageSize.value = settings.pageSize;
+          this.ui.updatePageSizeInputs(
+            this.elements.pageSize,
+            this.elements.pageWidth,
+            this.elements.pageHeight
+          );
+        }
+        if (settings.cardSize) {
+          this.elements.cardSize.value = settings.cardSize;
+          this.ui.updateCardSizeInputs(
+            this.elements.cardSize,
+            this.elements.imageWidth,
+            this.elements.imageHeight
+          );
+        }
+
         for (const key in settings) {
           const element = LayoutToolUI.elements[key];
           const value = settings[key];
 
-          if (element) {
+          if (element && key !== "pageSize" && key !== "cardSize") {
             // Standard element handling
             if (element.type === "checkbox" || element.type === "radio") {
               element.checked = value;
@@ -336,7 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (value === true) {
               elementToDisable.disabled = true;
             } else if (Array.isArray(value)) {
-              if (elementToDisable.tagName.toLowerCase() === 'select') {
+              if (elementToDisable.tagName.toLowerCase() === "select") {
                 for (const option of elementToDisable.options) {
                   if (value.includes(option.value)) {
                     option.disabled = true;
@@ -350,9 +383,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       getRawSettings() {
         const settings = {};
+        settings.preset = this.elements.preset.value;
         for (const key in LayoutToolUI.elements) {
           const element = LayoutToolUI.elements[key];
-          if (element.type === 'file') continue;
+          if (element.type === "file") continue;
           if (element.type === "checkbox" || element.type === "radio") {
             settings[key] = element.checked;
           } else if (element.id) {
@@ -365,13 +399,28 @@ document.addEventListener("DOMContentLoaded", () => {
       getRawGridSettings() {
         const settings = {};
         const gridElementIds = [
-          "rows", "columns", "pageSize", "pageWidth", "pageHeight",
-          "imageWidth", "imageHeight", "bleed", "borderWidth", "crosshaircolor",
-          "borderColor", "frontCheckbox", "backCheckbox", "frontBorderCheckbox",
-          "backBorderCheckbox", "crosswidth", "crosssize", "cornerRadius"
+          "rows",
+          "columns",
+          "pageSize",
+          "pageWidth",
+          "pageHeight",
+          "cardSize",
+          "imageWidth",
+          "imageHeight",
+          "bleed",
+          "borderWidth",
+          "crosshaircolor",
+          "borderColor",
+          "frontCheckbox",
+          "backCheckbox",
+          "frontBorderCheckbox",
+          "backBorderCheckbox",
+          "crosswidth",
+          "crosssize",
+          "cornerRadius",
         ];
 
-        gridElementIds.forEach(id => {
+        gridElementIds.forEach((id) => {
           const element = LayoutToolUI.elements[id];
           if (element) {
             if (element.type === "checkbox") {
@@ -390,7 +439,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const value = settings[key];
 
           if (element) {
-            if (element.type === 'file') continue;
+            if (element.type === "file") continue;
             if (element.type === "checkbox" || element.type === "radio") {
               element.checked = value;
             } else {
@@ -398,11 +447,30 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Special handling for elements that affect others
-            if (key === "pageSize" || key === "foldable_pageSize") {
+            if (key === "pageSize") {
               this.ui.updatePageSizeInputs(
                 element,
-                LayoutToolUI.elements[key.replace("Size", "Width")],
-                LayoutToolUI.elements[key.replace("Size", "Height")]
+                LayoutToolUI.elements.pageWidth,
+                LayoutToolUI.elements.pageHeight
+              );
+            } else if (key === "foldable_pageSize") {
+              this.ui.updatePageSizeInputs(
+                element,
+                LayoutToolUI.elements.foldable_pageWidth,
+                LayoutToolUI.elements.foldable_pageHeight
+              );
+            }
+            if (key === "cardSize") {
+              this.ui.updateCardSizeInputs(
+                element,
+                LayoutToolUI.elements.imageWidth,
+                LayoutToolUI.elements.imageHeight
+              );
+            } else if (key === "foldable_cardSize") {
+              this.ui.updateCardSizeInputs(
+                element,
+                LayoutToolUI.elements.foldable_cardWidth,
+                LayoutToolUI.elements.foldable_cardHeight
               );
             }
             if (key === "doubleSided" || key === "foldable") {
@@ -417,7 +485,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const response = await fetch("presets.json");
           const defaultPresets = await response.json();
           const userPresets = LayoutToolUI.storage.loadUserPresets() || {};
-          
+
           const presetSelect = LayoutToolUI.elements.preset;
           presetSelect.innerHTML = ""; // Clear existing options
 
@@ -444,7 +512,6 @@ document.addEventListener("DOMContentLoaded", () => {
           }
 
           LayoutToolUI.config.presets = { ...defaultPresets, ...userPresets };
-
         } catch (error) {
           console.error("Failed to load or parse presets:", error);
         }
@@ -454,32 +521,32 @@ document.addEventListener("DOMContentLoaded", () => {
           LayoutToolUI.elements;
 
         // Reset all to inactive
-        mode1.classList.remove('active', 'error');
-        mode2.classList.remove('active', 'error');
-        mode3.classList.remove('active', 'error');
-        mode1.classList.add('inactive');
-        mode2.classList.add('inactive');
-        mode3.classList.add('inactive');
+        mode1.classList.remove("active", "error");
+        mode2.classList.remove("active", "error");
+        mode3.classList.remove("active", "error");
+        mode1.classList.add("inactive");
+        mode2.classList.add("inactive");
+        mode3.classList.add("inactive");
 
         const fileCountBack = backImages.files.length;
         const fileCount = frontImages.files.length;
 
         if (fileCountBack === 0) {
-          mode1.classList.remove('inactive');
-          mode1.classList.add('active');
+          mode1.classList.remove("inactive");
+          mode1.classList.add("active");
         } else if (fileCountBack === 1) {
-          mode2.classList.remove('inactive');
-          mode2.classList.add('active');
+          mode2.classList.remove("inactive");
+          mode2.classList.add("active");
         } else if (fileCountBack === fileCount) {
-          mode3.classList.remove('inactive');
-          mode3.classList.add('active');
+          mode3.classList.remove("inactive");
+          mode3.classList.add("active");
         } else {
-          mode1.classList.remove('inactive');
-          mode2.classList.remove('inactive');
-          mode3.classList.remove('inactive');
-          mode1.classList.add('error');
-          mode2.classList.add('error');
-          mode3.classList.add('error');
+          mode1.classList.remove("inactive");
+          mode2.classList.remove("inactive");
+          mode3.classList.remove("inactive");
+          mode1.classList.add("error");
+          mode2.classList.add("error");
+          mode3.classList.add("error");
         }
       },
       updateFileCount(fileInput, countElement, isBack = false) {
@@ -623,8 +690,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      settings.pageWidth = parseFloat(document.getElementById("foldable_pageWidth").value);
-      settings.pageHeight = parseFloat(document.getElementById("foldable_pageHeight").value);
+      settings.pageWidth = parseFloat(
+        document.getElementById("foldable_pageWidth").value
+      );
+      settings.pageHeight = parseFloat(
+        document.getElementById("foldable_pageHeight").value
+      );
 
       for (const key in settings) {
         if (
