@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
       preset: document.getElementById("preset"),
       presetName: document.getElementById("presetName"),
       savePresetButton: document.getElementById("savePresetButton"),
+      deletePresetButton: document.getElementById("deletePresetButton"),
       rows: document.getElementById("rows"),
       columns: document.getElementById("columns"),
       pageSize: document.getElementById("pageSize"),
@@ -103,6 +104,16 @@ document.addEventListener("DOMContentLoaded", () => {
         this.storage.saveUserPreset(name, settings);
         this.ui.loadPresets(); // Reload presets to include the new one
         this.elements.presetName.value = "";
+      });
+
+      this.elements.deletePresetButton.addEventListener("click", () => {
+        const presetKey = this.elements.preset.value;
+        if (!presetKey.startsWith("user_")) {
+          alert("You can only delete user-defined presets.");
+          return;
+        }
+        this.storage.deleteUserPreset(presetKey);
+        this.ui.loadPresets(); // Reload presets to remove the deleted one
       });
 
       this.elements.frontImages.addEventListener("change", (event) => {
@@ -460,6 +471,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       loadUserPresets() {
         return this.load("layoutTool.userPresets");
+      },
+
+      deleteUserPreset(presetKey) {
+        const userPresets = this.loadUserPresets() || {};
+        delete userPresets[presetKey];
+        this.save("layoutTool.userPresets", userPresets);
       },
     },
 
