@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Pair Manager</title>
+    <!-- Library for drag-and-drop reordering of front images -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <link rel="stylesheet" href="preview.css">
+  </head>
+  <body>
+    <div class="container">
+      <!-- This h1 is optional, can be removed if the parent provides context -->
+      <h1>Advanced Image Preview & Ordering</h1>
+
+      <!-- Upload Section is removed, as uploads are handled by the parent window -->
+
+      <!-- Control Panel: Clear/Reset buttons for state management -->
+      <div class="control-panel">
+        <button class="clear-btn-front" onclick="clearFronts()">
+          Clear Fronts
+        </button>
+        <button class="clear-btn-back" onclick="clearBacks()">
+          Clear Backs
+        </button>
+        <button class="clear-btn-all" onclick="clearAll()">Clear All</button>
+      </div>
+
+      <!-- Preview Section: Hidden until content is loaded -->
+      <div id="previewSection" style="display: none">
+        <h2>Image Pairs Preview</h2>
+        <!-- Mode Info Box: Displays the current operating mode and validation status (VALID, NO_BACKS, INVALID) -->
+        <div id="modeInfo" class="info-box"></div>
+        <!-- Pairs Container: Holds the draggable front row and the fixed back row (if visible) -->
+        <div id="pairsContainer" class="pairs-container"></div>
+        <!-- The finalize button is no longer needed, as this is triggered by the parent -->
+      </div>
+
+      <!-- Empty State: Visible when no images are loaded -->
+      <div id="emptyState" class="empty-state">
+        <p>Waiting for images from the main application...</p>
+      </div>
+    </div>
+    <script src="preview.js"></script>
+  </body>
+</html>

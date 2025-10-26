@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Paper Size Selector</title>
+    <!-- DaisyUI and Tailwind CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* A little extra style for the preview box and icon */
+      #paperPreview {
+        /* Set a max size container for the preview */
+        max-width: 150px;
+        max-height: 150px;
+        /* Center the box itself */
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      #paperPreviewContainer {
+        /* FIX: Using long-form border properties for reliable dynamic color resolution */
+        border-width: 4px;
+        border-style: solid;
+        border-color: hsl(
+          var(--p)
+        ); /* Explicitly set border-color to the Primary variable */
+
+        /* Increased opacity of background tint for better contrast */
+        background-color: hsla(var(--p), 0.3);
+        border-radius: 0.5rem;
+        box-shadow: 0 0 10px hsl(var(--p)); /* Primary color glow for consistent visibility */
+
+        /* Added border style and width to transition property */
+        transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease,
+          border-style 0.3s ease, border-width 0.3s ease,
+          background-color 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+
+        /* Center the icon and text */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column; /* Allows icon and text to stack */
+        text-align: center;
+        padding: 5px; /* Added padding */
+
+        /* Ensure it doesn't shrink smaller than the icon */
+        min-width: 48px;
+        min-height: 48px;
+      }
+
+      #paperPreviewContainer svg {
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        opacity: 1; /* Set to 1 for maximum visibility */
+        /* Icon color uses the dynamic Primary color */
+        color: hsl(var(--p));
+      }
+
+      #paperPreviewContainer:hover svg {
+        transform: scale(1.1);
+        opacity: 1;
+      }
+
+      /* Subtle hover effect for labels */
+      .form-control:hover .label-text {
+        color: hsl(var(--p));
+        transition: color 0.3s ease;
+      }
+
+      /* Text color uses the dynamic Primary color */
+      #paperPreviewContainer span {
+        color: hsl(var(--p));
+        opacity: 1; /* Set to 1 for maximum visibility */
+      }
+    </style>
+  </head>
+  <body
+    class="bg-base-200 min-h-screen flex items-center justify-center font-sans p-4"
+  >
+    <div class="card w-full max-w-lg bg-base-100 shadow-xl h-[90vh] relative">
+      <div class="card-body">
+        <!-- Theme Selector (Top Right) -->
+        <div class="form-control w-full max-w-xs absolute top-4 right-4">
+          <label class="label" for="themeSelector">
+            <span class="label-text">Theme</span>
+          </label>
+          <select
+            id="themeSelector"
+            class="select select-bordered select-sm select-primary"
+          >
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="cupcake">Cupcake</option>
+            <option value="bumblebee">Bumblebee</option>
+            <option value="emerald">Emerald</option>
+            <option value="synthwave">Synthwave</option>
+            <option value="retro">Retro</option>
+            <option value="cyberpunk">Cyberpunk</option>
+            <option value="valentine">Valentine</option>
+            <option value="garden">Garden</option>
+            <option value="forest">Forest</option>
+            <option value="aqua">Aqua</option>
+            <option value="lofi">Lofi</option>
+            <option value="pastel">Pastel</option>
+            <option value="fantasy">Fantasy</option>
+            <option value="dracula">Dracula</option>
+            <option value="cmyk">CMYK</option>
+            <option value="acid">Acid</option>
+            <option value="lemonade">Lemonade</option>
+            <option value="coffee">Coffee</option>
+            <option value="winter">Winter</option>
+          </select>
+        </div>
+
+        <!-- Paper Size Select (Moved to top) -->
+        <div class="form-control w-full mt-16">
+          <!-- Added margin-top to clear theme selector -->
+          <label class="label" for="paperSizeSelect">
+            <span class="label-text text-primary font-bold"
+              >Paper Size Selector</span
+            >
+          </label>
+          <select id="paperSizeSelect" class="select select-primary w-full">
+            <option value="a4" selected>A4</option>
+            <option value="letter">US Letter</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+
+        <!-- Layout Grid -->
+        <!-- We use a grid to position items as requested:
+                 - Row 1: (empty) | Preview | Height
+                 - Row 2: (empty) | Width   | (empty)
+            -->
+        <!-- Set first row height to 150px to match max preview height and prevent layout shifts -->
+        <div
+          class="grid grid-cols-[1fr_150px_1fr] grid-rows-[150px_auto] gap-x-4 items-end mt-4"
+        >
+          <!-- Row 1, Col 2: Paper Preview -->
+          <div
+            id="paperPreview"
+            class="row-start-1 col-start-2 flex items-center justify-center"
+          >
+            <div id="paperPreviewContainer">
+              <!-- Embedded SVG for Rotate Icon -->
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-rotate-cw"
+              >
+                <path d="M21 2v6h-6" />
+                <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+                <path d="M3 22v-6h6" />
+                <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+              </svg>
+              <span class="text-xs font-semibold mt-1">Click to Rotate</span>
+            </div>
+          </div>
+
+          <!-- Row 1, Col 3: Height Input -->
+          <div class="form-control w-full row-start-1 col-start-3">
+            <label class="label" for="paperHeight">
+              <span class="label-text">Height (mm)</span>
+            </label>
+            <input
+              type="number"
+              id="paperHeight"
+              placeholder="e.g., 297"
+              class="input input-primary w-full"
+              step="0.1"
+            />
+          </div>
+
+          <!-- Row 2, Col 2: Width Input -->
+          <div class="form-control w-full row-start-2 col-start-2 mt-2">
+            <label class="label" for="paperWidth">
+              <span class="label-text">Width (mm)</span>
+            </label>
+            <input
+              type="number"
+              id="paperWidth"
+              placeholder="e.g., 210"
+              class="input input-primary w-full"
+              step="0.1"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- DOM Elements ---
+      const sizeSelect = document.getElementById("paperSizeSelect");
+      const widthInput = document.getElementById("paperWidth");
+      const heightInput = document.getElementById("paperHeight");
+      const previewBox = document.getElementById("paperPreviewContainer");
+      const themeSelector = document.getElementById("themeSelector");
+      const htmlElement = document.documentElement;
+
+      // --- Constants ---
+      const MAX_PREVIEW_DIMENSION = 150; // 150px
+      const PAPER_SIZES = {
+        a4: { w: 210, h: 297 },
+        letter: { w: 215.9, h: 279.4 }, // Standard 8.5" x 11"
+      };
+
+      // --- Functions ---
+
+      /**
+       * Updates the preview box dimensions based on input values.
+       * Maintains aspect ratio within a 200x200px container.
+       */
+      function updatePreview() {
+        let width = parseFloat(widthInput.value);
+        let height = parseFloat(heightInput.value);
+
+        // Fallback for invalid or empty inputs
+        if (isNaN(width) || width <= 0) width = 210;
+        if (isNaN(height) || height <= 0) height = 297;
+
+        let previewWidth_px, previewHeight_px;
+
+        // Calculate aspect ratio
+        const aspectRatio = width / height;
+
+        // Determine dimensions constrained by MAX_PREVIEW_DIMENSION
+        if (height >= width) {
+          // Portrait or square (constrain height to max)
+          previewHeight_px = MAX_PREVIEW_DIMENSION;
+          previewWidth_px = MAX_PREVIEW_DIMENSION * aspectRatio;
+        } else {
+          // Landscape (constrain width to max)
+          previewWidth_px = MAX_PREVIEW_DIMENSION;
+          previewHeight_px = MAX_PREVIEW_DIMENSION / aspectRatio;
+        }
+
+        // Ensure neither dimension exceeds the MAX_PREVIEW_DIMENSION (in case of very skewed aspect ratio)
+        if (previewWidth_px > MAX_PREVIEW_DIMENSION) {
+          previewWidth_px = MAX_PREVIEW_DIMENSION;
+          previewHeight_px = MAX_PREVIEW_DIMENSION / aspectRatio;
+        } else if (previewHeight_px > MAX_PREVIEW_DIMENSION) {
+          previewHeight_px = MAX_PREVIEW_DIMENSION;
+          previewWidth_px = MAX_PREVIEW_DIMENSION * aspectRatio;
+        }
+
+        // Apply styles to the preview box
+        previewBox.style.width = `${previewWidth_px}px`;
+        previewBox.style.height = `${previewHeight_px}px`;
+      }
+
+      /**
+       * Handles the change event for the paper size selector.
+       * Sets input values and enables/disables them.
+       */
+      function handleSizeChange() {
+        const selectedSize = sizeSelect.value;
+
+        if (selectedSize === "custom") {
+          // Enable inputs
+          widthInput.disabled = false;
+          heightInput.disabled = false;
+        } else {
+          // Disable inputs and set values
+          const dimensions = PAPER_SIZES[selectedSize];
+          if (dimensions) {
+            widthInput.value = dimensions.w;
+            heightInput.value = dimensions.h;
+            widthInput.disabled = true;
+            heightInput.disabled = true;
+          }
+        }
+
+        // Update the preview regardless of choice
+        updatePreview();
+      }
+
+      /**
+       * Swaps the width and height values and updates the preview.
+       */
+      function rotatePaper() {
+        const currentWidth = widthInput.value;
+        const currentHeight = heightInput.value;
+
+        // Only swap if not empty
+        if (currentWidth && currentHeight) {
+          widthInput.value = currentHeight;
+          heightInput.value = currentWidth;
+
+          // Update the preview
+          updatePreview();
+        }
+      }
+
+      // --- Event Listeners ---
+      sizeSelect.addEventListener("change", handleSizeChange);
+      widthInput.addEventListener("input", updatePreview);
+      heightInput.addEventListener("input", updatePreview);
+      previewBox.addEventListener("click", rotatePaper);
+
+      // --- Theme Selector Logic ---
+      themeSelector.addEventListener("change", () => {
+        const selectedTheme = themeSelector.value;
+        htmlElement.setAttribute("data-theme", selectedTheme);
+      });
+
+      // Set initial theme in dropdown (in case of page reload)
+      const initialTheme = htmlElement.getAttribute("data-theme") || "light";
+      themeSelector.value = initialTheme;
+
+      // --- Initialization ---
+      // Run on load to set the initial state (A4)
+      handleSizeChange();
+    </script>
+  </body>
+</html>

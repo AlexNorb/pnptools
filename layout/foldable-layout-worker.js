@@ -421,18 +421,12 @@ if (typeof importScripts === "function") {
     const foldLinePreference = withDefault(options.foldLinePreference, "auto");
     const allowMultipleRows = withDefault(options.allowMultipleRows, true);
 
-    const pageSize = validated(
-      options.pageSize,
-      (x) => PDFLib.PageSizes[x] !== undefined,
-      "A4"
-    );
-
-    const pageFormat = PDFLib.PageSizes[pageSize];
-
     const mmFactor = 72 / 25.4;
+    const pageWidth = options.pageWidth * mmFactor;
+    const pageHeight = options.pageHeight * mmFactor;
+
     const printerMarginDoc = printerMargin * mmFactor;
 
-    const [pageWidth, pageHeight] = pageFormat;
     const [usableWidth, usableHeight] = [
       pageWidth - 2 * printerMarginDoc,
       pageHeight - 2 * printerMarginDoc,
@@ -650,23 +644,17 @@ if (typeof importScripts === "function") {
       withDefault(options.borderColorBack, "#000000")
     );
 
-    const pageSize = validated(
-      options.pageSize,
-      (x) => PDFLib.PageSizes[x] !== undefined,
-      "A4"
-    );
     const title = withDefault(options.title, "Layout PDF");
 
-    const pageFormat = PDFLib.PageSizes[pageSize];
-
     const mmFactor = 72 / 25.4;
+    const pageWidth = options.pageWidth * mmFactor;
+    const pageHeight = options.pageHeight * mmFactor;
 
     const outerBorderDoc = outerBorder * mmFactor;
     const innerBorderWidthDoc = innerBorderWidth * mmFactor;
     const innerBorderHeightDoc = innerBorderHeight * mmFactor;
     const cornerRadiusDoc = cornerRadius * mmFactor;
 
-    const [pageWidth, pageHeight] = pageFormat;
     const [cardWidthDoc, cardHeightDoc] = [
       cardWidth * mmFactor,
       cardHeight * mmFactor,
@@ -752,7 +740,7 @@ if (typeof importScripts === "function") {
             cardRowsPerPage
           );
         pages++;
-        page = pdfDoc.addPage(pageFormat);
+        page = pdfDoc.addPage([pageWidth, pageHeight]);
       }
 
       let xFront, yFront, xBack, yBack, angleFront, angleBack;

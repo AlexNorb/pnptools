@@ -19,12 +19,16 @@ document.addEventListener("DOMContentLoaded", () => {
       mode1: document.getElementById("mode1"),
       mode2: document.getElementById("mode2"),
       mode3: document.getElementById("mode3"),
+      // Previewer
+      usePreviewer: document.getElementById("usePreviewer"),
+      previewerContainer: document.getElementById("previewerContainer"),
       // Grid Layout
       preset: document.getElementById("preset"),
       rows: document.getElementById("rows"),
       columns: document.getElementById("columns"),
       pageSize: document.getElementById("pageSize"),
-      foldable_pageSize: document.getElementById("foldable_pageSize"),
+      pageWidth: document.getElementById("pageWidth"),
+      pageHeight: document.getElementById("pageHeight"),
       imageWidth: document.getElementById("imageWidth"),
       imageHeight: document.getElementById("imageHeight"),
       bleed: document.getElementById("bleed"),
@@ -39,6 +43,9 @@ document.addEventListener("DOMContentLoaded", () => {
       crosssize: document.getElementById("crosssize"),
       cornerRadius: document.getElementById("cornerRadius"),
       // Foldable Layout
+      foldable_pageSize: document.getElementById("foldable_pageSize"),
+      foldable_pageWidth: document.getElementById("foldable_pageWidth"),
+      foldable_pageHeight: document.getElementById("foldable_pageHeight"),
       foldable_cardWidth: document.getElementById("foldable_cardWidth"),
       foldable_cardHeight: document.getElementById("foldable_cardHeight"),
       foldable_printerMargin: document.getElementById("foldable_printerMargin"),
@@ -62,6 +69,12 @@ document.addEventListener("DOMContentLoaded", () => {
       crosshairColor: null,
       borderColor: null,
       presets: {},
+      pageSizesInMM: {
+        "A4 Portrait": { width: 210, height: 297 },
+        "A4 Landscape": { width: 297, height: 210 },
+        "Letter Portrait": { width: 215.9, height: 279.4 },
+        "Letter Landscape": { width: 279.4, height: 215.9 },
+      },
     },
 
     async init() {
@@ -71,21 +84,32 @@ document.addEventListener("DOMContentLoaded", () => {
         "click",
         window.LayoutToolPDF.generatePDF.bind(window.LayoutToolPDF)
       );
-      this.elements.frontImages.addEventListener("change", () => {
+
+      this.elements.frontImages.addEventListener("change", (event) => {
         this.ui.updateModeIndicator();
         this.ui.updateFileCount(
           this.elements.frontImages,
           this.elements.fileCount
         );
+        // If previewer is active, append the new files
+        if (this.elements.usePreviewer.checked) {
+            window.LayoutToolPDF.appendDataToPreviewer(event.target.files, 'fronts');
+        }
       });
-      this.elements.backImages.addEventListener("change", () => {
+
+      this.elements.backImages.addEventListener("change", (event) => {
         this.ui.updateModeIndicator();
         this.ui.updateFileCount(
           this.elements.backImages,
           this.elements.fileCountBack,
           true
         );
+        // If previewer is active, append the new files
+        if (this.elements.usePreviewer.checked) {
+            window.LayoutToolPDF.appendDataToPreviewer(event.target.files, 'backs');
+        }
       });
+
       this.elements.preset.addEventListener(
         "change",
         this.ui.applyPreset.bind(this)
@@ -117,9 +141,53 @@ document.addEventListener("DOMContentLoaded", () => {
         "change",
         this.ui.toggleModeUI.bind(this)
       );
+
+      this.elements.pageSize.addEventListener("change", () =>
+        this.ui.updatePageSizeInputs(
+          this.elements.pageSize,
+          this.elements.pageWidth,
+          this.elements.pageHeight
+        )
+      );
+
+      this.elements.foldable_pageSize.addEventListener("change", () =>
+        this.ui.updatePageSizeInputs(
+          this.elements.foldable_pageSize,
+          this.elements.foldable_pageWidth,
+          this.elements.foldable_pageHeight
+        )
+      );
+
+      this.elements.usePreviewer.addEventListener("change", this.ui.togglePreviewer.bind(this));
     },
 
     ui: {
+      updatePageSizeInputs(dropdown, widthInput, heightInput) {
+        const selectedSize = dropdown.value;
+        const customSize = "Custom";
+
+        if (selectedSize === customSize) {
+          widthInput.disabled = false;
+          heightInput.disabled = false;
+        } else {
+          const dimensions = LayoutToolUI.config.pageSizesInMM[selectedSize];
+          if (dimensions) {
+            widthInput.value = dimensions.width;
+            heightInput.value = dimensions.height;
+          }
+          widthInput.disabled = true;
+          heightInput.disabled = true;
+        }
+      },
+      togglePreviewer() {
+          const isChecked = LayoutToolUI.elements.usePreviewer.checked;
+          LayoutToolUI.elements.previewerContainer.style.display = isChecked ? "block" : "none";
+
+          if (isChecked) {
+              // When showing the previewer for the first time, send all current files
+              window.LayoutToolPDF.sendDataToPreviewer();
+          }
+      },
       toggleModeUI() {
         const isDoubleSided = LayoutToolUI.elements.doubleSidedRadio.checked;
         LayoutToolUI.elements.doubleSidedModeUI.style.display = isDoubleSided
@@ -323,7 +391,8 @@ document.addEventListener("DOMContentLoaded", () => {
       settings.imageWidth += settings.bleed * 2;
       settings.imageHeight += settings.bleed * 2;
 
-      settings.pageSize = this.elements.pageSize.value;
+      settings.pageWidth = parseFloat(this.elements.pageWidth.value);
+      settings.pageHeight = parseFloat(this.elements.pageHeight.value);
 
       return settings;
     },
@@ -365,7 +434,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      settings.pageSize = document.getElementById("foldable_pageSize").value;
+      settings.pageWidth = parseFloat(document.getElementById("foldable_pageWidth").value);
+      settings.pageHeight = parseFloat(document.getElementById("foldable_pageHeight").value);
 
       for (const key in settings) {
         if (

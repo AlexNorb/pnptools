@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Pair Manager</title>
+    <!-- Library for drag-and-drop reordering of front images -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <style>
+      /* *** CSS STYLES COMMENTARY ***
+    This section defines the visual structure and layout.
+    Key styles:
+    - .container: Centers the app and applies primary box styling.
+    - .upload-section: Uses a grid to align the front/back upload boxes.
+    - .control-panel: Centers the clear/reset buttons.
+    - .draggable-row, .fixed-row: Important for horizontal scrolling and synchronizing the front and back image rows.
+    - .pair-column: Defines the fixed size (150px width) of each image element.
+    - .placeholder-text: Styles for visual cues when images or backs are missing.
+    */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        color: #1a202c;
+        margin-bottom: 2rem;
+        font-size: 2rem;
+      }
+
+      .upload-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .control-panel {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-bottom: 2.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .control-panel button {
+        padding: 0.75rem 1.25rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: none;
+      }
+
+      .clear-btn-front {
+        background: #fefcbf;
+        color: #975a16;
+        border: 2px solid #ecc94b;
+      }
+      .clear-btn-front:hover {
+        background: #faf089;
+      }
+
+      .clear-btn-back {
+        background: #feebc8;
+        color: #975a16;
+        border: 2px solid #f6ad55;
+      }
+      .clear-btn-back:hover {
+        background: #f6e0b5;
+      }
+
+      .clear-btn-all {
+        background: #feb2b2;
+        color: #c53030;
+        border: 2px solid #f56565;
+      }
+      .clear-btn-all:hover {
+        background: #fc8181;
+      }
+
+      .upload-box {
+        border: 3px dashed #cbd5e0;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .upload-box:hover {
+        border-color: #667eea;
+        background: #f7fafc;
+      }
+
+      .upload-box svg {
+        width: 60px;
+        height: 60px;
+        color: #a0aec0;
+        margin-bottom: 1rem;
+      }
+
+      .upload-box label {
+        display: block;
+        cursor: pointer;
+        font-weight: 600;
+        color: #2d3748;
+      }
+
+      .image-count-indicator {
+        margin-top: 1rem;
+        padding: 0.5rem;
+        background: #e6fffa;
+        color: #319795;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+
+      .preview-section h2 {
+        color: #2d3748;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+      }
+
+      /* Default Info Box Style (Used for working modes: Same Back, Unique Backs, NO BACKS) */
+      .info-box {
+        background: #ebf8ff;
+        border-left: 4px solid #4299e1;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        color: #2c5282;
+      }
+
+      /* Invalid Configuration Style (Used for error state: Orphaned Backs or Mismatched Counts) */
+      .info-box.invalid {
+        background: #fff5f5;
+        border-left-color: #c53030;
+        color: #9b2c2c;
+      }
+
+      .pairs-container {
+        margin-bottom: 2rem;
+      }
+
+      .draggable-row,
+      .fixed-row {
+        /* Key to allowing horizontal scrolling */
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.5rem;
+        /* Hide scrollbars for cleaner look */
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      .draggable-row::-webkit-scrollbar,
+      .fixed-row::-webkit-scrollbar {
+        display: none;
+      }
+
+      .pair-column {
+        /* Key to placing elements side-by-side without wrapping */
+        display: inline-block;
+        margin-right: 1rem;
+        vertical-align: top;
+        white-space: normal;
+      }
+
+      .pair-number {
+        /* Drag handle for Sortable.js */
+        width: 36px;
+        height: 36px;
+        background: #48bb78;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        flex-shrink: 0;
+        font-size: 0.875rem;
+        cursor: move;
+        transition: all 0.3s;
+      }
+
+      .pair-column.placeholder-front .pair-number {
+        background: #a0aec0;
+        cursor: default;
+      }
+
+      .draggable-section,
+      .fixed-section {
+        border-radius: 0.5rem;
+        overflow: hidden;
+        width: 150px;
+        height: 250px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+      }
+
+      .draggable-section {
+        /* Front image row is styled differently to denote interactivity (dragging) */
+        border: 2px solid #48bb78;
+        cursor: default;
+        transition: all 0.3s;
+      }
+
+      .pair-column.placeholder-front .draggable-section {
+        border: 2px solid #a0aec0;
+      }
+
+      .draggable-section:hover {
+        box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+        border-color: #38a169;
+      }
+
+      .fixed-section {
+        /* Back image row */
+        border: 2px solid #a0aec0;
+        justify-content: center;
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: #f0fff4;
+        border-bottom: 1px solid #c6f6d5;
+        flex-shrink: 0;
+      }
+
+      .pair-column.placeholder-front .controls {
+        background: #e2e8f0;
+        border-bottom-color: #cbd5e0;
+      }
+
+      .drag-handle {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+      }
+
+      .image-preview {
+        width: 100%;
+        height: 150px;
+        object-fit: contain;
+        display: block;
+        background: #f7fafc;
+        flex-grow: 1;
+      }
+
+      .placeholder-text {
+        width: 100%;
+        height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f7fafc;
+        color: #a0aec0;
+        font-size: 0.875rem;
+        text-align: center;
+        padding: 1rem;
+        flex-grow: 1;
+      }
+
+      /* Error state: front is missing but a back exists (Orphaned Backs) */
+      .placeholder-text.front-missing {
+        background: #fed7d7;
+        color: #c53030;
+        font-weight: bold;
+        height: 100%;
+      }
+
+      /* Warning state: back is missing when it should exist (in INVALID or UNIQUE_BACKS mode) */
+      .placeholder-text.back-missing {
+        background: #ffeccf;
+        color: #dd6b20;
+        font-weight: 600;
+      }
+
+      /* Indicator for the shared back in SAME_BACK mode */
+      .placeholder-text.shared-back {
+        height: 30px;
+        background: #e0f2f1;
+        color: #00796b;
+        font-weight: bold;
+      }
+
+      .image-preview.shared-back-image {
+        height: 120px;
+      }
+
+      .copies-control input {
+        width: 3rem;
+        text-align: center;
+        border: 1px solid #ccc;
+        border-radius: 0.25rem;
+        padding: 0.25rem;
+      }
+
+      .copies-control input:disabled {
+        background: #f7fafc;
+      }
+
+      .delete-btn {
+        padding: 0.25rem 0.5rem;
+        background: #fff5f5;
+        color: #c53030;
+        border: none;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        transition: background 0.3s;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      .delete-btn:disabled {
+        background: #f7fafc;
+        color: #a0aec0;
+        cursor: not-allowed;
+      }
+
+      .finalize-button {
+        width: 100%;
+        padding: 1.25rem;
+        background: #48bb78;
+        color: white;
+        border: none;
+        border-radius: 0.75rem;
+        font-size: 1.125rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s;
+        box-shadow: 0 4px 14px rgba(72, 187, 120, 0.4);
+        margin-top: 2rem;
+      }
+
+      .finalize-button:hover:not(:disabled) {
+        background: #38a169;
+      }
+
+      .finalize-button:disabled {
+        background: #cbd5e0;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #718096;
+      }
+
+      .sortable-ghost {
+        opacity: 0.5;
+        background: #edf2f7;
+      }
+
+      input[type="file"] {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Image Pair Manager</h1>
+
+      <!-- Upload Section: Handles File Input -->
+      <div class="upload-section">
+        <div
+          class="upload-box"
+          onclick="document.getElementById('frontInput').click()"
+        >
+          <!-- SVG Icon -->
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+            ></path>
+          </svg>
+          <label>Upload Front Images (Append)</label>
+          <input type="file" id="frontInput" accept="image/*" multiple />
+          <div id="frontCountIndicator" class="image-count-indicator"></div>
+        </div>
+
+        <div
+          class="upload-box"
+          onclick="document.getElementById('backInput').click()"
+        >
+          <!-- SVG Icon -->
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+            ></path>
+          </svg>
+          <label>Upload Back Images (Append)</label>
+          <input type="file" id="backInput" accept="image/*" multiple />
+          <div id="backCountIndicator" class="image-count-indicator"></div>
+        </div>
+      </div>
+
+      <!-- Control Panel: Clear/Reset buttons for state management -->
+      <div class="control-panel">
+        <button class="clear-btn-front" onclick="clearFronts()">
+          Clear Fronts
+        </button>
+        <button class="clear-btn-back" onclick="clearBacks()">
+          Clear Backs
+        </button>
+        <button class="clear-btn-all" onclick="clearAll()">Clear All</button>
+      </div>
+
+      <!-- Preview Section: Hidden until content is loaded -->
+      <div id="previewSection" style="display: none">
+        <h2>Image Pairs Preview</h2>
+        <!-- Mode Info Box: Displays the current operating mode and validation status (VALID, NO_BACKS, INVALID) -->
+        <div id="modeInfo" class="info-box"></div>
+        <!-- Pairs Container: Holds the draggable front row and the fixed back row (if visible) -->
+        <div id="pairsContainer" class="pairs-container"></div>
+        <!-- Finalize Button: Disabled unless a valid mode (Same Back or Unique Backs) is active -->
+        <button class="finalize-button" id="finalizeButton" disabled>
+          Finalize Image Pairs
+        </button>
+      </div>
+
+      <!-- Empty State: Visible when no images are loaded -->
+      <div id="emptyState" class="empty-state">
+        <p>Upload front and back images to get started.</p>
+      </div>
+    </div>
+
+    <script>
+      // --- CONSTANTS AND STATE MANAGEMENT ---
+
+      // Constants used internally to identify missing image slots
+      const PLACEHOLDER_FRONT = "MISSING_FRONT_PLACEHOLDER";
+      const PLACEHOLDER_BACK = "MISSING_BACK_PLACEHOLDER";
+
+      // Core application state
+      const state = {
+        fronts: [], // Array of Base64 strings for all loaded front images
+        backs: [], // Array of Base64 strings for all loaded back images
+        copies: [], // Array of integers defining the copy count for each front image (index matches state.fronts)
+      };
+
+      let sortableInstance = null; // Reference to the Sortable.js instance
+
+      // --- UTILITY FUNCTIONS ---
+
+      /**
+       * Converts a File object to a Base64 data URL for display and storage.
+       * @param {File} file
+       * @returns {Promise<string>} Base64 string
+       */
+      function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      /**
+       * Handles front image file uploads, appending them to state.fronts and initializing copies.
+       */
+      async function handleFrontUpload(event) {
+        const files = Array.from(event.target.files);
+        if (files.length === 0) return;
+        const base64Images = await Promise.all(files.map(fileToBase64));
+
+        // Append new images and set default copy count (1) for each new front
+        state.fronts.push(...base64Images);
+        state.copies.push(...base64Images.map(() => 1));
+
+        event.target.value = ""; // Clear file input
+        updateUI(); // Rerender UI
+      }
+
+      /**
+       * Handles back image file uploads, appending them to state.backs.
+       */
+      async function handleBackUpload(event) {
+        const files = Array.from(event.target.files);
+        if (files.length === 0) return;
+        const base64Images = await Promise.all(files.map(fileToBase64));
+
+        state.backs.push(...base64Images);
+
+        event.target.value = "";
+        updateUI();
+      }
+
+      // --- CLEAR FUNCTIONS (State Reset) ---
+
+      function clearFronts() {
+        if (state.fronts.length === 0) return;
+        state.fronts = [];
+        state.copies = [];
+        updateUI();
+      }
+
+      function clearBacks() {
+        if (state.backs.length === 0) return;
+        state.backs = [];
+        updateUI();
+      }
+
+      function clearAll() {
+        if (state.fronts.length === 0 && state.backs.length === 0) return;
+        state.fronts = [];
+        state.backs = [];
+        state.copies = [];
+        updateUI();
+      }
+
+      // --- CORE LOGIC: MODE DETERMINATION ---
+
+      /**
+       * Determines the current configuration mode based on the counts of fronts and backs.
+       * This logic dictates UI behavior (info text, button enable/disable) and finalization.
+       * @returns {string} The current mode name ('EMPTY', 'NO_BACKS', 'SAME_BACK', 'UNIQUE_BACKS', or 'INVALID').
+       */
+      function getCurrentMode() {
+        const frontLength = state.fronts.length;
+        const backLength = state.backs.length;
+
+        if (frontLength === 0 && backLength === 0) return "EMPTY";
+
+        // NO_BACKS: A valid, non-finalizable working state where the back row is hidden.
+        if (frontLength > 0 && backLength === 0) return "NO_BACKS";
+
+        // SAME_BACK: Valid finalization mode (F > 0, B = 1).
+        if (frontLength > 0 && backLength === 1) return "SAME_BACK";
+
+        // UNIQUE_BACKS: Valid finalization mode (F = B, F > 0).
+        if (frontLength > 0 && frontLength === backLength)
+          return "UNIQUE_BACKS";
+
+        // INVALID: Any other state (e.g., Orphaned Backs F=0, B>0 or Mismatched F>B>1).
+        return "INVALID";
+      }
+
+      // --- DISPLAY LOGIC: PAIR GENERATION ---
+
+      /**
+       * Generates a temporary list of pairs for rendering the UI rows.
+       * It uses placeholders for missing images in invalid/non-1:1 configurations.
+       */
+      function getDisplayPairs() {
+        const frontLength = state.fronts.length;
+        const backLength = state.backs.length;
+
+        // The number of columns to render is the max of fronts and backs loaded.
+        const maxLength = Math.max(frontLength, backLength);
+
+        const isSameBackMode = getCurrentMode() === "SAME_BACK";
+
+        const displayPairs = [];
+
+        if (maxLength === 0) return [];
+
+        for (let i = 0; i < maxLength; i++) {
+          const frontImage = state.fronts[i] || PLACEHOLDER_FRONT;
+          let backImage;
+
+          if (isSameBackMode) {
+            // In Same Back Mode, the first (and only) back image is used for all front slots.
+            backImage = state.backs[0];
+          } else {
+            // In other modes (UNIQUE_BACKS, INVALID), we try to match by index.
+            backImage = state.backs[i] || PLACEHOLDER_BACK;
+          }
+
+          const copies = state.copies[i] || 1;
+          const isFrontPlaceholder = frontImage === PLACEHOLDER_FRONT;
+
+          displayPairs.push({
+            front: frontImage,
+            back: backImage,
+            copies: copies,
+            index: i,
+            isFrontPlaceholder: isFrontPlaceholder,
+            isBackPlaceholder: backImage === PLACEHOLDER_BACK,
+          });
+        }
+        return displayPairs;
+      }
+
+      // --- INTERACTION LOGIC ---
+
+      /**
+       * Deletes a specific front image, its copy count, and conditionally deletes the corresponding back image.
+       * @param {number} index - Index of the pair to delete.
+       */
+      function deletePair(index) {
+        const initialMode = getCurrentMode();
+
+        // 1. Always delete the front image and its configuration
+        state.fronts.splice(index, 1);
+        state.copies.splice(index, 1);
+
+        // 2. Delete the back image only if we were in the UNIQUE_BACKS mode (1:1 mapping).
+        // In SAME_BACK or NO_BACKS, we do not delete from the backs array.
+        if (initialMode === "UNIQUE_BACKS") {
+          state.backs.splice(index, 1);
+        }
+
+        // 3. Cleanup: If all fronts are gone, remove all remaining backs (prevents Orphaned Backs persistence).
+        if (state.fronts.length === 0 && state.backs.length > 0) {
+          state.backs = [];
+        }
+
+        updateUI();
+      }
+
+      /**
+       * Updates the number of copies for a specific front image.
+       * @param {number} index - Index of the front image.
+       * @param {string} value - New copy count (as string from input).
+       */
+      function updateCopies(index, value) {
+        state.copies[index] = parseInt(value) || 1;
+        updateUI();
+      }
+
+      // --- RENDERING & SYNCHRONIZATION ---
+
+      /**
+       * Initializes Sortable.js on the front image row to enable drag-and-drop reordering.
+       */
+      function initializeSortable(pairs) {
+        if (sortableInstance) {
+          sortableInstance.destroy();
+          sortableInstance = null;
+        }
+
+        if (state.fronts.length === 0) return;
+
+        const draggableRow = document.getElementById("draggableRow");
+        if (!draggableRow) return;
+
+        sortableInstance = Sortable.create(draggableRow, {
+          animation: 150,
+          handle: ".pair-number", // Only the number bubble triggers drag
+          ghostClass: "sortable-ghost",
+
+          onEnd: function (evt) {
+            // IMPORTANT: Reorder state.fronts AND state.copies arrays together to maintain synchronization
+            const movedFront = state.fronts.splice(evt.oldIndex, 1)[0];
+            const movedCopies = state.copies.splice(evt.oldIndex, 1)[0];
+
+            state.fronts.splice(evt.newIndex, 0, movedFront);
+            state.copies.splice(evt.newIndex, 0, movedCopies);
+
+            updateUI();
+          },
+        });
+      }
+
+      /**
+       * Sets up event listeners to ensure the horizontal scroll position of the front and back rows are synchronized.
+       */
+      function setupScrollSync() {
+        const draggableRow = document.getElementById("draggableRow");
+        const fixedRow = document.getElementById("fixedRow");
+
+        if (!draggableRow || !fixedRow) return;
+
+        // Clear previous listeners to avoid memory leaks on re-render
+        draggableRow.onscroll = null;
+        fixedRow.onscroll = null;
+
+        // Synchronize scrolls
+        draggableRow.onscroll = () => {
+          fixedRow.scrollLeft = draggableRow.scrollLeft;
+        };
+
+        fixedRow.onscroll = () => {
+          draggableRow.scrollLeft = fixedRow.scrollLeft;
+        };
+      }
+
+      /**
+       * Renders the HTML structure for the front and back image rows into the container.
+       * @param {string} mode - Current operating mode.
+       * @param {Array<Object>} pairs - Data structure for rendering.
+       */
+      function renderPairs(mode, pairs) {
+        const container = document.getElementById("pairsContainer");
+        const isSameBack = mode === "SAME_BACK";
+
+        // --- Render Draggable Row (Fronts) ---
+        const draggableRowContent = pairs
+          .map((pair, index) => {
+            const isFrontPlaceholder = pair.isFrontPlaceholder;
+            // Conditional content for front image or orphaned back placeholder
+            const frontContent = isFrontPlaceholder
+              ? `<div class="placeholder-text front-missing">MISSING FRONT (Image B[${index}] is Orphaned)</div>`
+              : `<img src="${pair.front}" alt="Front ${
+                  index + 1
+                }" class="image-preview">`;
+
+            const dragHandle = isFrontPlaceholder
+              ? `<div class="pair-number" title="Cannot drag missing front">${
+                  index + 1
+                }</div>`
+              : `<div class="pair-number" title="Drag to reorder">${
+                  index + 1
+                }</div>`;
+
+            return `
+          <div class="pair-column ${
+            isFrontPlaceholder ? "placeholder-front" : ""
+          }">
+            <div class="draggable-section">
+              <div class="controls">
+                <div class="drag-handle">${dragHandle}</div>
+                <div class="copies-control">
+                  <input type="number" min="1" value="${pair.copies}" 
+                         onchange="updateCopies(${index}, this.value);"
+                         title="Number of copies"
+                         ${isFrontPlaceholder ? "disabled" : ""}>
+                </div>
+                <button class="delete-btn" onclick="deletePair(${index})" title="Delete this pair" ${
+              isFrontPlaceholder ? "disabled" : ""
+            }>Delete</button>
+              </div>
+              ${frontContent}
+            </div>
+          </div>
+        `;
+          })
+          .join("");
+
+        // --- Render Fixed Row (Backs) ---
+        let fixedRowContent = "";
+
+        // CRITICAL LOGIC: Only render the back row if at least one back image is loaded.
+        // This hides the entire row in the 'NO_BACKS' mode (F>0, B=0).
+        if (state.backs.length > 0) {
+          fixedRowContent = pairs
+            .map((pair, index) => {
+              let backContent;
+              if (pair.isBackPlaceholder) {
+                // Warning placeholder for general missing/invalid back (e.g., in INVALID mode F=5, B=3)
+                backContent = `<div class="placeholder-text back-missing">MISSING BACK (Image F[${index}] has no Back)</div>`;
+              } else if (isSameBack) {
+                // If in SAME_BACK mode, show the shared back text and the single image
+                backContent = `
+              <div class="placeholder-text shared-back">(Shared Back)</div>
+              <img src="${pair.back}" alt="Shared Back" class="image-preview shared-back-image">
+            `;
+              } else {
+                // UNIQUE_BACKS or INVALID
+                backContent = `<img src="${pair.back}" alt="Back ${
+                  index + 1
+                }" class="image-preview">`;
+              }
+
+              return `
+            <div class="pair-column">
+              <div class="fixed-section">
+                ${backContent}
+              </div>
+            </div>
+          `;
+            })
+            .join("");
+
+          // Wrap the back content in the fixed row container
+          fixedRowContent = `<div class="fixed-row" id="fixedRow">${fixedRowContent}</div>`;
+        }
+
+        // Inject both rows into the main container
+        container.innerHTML = `
+        <div class="draggable-row" id="draggableRow">${draggableRowContent}</div>
+        ${fixedRowContent}
+      `;
+
+        initializeSortable(pairs);
+        setupScrollSync();
+      }
+
+      /**
+       * Executes the final data generation process.
+       * Only runs if the current mode is a finalizable configuration.
+       */
+      function finalize() {
+        const mode = getCurrentMode();
+
+        // Check for valid finalization modes
+        const validModes = ["SAME_BACK", "UNIQUE_BACKS"];
+
+        if (!validModes.includes(mode)) {
+          alert(
+            "Cannot finalize: Image configuration is not in a finalizable mode. Please check the info box for required configurations."
+          );
+          return [];
+        }
+
+        // Generate final output data, including copies
+        const finalData = [];
+        const isSameBack = mode === "SAME_BACK";
+        const backImageForSameMode = isSameBack ? state.backs[0] : null;
+
+        state.fronts.forEach((frontImage, i) => {
+          const copies = state.copies[i] || 1;
+
+          let backImage;
+          if (isSameBack) {
+            backImage = backImageForSameMode;
+          } else {
+            // UNIQUE_BACKS
+            backImage = state.backs[i];
+          }
+
+          for (let c = 0; c < copies; c++) {
+            finalData.push({
+              uniquePosition: i,
+              copyNumber: c + 1,
+              frontImage: frontImage,
+              backImage: backImage,
+            });
+          }
+        });
+
+        console.log("Finalized data:", finalData);
+        console.log(`Finalized Mode: ${mode}`);
+        console.log(
+          `Total pairs in output: ${finalData.length} (from ${state.fronts.length} unique pairings)`
+        );
+
+        alert(
+          `Finalized ${finalData.length} total image pairs from ${state.fronts.length} unique pairings! Mode: ${mode}. Check console for details.`
+        );
+
+        return finalData;
+      }
+
+      // --- MAIN UI RENDER LOOP ---
+
+      /**
+       * The main function responsible for updating all UI elements based on the current application state.
+       * It handles: scroll position, mode determination, element visibility, and rendering.
+       */
+      function updateUI() {
+        const mode = getCurrentMode();
+        const pairs = getDisplayPairs();
+
+        // 1. Save current scroll position before re-rendering (prevents screen jump)
+        const draggableRow = document.getElementById("draggableRow");
+        const scrollLeft = draggableRow ? draggableRow.scrollLeft : 0;
+
+        // 2. Update Image Count Indicators
+        document.getElementById(
+          "frontCountIndicator"
+        ).textContent = `${state.fronts.length} Front(s) Loaded`;
+        document.getElementById(
+          "backCountIndicator"
+        ).textContent = `${state.backs.length} Back(s) Loaded`;
+
+        const hasContent = state.fronts.length > 0 || state.backs.length > 0;
+
+        // 3. Control section visibility (Empty State vs. Preview)
+        const previewSection = document.getElementById("previewSection");
+        const emptyState = document.getElementById("emptyState");
+
+        if (hasContent) {
+          previewSection.style.display = "block";
+          emptyState.style.display = "none";
+        } else {
+          previewSection.style.display = "none";
+          emptyState.style.display = "block";
+        }
+
+        const finalizeButton = document.getElementById("finalizeButton");
+        const modeInfo = document.getElementById("modeInfo");
+
+        // 4. Handle Mode Display and Validation
+        const validFinalizableModes = ["SAME_BACK", "UNIQUE_BACKS"];
+        const isFinalizable = validFinalizableModes.includes(mode);
+
+        // Set button state and remove error styling by default
+        finalizeButton.disabled = !isFinalizable;
+        modeInfo.classList.remove("invalid");
+        let modeDescription = "";
+
+        // Define mode descriptions for the info box
+        if (mode === "EMPTY") {
+          modeDescription = "Upload front and back images to get started.";
+        } else if (mode === "NO_BACKS") {
+          // Working mode: Back row is hidden, informative blue style.
+          modeDescription = `<strong>WORKING MODE:</strong> "No back mode." ${state.fronts.length} front images loaded. The back image row is hidden until back images are uploaded.`;
+        } else if (mode === "SAME_BACK") {
+          modeDescription = `<strong>VALID MODE:</strong> "Same back." The single back image will be paired with all ${state.fronts.length} front images.`;
+        } else if (mode === "UNIQUE_BACKS") {
+          modeDescription = `<strong>VALID MODE:</strong> "Unique back." ${state.fronts.length} 1:1 pairs created.`;
+        } else if (mode === "INVALID") {
+          // Error state: Show red invalid box
+          modeInfo.classList.add("invalid");
+          modeDescription = `
+            <strong>INVALID CONFIGURATION:</strong> Cannot finalize with ${state.fronts.length} front image(s) and ${state.backs.length} back image(s). 
+            Please adjust images to match one of the valid finalization modes:
+            <ul style="margin-top: 0.5rem; margin-left: 1.5rem; text-align: left;">
+              <li>Mode 2: Fronts > 0, Backs = 1 (Shared Back)</li>
+              <li>Mode 3: Fronts = Backs ($F>0$) (Unique Backs)</li>
+            </ul>
+          `;
+        }
+
+        modeInfo.innerHTML = modeDescription;
+
+        // 5. Render Pairs if content exists
+        if (hasContent) {
+          renderPairs(mode, pairs);
+
+          // 6. Restore scroll position after re-rendering
+          const newDraggableRow = document.getElementById("draggableRow");
+          if (newDraggableRow) {
+            newDraggableRow.scrollLeft = scrollLeft;
+          }
+
+          // 7. Update Finalize Button Text with copy counts
+          const totalCopies = state.copies.reduce(
+            (sum, count) => sum + count,
+            0
+          );
+          const uniqueCount = state.fronts.length;
+          finalizeButton.textContent = `Finalize ${uniqueCount} Unique Pairings (${totalCopies} total pairs)`;
+        }
+      }
+
+      // --- INITIALIZATION ---
+      document
+        .getElementById("frontInput")
+        .addEventListener("change", handleFrontUpload);
+      document
+        .getElementById("backInput")
+        .addEventListener("change", handleBackUpload);
+      document
+        .getElementById("finalizeButton")
+        .addEventListener("click", finalize);
+
+      // Initial UI render on load
+      updateUI();
+    </script>
+  </body>
+</html>
