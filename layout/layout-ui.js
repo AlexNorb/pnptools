@@ -298,6 +298,8 @@ document.addEventListener("DOMContentLoaded", () => {
       updateProgress(data) {
         const { progress, done, all } = data;
         if (all > 0) {
+          // setting to display bar as not full when reaching saving step
+          // LayoutToolUI.elements.progressBar.max = 120;
           LayoutToolUI.elements.progressBar.value = progress;
           LayoutToolUI.elements.progressStatus.textContent = `Processing ${done} / ${all}... (${progress}%)`;
         } else {
