@@ -121,6 +121,7 @@ async function createPDF(frontImages, backImages, settings, config) {
 
   const deduplicationLUT = {};
   const getOrEmbedImage = async (imageAsDataUrl) => {
+    if (!imageAsDataUrl) return;
     if (!deduplicationLUT[imageAsDataUrl]) {
       let embeddedImage;
       if (imageAsDataUrl.startsWith("data:image/png;base64,")) {

@@ -699,6 +699,7 @@ if (typeof importScripts === "function") {
 
     const deduplicationLUT = {};
     const lookupCard = async (card) => {
+      if (!card) return;
       if (!deduplicationLUT[card]) {
         if (card.startsWith("data:image/png;base64,")) {
           deduplicationLUT[card] = await pdfDoc.embedPng(card);
