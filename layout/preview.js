@@ -75,12 +75,19 @@ function compileFinalData() {
 
     for (let c = 0; c < copies; c++) {
       frontImageUrls.push(frontImage);
-      // Add the corresponding back image for each copy of the front
-      backImageUrls.push(backImage);
+      // Only add to backImageUrls if there is a back image.
+      // This ensures that in "no back" mode, the array remains empty.
+      if (backImage) {
+        backImageUrls.push(backImage);
+      }
     }
   });
 
-  return { frontImages: frontImageUrls, backImages: backImageUrls };
+  // In "no back" mode, backImageUrls will be empty, which is the expected format.
+  return {
+    frontImages: frontImageUrls,
+    backImages: backImageUrls.length > 0 ? backImageUrls : [],
+  };
 }
 
 // --- CLEAR FUNCTIONS (State Reset) ---
