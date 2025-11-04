@@ -97,6 +97,8 @@ document.addEventListener("DOMContentLoaded", () => {
           this.ui.applyPreset.call(this); // Apply the preset first
         }
         this.ui.applySettings.call(this, lastUsedSettings); // Then apply the user's modifications
+        this.ui.toggleModeUI();
+        this.ui.togglePreviewer();
       }
 
       this.elements.generatePdfButton.addEventListener("click", () => {
@@ -475,9 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 LayoutToolUI.elements.foldable_cardHeight
               );
             }
-            if (key === "doubleSided" || key === "foldable") {
-              this.ui.toggleModeUI();
-            }
+
           }
         }
       },
