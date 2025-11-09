@@ -136,7 +136,7 @@ async function createPDF(frontImages, backImages, settings, config) {
     return deduplicationLUT[imageAsDataUrl];
   };
 
-  const mmToPt = 72 / 25.4;
+  const mmToPt = 2.83464567;
   const pageWidth = settings.pageWidth * mmToPt;
   const pageHeight = settings.pageHeight * mmToPt;
 

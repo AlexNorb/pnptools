@@ -114,7 +114,7 @@ if (typeof importScripts === "function") {
   ) => {
     if (!page) return;
 
-    const mmFactor = 72 / 25.4;
+    const mmFactor = 2.83464567;
 
     const cardWidthDoc = cardWidth * mmFactor;
     const cardHeightDoc = cardHeight * mmFactor;
@@ -421,7 +421,7 @@ if (typeof importScripts === "function") {
     const foldLinePreference = withDefault(options.foldLinePreference, "auto");
     const allowMultipleRows = withDefault(options.allowMultipleRows, true);
 
-    const mmFactor = 72 / 25.4;
+    const mmFactor = 2.83464567;
     const pageWidth = options.pageWidth * mmFactor;
     const pageHeight = options.pageHeight * mmFactor;
 
@@ -646,7 +646,7 @@ if (typeof importScripts === "function") {
 
     const title = withDefault(options.title, "Layout PDF");
 
-    const mmFactor = 72 / 25.4;
+    const mmFactor = 2.83464567;
     const pageWidth = options.pageWidth * mmFactor;
     const pageHeight = options.pageHeight * mmFactor;
 
