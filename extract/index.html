@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>PDF → Extract Unique Images (client-side)</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <!-- Basic styling for the tool -->
+    <style>
+      body {
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        margin: 18px;
+        color: #111;
+        background-color: #fdfdfd;
+      }
+      h1 {
+        margin: 0 0 12px 0;
+        font-size: 1.75rem;
+        color: #222;
+      }
+
+      /* Global Control Styling */
+      .main-actions,
+      .controls.configuration-group {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 12px;
+        background-color: #f5f5f5;
+        border-radius: 8px;
+      }
+      .main-actions {
+        margin-bottom: 8px;
+      }
+      .controls.configuration-group {
+        margin-top: 8px;
+        margin-bottom: 12px;
+        /* Ensure utility buttons like Clear All/Log align properly in configuration group */
+        justify-content: flex-start;
+      }
+
+      /* Full Width Button for Toggles and Results Button */
+      .full-width-btn {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+        margin: 8px 0;
+        font-weight: 500;
+      }
+
+      /* Default Blue Button (for loading/utility/thumbnail toggle when enabled) */
+      label.button,
+      button.button {
+        display: inline-block;
+        padding: 10px 14px;
+        background: #0077cc; /* Default Blue */
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s ease, opacity 0.2s ease;
+        font-size: 1rem;
+        font-weight: 500;
+        border: none;
+        line-height: 1;
+        text-decoration: none;
+      }
+      label.button:hover,
+      button.button:hover:not(:disabled) {
+        background: #005fa3;
+      }
+      button.button:disabled {
+        background: #ccc !important;
+        cursor: not-allowed;
+      }
+
+      /* Green Primary Button (for Extract/Save All) */
+      .button.primary-green {
+        background: #10b981; /* Emerald Green */
+        min-width: 150px;
+      }
+      .button.primary-green:hover:not(:disabled) {
+        background: #059669;
+      }
+
+      /* Small Utility Buttons (Clear Log/Clear All/Toggle Thumbs when disabled) */
+      button.small,
+      a.small {
+        padding: 6px 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background: white;
+        cursor: pointer;
+        font-size: 12px;
+        color: #333;
+        text-decoration: none;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+      }
+      button.small:hover:not(:disabled),
+      a.small:hover {
+        background-color: #f0f0f0;
+        border-color: #bbb;
+      }
+      button.small:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* Standard text input styling */
+      .text-input {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: border-color 0.2s ease, background-color 0.2s ease;
+        line-height: 1;
+        width: 150px;
+      }
+      .text-input:focus:not(:disabled) {
+        border-color: #0077cc;
+        outline: none;
+      }
+      .text-input:disabled {
+        background-color: #eee;
+        cursor: not-allowed;
+      }
+
+      /* This rule hides the file input */
+      input[type="file"] {
+        display: none;
+      }
+
+      /* Status styling and container for the progress bar */
+      .status-container {
+        margin-top: 8px;
+        margin-bottom: 12px;
+        min-height: 2em;
+      }
+      .progress-text {
+        color: #555;
+        font-weight: 500;
+        padding: 4px 0;
+        min-height: 1.2em;
+        display: flex;
+        align-items: center;
+      }
+
+      /* --- PROGRESS BAR STYLES (MODIFIED FOR DETERMINISTIC PROGRESS) --- */
+      #pageProgressBar {
+        height: 5px;
+        background-color: #e0e0e0;
+        border-radius: 2.5px;
+        overflow: hidden;
+        margin-top: 4px;
+        display: none; /* Hidden by default */
+      }
+      #progressBarFill {
+        height: 100%;
+        background-color: #0077cc;
+        width: 0%; /* Start at 0% now */
+        transition: width 0.3s ease-out; /* Smooth transition for updates */
+      }
+
+      /* Results Bar Styles (Simplified: just a wrapper for the full-width button) */
+      .results-bar {
+        padding: 12px 0;
+        margin-top: 12px;
+        margin-bottom: 12px;
+      }
+
+      /* Collapsible Thumbnail Section Styles */
+      .thumbnail-section {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #eee;
+      }
+
+      /* Grid layout for image thumbnails */
+      .images {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+        margin-top: 14px;
+      }
+      .thumb {
+        border: 1px solid #ddd;
+        padding: 8px;
+        border-radius: 8px;
+        background: #fafafa;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+      }
+      .thumb img {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 4px;
+        background-color: #eee;
+        min-height: 100px;
+      }
+      .thumb .meta {
+        font-size: 12px;
+        margin-top: 8px;
+        display: flex;
+        flex-direction: column; /* Stack controls vertically for clarity */
+        gap: 6px;
+        justify-content: flex-start;
+        align-items: flex-start;
+      }
+
+      /* Style for the Name/Resolution Row in the thumbnail */
+      .thumb .meta .row {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+      .thumb .meta .filename {
+        word-break: break-all;
+        flex-grow: 1;
+        font-weight: 500;
+      }
+      .thumb .meta .resolution {
+        font-weight: bold;
+        color: #0077cc;
+      }
+      .thumb .meta .controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 4px;
+      }
+      .thumb .meta .controls label {
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+      }
+
+      footer {
+        margin-top: 18px;
+        font-size: 13px;
+        color: #666;
+        border-top: 1px solid #eee;
+        padding-top: 12px;
+      }
+      /* Loading spinner animation */
+      .spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid #ccc;
+        border-top-color: #0077cc;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        vertical-align: middle;
+        margin-right: 6px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* --- LOG STYLES --- */
+      #logContainer {
+        margin-top: 18px;
+        margin-bottom: 8px;
+      }
+      #logContainer h2 {
+        font-size: 1.2rem;
+        margin-bottom: 8px;
+      }
+      pre#logOutput {
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px;
+        max-height: 250px;
+        overflow-y: auto;
+        font-family: monospace;
+        font-size: 13px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+      .log-warn {
+        color: #a66a00;
+      }
+      .log-error {
+        color: #c00;
+        font-weight: bold;
+      }
+      .log-filter {
+        color: #005fa3;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>PDF → Extract Unique Images (client-side)</h1>
+
+    <!-- Main Actions: File Input and Extract Button -->
+    <div class="main-actions">
+      <label class="button" for="fileInput"> Select PDF File </label>
+      <input id="fileInput" type="file" accept="application/pdf" />
+
+      <button id="extractBtn" class="button primary-green" disabled>
+        Extract Images
+      </button>
+    </div>
+
+    <!-- Toggle for Configurations -->
+    <button id="toggleConfigBtn" class="small full-width-btn">
+      Show Advanced Configuration
+    </button>
+
+    <!-- Configuration Container (HIDDEN BY DEFAULT) -->
+    <div id="configContainer" style="display: none">
+      <div class="controls configuration-group">
+        <!-- Page Range Controls -->
+        <div class="opts page-range-controls">
+          <input type="checkbox" id="allPagesToggle" checked />
+          <label for="allPagesToggle">All Pages</label>
+          <input
+            type="text"
+            id="pageRangeInput"
+            placeholder="e.g., 1, 3, 5-9"
+            disabled
+            class="text-input"
+          />
+        </div>
+
+        <!-- Quality Control -->
+        <div class="opts">
+          <label
+            >JPEG quality
+            <!-- DEFAULT VALUE CHANGED TO 1 (1.0) -->
+            <input
+              id="quality"
+              type="range"
+              min="0.4"
+              max="1"
+              step="0.05"
+              value="1"
+              style="vertical-align: middle; margin-left: 8px"
+            />
+          </label>
+          <!-- DEFAULT DISPLAY VALUE CHANGED TO 1.00 -->
+          <label style="font-size: 13px; margin-left: 6px" id="qualityVal"
+            >1.00</label
+          >
+        </div>
+
+        <!-- Output Format Controls -->
+        <div class="opts output-format-controls">
+          <label>Format:</label>
+          <input
+            type="radio"
+            id="formatJpeg"
+            name="outputFormat"
+            value="image/jpeg"
+            checked
+          />
+          <label for="formatJpeg">JPG</label>
+          <input
+            type="radio"
+            id="formatPng"
+            name="outputFormat"
+            value="image/png"
+          />
+          <label for="formatPng">PNG</label>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="opts filter-controls">
+          <input type="checkbox" id="ignoreSmallFiles" checked />
+          <label for="ignoreSmallFiles">Ignore small files (&lt;5KB)</label>
+        </div>
+
+        <!-- Mode Controls -->
+        <div class="opts mode-controls">
+          <input type="checkbox" id="safeModeToggle" />
+          <!-- LABEL CHANGED TO SLOW MODE -->
+          <label for="safeModeToggle">Slow Mode</label>
+
+          <input type="checkbox" id="debugModeToggle" />
+          <label for="debugModeToggle">Debug mode</label>
+        </div>
+
+        <!-- Utility Buttons (Clear All/Log) -->
+        <button id="clearBtn" class="small" disabled>Clear All</button>
+        <button id="clearLogBtn" class="small">Clear Log</button>
+      </div>
+    </div>
+    <!-- END Configuration Container -->
+
+    <!-- Status/Progress Container -->
+    <div class="status-container">
+      <div class="progress-text" id="status">No PDF loaded.</div>
+      <!-- Progress Bar -->
+      <div id="pageProgressBar">
+        <div id="progressBarFill"></div>
+      </div>
+    </div>
+
+    <!-- Results Bar (Summary and Save All Button) -->
+    <div class="results-bar" id="resultsBar" style="display: none">
+      <!-- Text updated in JS: "Save all [X] images (~[file size]MB)" -->
+      <button
+        id="downloadZip"
+        class="button primary-green full-width-btn"
+        disabled
+      >
+        Save all 0 images (~0.0 MB)
+      </button>
+    </div>
+    <!-- END Results Bar -->
+
+    <!-- Log Output Area - HIDDEN BY DEFAULT -->
+    <div class="log-container" id="logContainer" style="display: none">
+      <h2>Log</h2>
+      <pre id="logOutput"></pre>
+    </div>
+    <!-- END Log Output Area -->
+
+    <!-- Collapsible Thumbnail Section -->
+    <div class="thumbnail-section">
+      <!-- Thumbnail Toggle (FULL-WIDTH) -->
+      <!-- Text updated in JS: "Preview [X] images" / "Hide images" -->
+      <button id="toggleThumbsBtn" class="small full-width-btn" disabled>
+        Preview 0 images
+      </button>
+      <!-- Container for image thumbnails - Hidden by default in JS -->
+      <div class="images" id="images" style="display: none"></div>
+    </div>
+    <!-- END Collapsible Thumbnail Section -->
+
+    <footer>
+      Runs entirely in your browser. Deduplication is based on the SHA-256 hash
+      of the final content. Uses PDF.js and JSZip.
+    </footer>
+
+    <!-- Dependencies (CDN) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <script>
+      function initApp() {
+        // --- PDF.js Worker Setup ---
+        if (typeof pdfjsLib === "undefined" || !pdfjsLib.GlobalWorkerOptions) {
+          const msg =
+            "Error: Failed to load PDF library. Please refresh the page.";
+          document.getElementById("status").textContent = msg;
+          document.getElementById("status").style.color = "red";
+          return;
+        }
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+        // --- Global Application State & DOM References ---
+        const fileInput = document.getElementById("fileInput");
+        const extractBtn = document.getElementById("extractBtn");
+        const allPagesToggle = document.getElementById("allPagesToggle");
+        const pageRangeInput = document.getElementById("pageRangeInput");
+        const status = document.getElementById("status");
+        const imagesWrap = document.getElementById("images");
+        const downloadZipBtn = document.getElementById("downloadZip");
+        const clearBtn = document.getElementById("clearBtn");
+        const qualityRange = document.getElementById("quality");
+        const qualityVal = document.getElementById("qualityVal");
+        const safeModeToggle = document.getElementById("safeModeToggle");
+        const logOutput = document.getElementById("logOutput");
+        const clearLogBtn = document.getElementById("clearLogBtn");
+        const pageProgressBar = document.getElementById("pageProgressBar");
+        const progressBarFill = document.getElementById("progressBarFill");
+
+        // DOM Elements for Summary/Collapse/Debug/Config
+        const resultsBar = document.getElementById("resultsBar");
+        const toggleThumbsBtn = document.getElementById("toggleThumbsBtn");
+        const debugModeToggle = document.getElementById("debugModeToggle");
+        const logContainer = document.getElementById("logContainer");
+        const toggleConfigBtn = document.getElementById("toggleConfigBtn");
+        const configContainer = document.getElementById("configContainer");
+
+        const formatJpeg = document.getElementById("formatJpeg");
+        const formatPng = document.getElementById("formatPng");
+        const ignoreSmallFiles = document.getElementById("ignoreSmallFiles");
+
+        const SAFE_TIMEOUT = 1500; // Used for actual delay
+        const FAST_TIMEOUT = 200; // Used for actual delay
+        const MIN_FILE_SIZE_BYTES = 5 * 1024; // 5 KB
+
+        let pdfDocument = null;
+        let maxPages = 0;
+        let currentDocName = "";
+        let isLoading = false;
+        let inProgress = false;
+        let areThumbsVisible = false;
+        let areThumbsRendered = false;
+
+        // imageStore structure: Map<CONTENT_HASH, { baseName: string, blob: Blob, name: string, tempUrl: string, width: number, height: number }>
+        let imageStore = new Map();
+        let reuseCanvas = document.createElement("canvas");
+        let reuseCtx = reuseCanvas.getContext("2d");
+
+        let processedObjIds = new Set();
+        let failedObjIds = new Set();
+        let processedContentHashes = new Set();
+
+        let aCounter = 0;
+        let bCounter = 0;
+
+        // --- Helper Functions: Format and Log ---
+
+        function formatSize(bytes) {
+          if (bytes === 0) return "0 Bytes";
+          const k = 1024;
+          const dm = 1;
+          const sizes = ["Bytes", "KB", "MB", "GB"];
+          const i = Math.floor(Math.log(bytes) / Math.log(k));
+          return (
+            parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i]
+          );
+        }
+
+        /**
+         * Converts raw bytes to a formatted string in MB (e.g., 5.4).
+         */
+        function formatSizeToMB(bytes) {
+          if (bytes === 0) return "0.0";
+          // Use 1 decimal point for MB unless the value is tiny
+          const mb = bytes / (1024 * 1024);
+          return mb.toFixed(mb < 1 ? 2 : 1);
+        }
+
+        function getSelectedFormat() {
+          if (formatPng.checked) return { mime: "image/png", ext: ".png" };
+          return { mime: "image/jpeg", ext: ".jpg" };
+        }
+
+        function log(message, type = "info") {
+          if (
+            !debugModeToggle.checked &&
+            type !== "error" &&
+            type !== "warn" &&
+            type !== "config" &&
+            type !== "dedupe" &&
+            type !== "filter"
+          ) {
+            return;
+          }
+          const entry = document.createElement("div");
+          entry.textContent = message;
+          if (type === "warn") {
+            entry.className = "log-warn";
+          } else if (type === "error") {
+            entry.className = "log-error";
+          } else if (type === "filter") {
+            entry.className = "log-filter";
+          }
+          logOutput.prepend(entry);
+          logOutput.scrollTop = 0;
+        }
+
+        /**
+         * Updates the progress bar width based on current vs total operations.
+         */
+        function updatePageProgressBar(currentOps, totalOps) {
+          if (totalOps > 0) {
+            const percentage = Math.min(100, (currentOps / totalOps) * 100);
+            progressBarFill.style.width = `${percentage}%`;
+          } else {
+            progressBarFill.style.width = "100%"; // Assume quick processing if zero ops
+          }
+        }
+
+        // --- CORE LOGIC: Page Range Parsing ---
+
+        function parsePageRange(rangeString, max) {
+          const pages = new Set();
+          const parts = rangeString.split(",");
+
+          for (const part of parts) {
+            const trimmedPart = part.trim();
+            if (!trimmedPart) continue;
+
+            if (trimmedPart.includes("-")) {
+              const [startStr, endStr] = trimmedPart
+                .split("-")
+                .map((s) => s.trim());
+              const start = parseInt(startStr);
+              let end = parseInt(endStr);
+
+              if (!isNaN(start) && !isNaN(end) && start <= end) {
+                end = Math.min(end, max);
+                for (let i = start; i <= end; i++) {
+                  if (i >= 1 && i <= max) {
+                    pages.add(i);
+                  }
+                }
+              }
+            } else {
+              const page = parseInt(trimmedPart);
+              if (!isNaN(page) && page >= 1 && page <= max) {
+                pages.add(page);
+              }
+            }
+          }
+          return Array.from(pages).sort((a, b) => a - b);
+        }
+
+        function getPagesToProcess(max) {
+          if (!pdfDocument || max <= 0) return [];
+
+          if (allPagesToggle.checked) {
+            return Array.from({ length: max }, (_, i) => i + 1);
+          } else {
+            return parsePageRange(pageRangeInput.value, max);
+          }
+        }
+
+        // --- Event Listeners ---
+
+        qualityRange.addEventListener("input", () => {
+          qualityVal.textContent = Number(qualityRange.value).toFixed(2);
+        });
+
+        // Toggle quality slider enablement based on format
+        const updateQualitySlider = () => {
+          const isJpeg = formatJpeg.checked;
+          qualityRange.disabled = !isJpeg;
+          qualityVal.style.opacity = isJpeg ? "1" : "0.5";
+        };
+        formatJpeg.addEventListener("change", updateQualitySlider);
+        formatPng.addEventListener("change", updateQualitySlider);
+
+        // Toggle Debug Log Visibility
+        debugModeToggle.addEventListener("change", () => {
+          const isDebug = debugModeToggle.checked;
+          logContainer.style.display = isDebug ? "block" : "none";
+          log(
+            `[CONFIG] Debug mode is now ${isDebug ? "ON" : "OFF"}.`,
+            "config"
+          );
+        });
+
+        // Toggle Advanced Configuration Visibility
+        toggleConfigBtn.addEventListener("click", () => {
+          const isHidden = configContainer.style.display === "none";
+          configContainer.style.display = isHidden ? "block" : "none";
+          toggleConfigBtn.textContent = isHidden
+            ? "Hide Advanced Configuration"
+            : "Show Advanced Configuration";
+        });
+
+        // Initial log based on default mode
+        if (!safeModeToggle.checked) {
+          log(`[CONFIG] Fast Mode active.`, "config");
+        }
+
+        // 1. PDF File Selection
+        fileInput.addEventListener("change", async (ev) => {
+          const file = ev.target.files && ev.target.files[0];
+          if (!file || isLoading) {
+            return;
+          }
+
+          // Perform a full reset before loading a new PDF
+          clearAll(true);
+
+          extractBtn.disabled = true;
+
+          await loadPdf(file);
+          fileInput.value = null;
+        });
+
+        // 2. Page Range Toggle Control
+        allPagesToggle.addEventListener("change", () => {
+          const isChecked = allPagesToggle.checked;
+          pageRangeInput.disabled = isChecked;
+          extractBtn.disabled = !pdfDocument || inProgress;
+
+          if (isChecked && maxPages > 0) {
+            pageRangeInput.value = `1-${maxPages}`;
+          }
+        });
+
+        // 3. Extraction Trigger
+        extractBtn.addEventListener("click", async () => {
+          if (inProgress || !pdfDocument) return;
+
+          extractBtn.disabled = true;
+
+          const pagesToProcess = getPagesToProcess(maxPages);
+
+          if (pagesToProcess.length === 0) {
+            log(
+              "[ERROR] Invalid or empty page range specified. Please check input.",
+              "error"
+            );
+            status.textContent = "Extraction failed: Invalid page range.";
+            extractBtn.disabled = !pdfDocument;
+            return;
+          }
+
+          await startExtraction(pdfDocument, pagesToProcess);
+        });
+
+        // --- Utility Event Listeners ---
+        clearBtn.addEventListener("click", () => {
+          clearAll(true);
+        });
+
+        clearLogBtn.addEventListener("click", () => {
+          logOutput.innerHTML = "";
+          log("[INFO] Log cleared.", "config");
+          if (!safeModeToggle.checked) {
+            log(`[CONFIG] Fast Mode active.`, "config");
+          } else {
+            log(`[CONFIG] Slow Mode active.`, "config");
+          }
+        });
+
+        // Mode Toggle Logic
+        safeModeToggle.addEventListener("change", () => {
+          if (safeModeToggle.checked) {
+            log(`[CONFIG] Slow Mode activated.`, "config");
+          } else {
+            log(`[CONFIG] Fast Mode activated.`, "config");
+          }
+        });
+
+        // Thumbnail Toggle: Lazy rendering is implemented here
+        toggleThumbsBtn.addEventListener("click", () => {
+          if (toggleThumbsBtn.disabled) return;
+
+          areThumbsVisible = !areThumbsVisible;
+          const currentCount = imageStore.size;
+
+          if (areThumbsVisible) {
+            // ONLY render if they haven't been rendered yet
+            if (!areThumbsRendered) {
+              renderThumbnails();
+              areThumbsRendered = true;
+            }
+            imagesWrap.style.display = "grid";
+            toggleThumbsBtn.textContent = "Hide images";
+          } else {
+            imagesWrap.style.display = "none";
+            toggleThumbsBtn.textContent = `Preview ${currentCount} images`;
+          }
+
+          // Ensure styling is 'button' (blue) when enabled
+          if (currentCount > 0) {
+            toggleThumbsBtn.className = "button full-width-btn";
+          } else {
+            toggleThumbsBtn.className = "small full-width-btn";
+          }
+        });
+
+        downloadZipBtn.addEventListener("click", async () => {
+          if (imageStore.size === 0) return;
+          downloadZipBtn.disabled = true;
+
+          // 1. Determine which images are included based on checkbox state
+          const includedImages = [];
+          let totalIncludedBytes = 0;
+
+          for (const [hash, rec] of imageStore.entries()) {
+            // If thumbnails were rendered, check the checkbox state.
+            // If thumbnails were NOT rendered, we assume all are included by default.
+            let isIncluded = true;
+            const checkbox = document.getElementById(`include-${hash}`);
+
+            if (checkbox) {
+              isIncluded = checkbox.checked;
+            }
+
+            if (isIncluded) {
+              includedImages.push(rec);
+              totalIncludedBytes += rec.blob.size;
+            }
+          }
+
+          const count = includedImages.length;
+          const estimatedSizeMB = formatSizeToMB(totalIncludedBytes);
+
+          if (count === 0) {
+            status.textContent = "[INFO] No images selected for download.";
+            log("[INFO] ZIP creation skipped: No images selected.", "warn");
+            downloadZipBtn.disabled = false;
+            return;
+          }
+
+          const msg = `[PROGRESS] Preparing ZIP with ${count} selected image(s) (~${estimatedSizeMB} MB)...`;
+          status.innerHTML = `<span class="spinner"></span>${msg}`;
+          log(msg);
+          pageProgressBar.style.display = "block";
+          progressBarFill.style.width = "100%"; // Indeterminate progress for ZIP creation
+
+          try {
+            const zip = new JSZip();
+            const folderName = currentDocName || "extracted_images";
+            const folder = zip.folder(folderName) || zip;
+
+            for (const rec of includedImages) {
+              folder.file(rec.name, rec.blob);
+            }
+
+            const zipBlob = await zip.generateAsync({
+              type: "blob",
+              compression: "DEFLATE",
+              streamFiles: true,
+            });
+
+            saveAs(zipBlob, `${currentDocName}.zip`);
+
+            const actualZipSizeMB = formatSizeToMB(zipBlob.size);
+
+            const doneMsg = `[INFO] ZIP ready. ${count} selected image(s) saved. (Final size: ${formatSize(
+              zipBlob.size
+            )})`;
+            status.textContent = doneMsg;
+            log(doneMsg);
+
+            // Update the button with final size
+            downloadZipBtn.textContent = `Save all ${count} images (~${actualZipSizeMB} MB)`;
+          } catch (err) {
+            const errorMsg =
+              "[ERROR] Error creating ZIP: " + ((err && err.message) || err);
+            status.textContent = errorMsg;
+            log(errorMsg, "error");
+          } finally {
+            // Recalculate size/count of currently CHECKED items to re-enable button accurately
+            const finalCount = Array.from(imageStore.entries()).filter(
+              ([hash]) => {
+                const checkbox = document.getElementById(`include-${hash}`);
+                return !checkbox || checkbox.checked; // If no checkbox (not rendered), include it
+              }
+            ).length;
+
+            downloadZipBtn.disabled = !(finalCount > 0);
+            pageProgressBar.style.display = "none";
+          }
+        });
+
+        /**
+         * Clears all stored data and resets the UI state.
+         * @param {boolean} fullReset If true, wipes document state (pdf, currentDocName). If false, only wipes results (images, counters).
+         */
+        function clearAll(fullReset = false) {
+          log(
+            `[INFO] Clearing ${
+              fullReset ? "all app state" : "previous results"
+            }...`
+          );
+
+          // Revoke all temporary URLs if they were created
+          imageStore.forEach((rec) => {
+            if (rec.tempUrl) URL.revokeObjectURL(rec.tempUrl);
+          });
+          imageStore.clear();
+
+          processedObjIds.clear();
+          failedObjIds.clear();
+          processedContentHashes.clear();
+
+          aCounter = 0;
+          bCounter = 0;
+
+          // Reset UI elements
+          imagesWrap.innerHTML = "";
+          imagesWrap.style.display = "none";
+          resultsBar.style.display = "none";
+          pageProgressBar.style.display = "none";
+
+          areThumbsVisible = false;
+          areThumbsRendered = false; // Reset render state
+
+          // Reset text and class for thumbnail button
+          toggleThumbsBtn.textContent = "Preview 0 images";
+          toggleThumbsBtn.className = "small full-width-btn";
+          toggleThumbsBtn.disabled = true;
+
+          downloadZipBtn.disabled = true;
+          downloadZipBtn.textContent = `Save all 0 images (~0.0 MB)`;
+
+          // --- Document State Clear (Only if fullReset is true) ---
+          if (fullReset) {
+            pdfDocument = null;
+            maxPages = 0;
+            currentDocName = "";
+
+            status.textContent = "Cleared. Select a PDF to begin.";
+            clearBtn.disabled = true;
+            extractBtn.disabled = true;
+            pageRangeInput.value = "";
+            pageRangeInput.disabled = true;
+            allPagesToggle.checked = true;
+          }
+
+          if (fullReset) {
+            logOutput.innerHTML = "";
+            log("[INFO] Log cleared.", "config");
+          }
+        }
+
+        /**
+         * Step 1: Loads the PDF.
+         */
+        async function loadPdf(file) {
+          if (isLoading) return;
+          isLoading = true;
+
+          const rawDocName = file.name.replace(/\.pdf$/i, "");
+          // Ensure currentDocName is URL-safe and used consistently as the prefix.
+          const safeDocName = rawDocName.replace(/[^\w\d-_\.]/g, "_");
+
+          try {
+            const arrayBuffer = await file.arrayBuffer();
+            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+
+            status.innerHTML = `<span class="spinner"></span>[PROGRESS] Loading ${file.name}...`;
+            log(`[INFO] Starting load for ${file.name}...`);
+
+            pdfDocument = await loadingTask.promise;
+            maxPages = pdfDocument.numPages;
+            currentDocName = safeDocName; // Store the cleaned name globally
+
+            pageRangeInput.value = `1-${maxPages}`;
+            pageRangeInput.disabled = allPagesToggle.checked;
+            extractBtn.disabled = false;
+            clearBtn.disabled = false;
+
+            const msg = `[INFO] ${file.name} loaded (${maxPages} pages). Ready for extraction.`;
+            status.textContent = msg;
+            log(msg);
+          } catch (err) {
+            const errorMsg =
+              "[ERROR] Fatal error during PDF loading: " +
+              ((err && err.message) || err);
+            status.textContent = errorMsg;
+            log(errorMsg, "error");
+            pdfDocument = null;
+            currentDocName = "";
+            clearBtn.disabled = false;
+          } finally {
+            isLoading = false;
+          }
+        }
+
+        /**
+         * Step 2: Starts the extraction loop.
+         */
+        async function startExtraction(pdf, pagesToProcess) {
+          if (inProgress) return;
+          inProgress = true;
+
+          // --- FIX: Only reset RESULTS, keep document state (currentDocName) intact ---
+          clearAll(false);
+
+          const safeDocName = currentDocName;
+          const totalPages = pagesToProcess.length;
+
+          log(
+            `[INFO] Starting image extraction across ${totalPages} selected page(s).`
+          );
+          log(
+            `[CONFIG] Output format set to: ${getSelectedFormat()
+              .ext.toUpperCase()
+              .substring(1)}`,
+            "config"
+          );
+
+          try {
+            for (let i = 0; i < totalPages; i++) {
+              const p = pagesToProcess[i];
+              try {
+                const pageMsg = `[PROGRESS] Scanning page ${
+                  i + 1
+                }/${totalPages} (Page ${p} of PDF)...`;
+                status.innerHTML = `<span class="spinner"></span>${pageMsg}`;
+                pageProgressBar.style.display = "block";
+
+                const page = await pdf.getPage(p);
+                await processPageImages(page, safeDocName, p);
+              } catch (pageErr) {
+                log(
+                  `[ERROR] Failed to process PDF page ${p}: ${pageErr.message}. Continuing...`,
+                  "error"
+                );
+              }
+            }
+
+            // 2. Hide Progress Bar
+            pageProgressBar.style.display = "none";
+
+            // --- FINALIZATION STEP ---
+            finalizeNamingAndUI();
+
+            const finalCount = imageStore.size;
+
+            // Recalculate the count based on the initial default state (all included) for the final message
+            const initialIncludedCount = finalCount;
+            let doneMsg =
+              initialIncludedCount > 0
+                ? `[INFO] Extraction complete. ${initialIncludedCount} unique image(s) ready for download.`
+                : `[INFO] Extraction complete. No unique images found in the selected range or after filtering.`;
+            status.textContent = doneMsg;
+            log(doneMsg);
+
+            resultsBar.style.display = "block";
+            downloadZipBtn.disabled = initialIncludedCount === 0;
+          } catch (err) {
+            log(`[ERROR] Extraction process failed: ${err.message}`, "error");
+            pageProgressBar.style.display = "none";
+          } finally {
+            inProgress = false;
+            extractBtn.disabled = !pdfDocument;
+            clearBtn.disabled = false;
+          }
+        }
+
+        /**
+         * Finalizes the naming of all images, calculates size, and updates the UI.
+         */
+        function finalizeNamingAndUI() {
+          const { ext } = getSelectedFormat();
+          const finalCount = imageStore.size;
+          let totalBytes = 0;
+
+          imageStore.forEach((rec, hash) => {
+            rec.name = `${rec.baseName}${ext}`;
+            totalBytes += rec.blob.size;
+          });
+
+          const totalSizeFormatted = formatSize(totalBytes);
+          const totalSizeMB = formatSizeToMB(totalBytes);
+          log(
+            `[INFO] Finished naming ${finalCount} unique images with ${ext} extension. Estimated total size: ${totalSizeFormatted}`
+          );
+
+          // Update the Results Bar Button with estimated size (since all are checked by default)
+          downloadZipBtn.textContent = `Save all ${finalCount} images (~${totalSizeMB} MB)`;
+
+          // Update the Thumbnail Toggle button
+          if (finalCount > 0) {
+            if (areThumbsVisible) {
+              toggleThumbsBtn.textContent = "Hide images";
+            } else {
+              toggleThumbsBtn.textContent = `Preview ${finalCount} images`;
+            }
+            toggleThumbsBtn.disabled = false;
+            // Set to blue color
+            toggleThumbsBtn.className = "button full-width-btn";
+          } else {
+            toggleThumbsBtn.textContent = "Preview 0 images";
+            toggleThumbsBtn.disabled = true;
+            // Set back to small/grey color
+            toggleThumbsBtn.className = "small full-width-btn";
+          }
+        }
+
+        /**
+         * Wraps the callback-based page.objs.get in a Promise.
+         */
+        function objGetPromise(page, objId) {
+          return new Promise((resolve, reject) => {
+            const timeoutDuration = safeModeToggle.checked
+              ? SAFE_TIMEOUT
+              : FAST_TIMEOUT;
+
+            try {
+              const timeout = setTimeout(() => {
+                // Updated log message to remove time details
+                log(
+                  `[WARN] Timeout getting object "${objId}". Skipping reference.`,
+                  "warn"
+                );
+                resolve(null);
+              }, timeoutDuration);
+
+              page.objs.get(objId, (obj) => {
+                clearTimeout(timeout);
+                resolve(obj);
+              });
+            } catch (e) {
+              log(
+                `[WARN] Failed to retrieve object ${objId}: ${e.message}`,
+                "warn"
+              );
+              resolve(null);
+            }
+          });
+        }
+
+        /**
+         * Processes a single page to find and handle image objects.
+         */
+        async function processPageImages(page, docName, pageNumber) {
+          try {
+            const ops = await page.getOperatorList();
+            const fns = ops.fnArray;
+            const args = ops.argsArray;
+            const OPS = pdfjsLib.OPS || {};
+            const interesting = new Set(
+              Object.keys({
+                [OPS.paintJpegXObject]: 1,
+                [OPS.paintImageXObject]: 1,
+                [OPS.paintInlineImageXObject]: 1,
+                [OPS.paintImageXObjectRepeat]: 1,
+                [OPS.paintInlineImageXObjectGroup]: 1,
+              }).map(Number)
+            );
+
+            // 1. Calculate Total Image Operations for this page
+            let totalImageOps = fns.filter((fn) => interesting.has(fn)).length;
+            let processedImageOps = 0;
+            updatePageProgressBar(0, totalImageOps); // Initialize bar
+
+            for (let i = 0; i < fns.length; i++) {
+              if (!interesting.has(fns[i])) continue;
+
+              const arg = args[i];
+              let imgObj = null;
+              let currentObjId = null;
+
+              try {
+                if (
+                  Array.isArray(arg) &&
+                  arg.length > 0 &&
+                  typeof arg[0] === "string"
+                ) {
+                  currentObjId = arg[0];
+
+                  if (
+                    processedObjIds.has(currentObjId) ||
+                    failedObjIds.has(currentObjId)
+                  ) {
+                    // Image already processed/failed, update progress but skip processing
+                  } else {
+                    imgObj = await objGetPromise(page, currentObjId);
+
+                    if (!imgObj) {
+                      failedObjIds.add(currentObjId);
+                    } else {
+                      processedObjIds.add(currentObjId);
+                      await handleImageObject(
+                        imgObj,
+                        docName,
+                        pageNumber,
+                        currentObjId
+                      );
+                    }
+                  }
+                } else if (arg && typeof arg === "object" && arg.data) {
+                  imgObj = arg;
+                  await handleImageObject(imgObj, docName, pageNumber, null);
+                }
+
+                // 2. Update Progress Bar after image operation
+                processedImageOps++;
+                updatePageProgressBar(processedImageOps, totalImageOps);
+                // Yield control slightly to ensure UI update
+                await new Promise((resolve) => setTimeout(resolve, 1));
+              } catch (err) {
+                log(
+                  `[ERROR] Image process error (Page ${pageNumber}, ID: ${
+                    currentObjId || "inline"
+                  }): ${err.message}. Continuing...`,
+                  "error"
+                );
+                if (currentObjId) {
+                  failedObjIds.add(currentObjId);
+                }
+
+                // Still increment the counter if an error occurs mid-processing to show progress
+                processedImageOps++;
+                updatePageProgressBar(processedImageOps, totalImageOps);
+                await new Promise((resolve) => setTimeout(resolve, 1));
+              }
+            }
+
+            await page.cleanup();
+            updatePageProgressBar(totalImageOps, totalImageOps); // Ensure 100% on exit
+          } catch (err) {
+            log(
+              `[ERROR] Cleanup error on page ${pageNumber}: ${err.message}`,
+              "error"
+            );
+            throw err;
+          }
+        }
+
+        /**
+         * Converts image object, checks uniqueness, filters by size, and stores.
+         * Returns true if stored, false if filtered/skipped.
+         */
+        async function handleImageObject(imgObj, docName, pageNumber, objId) {
+          try {
+            let blob = null;
+            let ab = null;
+            let width = 0; // Added for resolution
+            let height = 0; // Added for resolution
+
+            const resetCanvas = (w, h) => {
+              reuseCanvas.width = w;
+              reuseCanvas.height = h;
+              reuseCtx.setTransform(1, 0, 0, 1, 0, 0);
+              reuseCtx.clearRect(0, 0, w, h);
+            };
+
+            let abRaw = null;
+            let hashRaw = null;
+
+            // --- TIER 1 DEDUPLICATION: Hashing RAW Pixel Data ---
+            if (
+              (imgObj.data && (imgObj.width || imgObj.height)) ||
+              imgObj instanceof ImageData
+            ) {
+              const dataView =
+                imgObj.data instanceof Uint8ClampedArray
+                  ? imgObj.data
+                  : imgObj.data instanceof Uint8Array
+                  ? imgObj.data
+                  : new Uint8Array(imgObj.data.buffer || imgObj.data);
+
+              if (dataView.buffer) {
+                abRaw = dataView.buffer.slice(
+                  dataView.byteOffset,
+                  dataView.byteOffset + dataView.byteLength
+                );
+                hashRaw = await hashArrayBuffer(abRaw);
+
+                if (processedContentHashes.has(hashRaw)) {
+                  log(
+                    `[DEDUPE] Raw content hash matched. Skipping image on page ${pageNumber}.`,
+                    "dedupe"
+                  );
+                  return false;
+                }
+              }
+            }
+            // --- END TIER 1 DEDUPLICATION ---
+
+            // --- CONVERSION TO OUTPUT BLOB & SIZE CHECK ---
+            const quality = Number(qualityRange.value);
+
+            if (imgObj.src && typeof imgObj.src === "string") {
+              const imgEl =
+                imgObj instanceof HTMLImageElement
+                  ? imgObj
+                  : await createImageFromBlob(
+                      await (await fetch(imgObj.src)).blob()
+                    );
+              width = imgEl.naturalWidth || imgEl.width;
+              height = imgEl.naturalHeight || imgEl.height;
+              resetCanvas(width, height);
+              blob = await canvasToOutputBlob(reuseCanvas, quality);
+              ab = await blob.arrayBuffer();
+            } else if (imgObj instanceof HTMLCanvasElement) {
+              width = imgObj.width;
+              height = imgObj.height;
+              blob = await canvasToOutputBlob(imgObj, quality);
+              ab = await blob.arrayBuffer();
+            } else if (
+              (imgObj.data && (imgObj.width || imgObj.height)) ||
+              imgObj instanceof ImageData
+            ) {
+              width = imgObj.width || imgObj.data.width || 1;
+              height = imgObj.height || imgObj.data.height || 1;
+              if (width <= 1 || height <= 1) {
+                return false;
+              }
+
+              resetCanvas(width, height);
+
+              try {
+                const imageData =
+                  imgObj instanceof ImageData
+                    ? imgObj
+                    : new ImageData(
+                        new Uint8ClampedArray(
+                          imgObj.data.buffer || imgObj.data
+                        ),
+                        width,
+                        height
+                      );
+                reuseCtx.putImageData(imageData, 0, 0);
+              } catch (e) {
+                return false;
+              }
+
+              blob = await canvasToOutputBlob(reuseCanvas, quality);
+              ab = await blob.arrayBuffer();
+            } else if (
+              imgObj.bitmap &&
+              imgObj.bitmap.width &&
+              imgObj.bitmap.height
+            ) {
+              const bmp = imgObj.bitmap;
+              width = bmp.width;
+              height = bmp.height;
+              resetCanvas(width, height);
+              reuseCtx.drawImage(bmp, 0, 0);
+              blob = await canvasToOutputBlob(reuseCanvas, quality);
+              ab = await blob.arrayBuffer();
+            } else {
+              return false;
+            }
+
+            if (!ab || !blob) {
+              return false;
+            }
+
+            // --- FILE SIZE FILTER CHECK ---
+            if (ignoreSmallFiles.checked && blob.size < MIN_FILE_SIZE_BYTES) {
+              log(
+                `[FILTER] Skipped image (size: ${(blob.size / 1024).toFixed(
+                  1
+                )} KB, Dim: ${width}x${height}px) on page ${pageNumber}.`,
+                "filter"
+              );
+              return false;
+            }
+
+            const hashContent = await hashArrayBuffer(ab);
+
+            // --- FINAL DUPLICATION CHECK (Content Hash) ---
+            if (imageStore.has(hashContent)) {
+              log(
+                `[DEDUPE] Processed content hash matched. Skipping image on page ${pageNumber}.`,
+                "dedupe"
+              );
+              return false;
+            }
+
+            // --- NEW UNIQUE IMAGE FOUND ---
+
+            let prefix;
+            let counter;
+
+            if (pageNumber % 2 !== 0) {
+              aCounter++;
+              prefix = "A";
+              counter = aCounter;
+            } else {
+              bCounter++;
+              prefix = "B";
+              counter = bCounter;
+            }
+
+            const baseName = `${docName}-${prefix}${counter}`;
+
+            // Store Hashes
+            if (hashRaw) {
+              processedContentHashes.add(hashRaw);
+            }
+            processedContentHashes.add(hashContent);
+
+            // Store with dimensions
+            imageStore.set(hashContent, {
+              baseName: baseName,
+              blob: blob,
+              name: "",
+              tempUrl: null,
+              width: width, // Storing width
+              height: height, // Storing height
+            });
+
+            log(
+              `[NEW] Found image ${baseName} (${(blob.size / 1024).toFixed(
+                1
+              )} KB, Dim: ${width}x${height}px).`
+            );
+
+            return true;
+          } catch (err) {
+            log(`[ERROR] Image storage failure: ${err.message}`, "error");
+            return false;
+          }
+        }
+
+        // --- Generic Canvas to Blob Conversion (supports JPG and PNG) ---
+        function canvasToOutputBlob(canvas, quality) {
+          const format = getSelectedFormat();
+          return new Promise((resolve, reject) => {
+            try {
+              canvas.toBlob(
+                (b) => {
+                  if (b) resolve(b);
+                  else reject(new Error("canvas.toBlob returned null"));
+                },
+                format.mime,
+                format.mime === "image/jpeg" ? quality : undefined
+              );
+            } catch (e) {
+              reject(e);
+            }
+          });
+        }
+
+        // --- Thumbnail Rendering Logic (Moved out of extraction loop) ---
+
+        function renderThumbnails() {
+          if (areThumbsRendered) return;
+
+          imagesWrap.innerHTML = ""; // Clear in case of previous failed render
+
+          log(`[INFO] Generating ${imageStore.size} thumbnail previews...`);
+
+          // Iterate over the stored images and create DOM elements
+          for (const [hash, rec] of imageStore) {
+            // Create temporary URL and store it (This is the slow/expensive part we defer)
+            rec.tempUrl = URL.createObjectURL(rec.blob);
+
+            const div = document.createElement("div");
+            div.className = "thumb";
+
+            const img = document.createElement("img");
+            img.src = rec.tempUrl;
+            img.alt = rec.name;
+
+            const meta = document.createElement("div");
+            meta.className = "meta";
+
+            // Filename and Resolution Row
+            const row = document.createElement("div");
+            row.className = "row";
+
+            const nameEl = document.createElement("div");
+            nameEl.className = "filename";
+            nameEl.id = `name-${hash}`;
+            nameEl.textContent = rec.name;
+            nameEl.title = rec.name;
+
+            const resolutionEl = document.createElement("div");
+            resolutionEl.className = "resolution";
+            resolutionEl.textContent = `${rec.width}x${rec.height}px`;
+
+            row.appendChild(nameEl);
+            row.appendChild(resolutionEl);
+
+            // Inclusion Control and Save Button Row
+            const controls = document.createElement("div");
+            controls.className = "controls";
+
+            // Inclusion Checkbox (NEW)
+            const checkboxId = `include-${hash}`;
+            const includeLabel = document.createElement("label");
+
+            const includeCheckbox = document.createElement("input");
+            includeCheckbox.type = "checkbox";
+            includeCheckbox.id = checkboxId;
+            includeCheckbox.checked = true; // Default checked
+
+            // Add listener to update total size/count when a box is unchecked
+            includeCheckbox.addEventListener("change", () => {
+              const totalBytes = Array.from(imageStore.entries())
+                .filter(([hash]) => {
+                  const cb = document.getElementById(`include-${hash}`);
+                  return cb && cb.checked;
+                })
+                .reduce((sum, [, rec]) => sum + rec.blob.size, 0);
+
+              const finalCount = Array.from(imageStore.entries()).filter(
+                ([hash]) => {
+                  const cb = document.getElementById(`include-${hash}`);
+                  return cb && cb.checked;
+                }
+              ).length;
+
+              const totalSizeMB = formatSizeToMB(totalBytes);
+              downloadZipBtn.textContent = `Save all ${finalCount} images (~${totalSizeMB} MB)`;
+              downloadZipBtn.disabled = finalCount === 0;
+            });
+
+            includeLabel.appendChild(includeCheckbox);
+            includeLabel.appendChild(document.createTextNode("Include"));
+
+            const dl = document.createElement("a");
+            dl.href = rec.tempUrl;
+            dl.className = "small";
+            dl.textContent = "Save (Single)";
+            dl.download = rec.name;
+
+            controls.appendChild(includeLabel);
+            controls.appendChild(dl);
+
+            meta.appendChild(row);
+            meta.appendChild(controls);
+
+            div.appendChild(img);
+            div.appendChild(meta);
+            imagesWrap.prepend(div);
+          }
+
+          areThumbsRendered = true;
+          log(
+            `[INFO] Thumbnail rendering complete. Individual inclusion controls enabled.`
+          );
+        }
+
+        // --- Helper Functions ---
+
+        function createImageFromBlob(blob) {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            const url = URL.createObjectURL(blob);
+            img.onload = () => {
+              URL.revokeObjectURL(url);
+              resolve(img);
+            };
+            img.onerror = (err) => {
+              URL.revokeObjectURL(url);
+              reject(err);
+            };
+            img.src = url;
+          });
+        }
+
+        async function hashArrayBuffer(arrayBuffer) {
+          const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+        }
+
+        clearBtn.disabled = true;
+        updateQualitySlider(); // Initial state for quality slider
+      }
+
+      window.addEventListener("load", function () {
+        setTimeout(initApp, 200);
+      });
+    </script>
+  </body>
+</html>
