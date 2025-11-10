@@ -31,6 +31,7 @@ p {
   margin-top: 30px;
   display: flex;
   gap: 20px;
+  flex-wrap: wrap;
 }
 
 .tool {
@@ -43,6 +44,7 @@ p {
   display: flex;
   flex-direction: column;
   justify-content: top;
+  min-width: 250px;
 }
 
 .tool:hover {
