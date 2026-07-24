@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
       this.elements.savePresetButton.addEventListener("click", () => {
         const name = this.elements.presetName.value;
         if (!name) {
-          alert("Please enter a name for the preset.");
+          Toast.show("Please enter a name for the preset.", "error");
           return;
         }
         const settings = this.ui.getRawGridSettings();
@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
       this.elements.deletePresetButton.addEventListener("click", () => {
         const presetKey = this.elements.preset.value;
         if (!presetKey.startsWith("user_")) {
-          alert("You can only delete user-defined presets.");
+          Toast.show("You can only delete user-defined presets.", "error");
           return;
         }
         this.storage.deleteUserPreset(presetKey);

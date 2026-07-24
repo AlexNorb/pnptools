@@ -29,17 +29,17 @@
 - [x] 2.6 Fix preset data (typo, hide template entry)
 - [x] 2.7 Scope global CSS selectors (button, checkbox)
 
-## Phase 3 — UI/UX Overhaul `NOT STARTED`
+## Phase 3 — UI/UX Overhaul `COMPLETED`
 
 > Spec: [`docs/PHASE-3-UI-OVERHAUL.md`](docs/PHASE-3-UI-OVERHAUL.md)
 > Branding: [`docs/BRANDING.md`](docs/BRANDING.md)
 
-- [ ] 3.1 Create toast notification system (replace all `alert()`)
-- [ ] 3.2 Apply brand design system (CSS custom properties, typography, colors)
-- [ ] 3.3 Add branded header with logo
-- [ ] 3.4 Make responsive (mobile, tablet, desktop breakpoints)
-- [ ] 3.5 Add accessibility (ARIA labels, keyboard nav, focus styles)
-- [ ] 3.6 Dark mode (bonus/optional)
+- [x] 3.1 Create toast notification system (replace all `alert()`)
+- [x] 3.2 Apply brand design system (CSS custom properties, typography, colors)
+- [x] 3.3 Add branded header with logo
+- [x] 3.4 Make responsive (mobile, tablet, desktop breakpoints)
+- [x] 3.5 Add accessibility (ARIA labels, keyboard nav, focus styles)
+- [x] 3.6 Dark mode (bonus/optional)
 
 ## Completed
 

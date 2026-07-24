@@ -11,7 +11,7 @@ const LayoutToolPDF = {
 
       if (error) {
         console.error("Error from PDF worker:", error);
-        alert(`An error occurred during PDF generation: ${error}`);
+        Toast.show(`An error occurred during PDF generation: ${error}`, "error");
         window.LayoutToolUI.ui.toggleProgressUI(false);
         return;
       }
@@ -114,7 +114,7 @@ const LayoutToolPDF = {
           }
       } catch (error) {
           console.error("Error reading files for previewer:", error);
-          alert("Could not read files for the previewer. Please check the console.");
+          Toast.show("Could not read files for the previewer. Please check the console.", "error");
       }
   },
 
@@ -136,7 +136,7 @@ const LayoutToolPDF = {
           }
       } catch (error) {
           console.error("Error reading files for previewer append:", error);
-          alert("Could not read new files for the previewer. Please check the console.");
+          Toast.show("Could not read new files for the previewer. Please check the console.", "error");
       }
   },
 
@@ -170,12 +170,12 @@ const LayoutToolPDF = {
     try {
         const mode = window.PreviewPanel.getMode();
         if (mode === 'empty') {
-            alert("Error: No front images loaded.");
+            Toast.show("Error: No front images loaded.", "error");
             window.LayoutToolUI.ui.toggleProgressUI(false);
             return;
         }
         if (mode === 'error') {
-            alert("Error: Number of backs must be 0, 1, or equal to the number of fronts.");
+            Toast.show("Error: Number of backs must be 0, 1, or equal to the number of fronts.", "error");
             window.LayoutToolUI.ui.toggleProgressUI(false);
             return;
         }
@@ -183,7 +183,7 @@ const LayoutToolPDF = {
         const { frontImages: frontImageUrls, backImages: backImageUrls } = window.PreviewPanel.getImageData();
 
         if (frontImageUrls.length < 1) {
-            alert("Error: No front images selected.");
+            Toast.show("Error: No front images selected.", "error");
             window.LayoutToolUI.ui.toggleProgressUI(false);
             return;
         }
@@ -217,7 +217,7 @@ const LayoutToolPDF = {
 
     } catch (error) {
       console.error("Error during PDF preparation:", error.message);
-      alert(`An unexpected error occurred: ${error.message}`);
+      Toast.show(`An unexpected error occurred: ${error.message}`, "error");
       window.LayoutToolUI.ui.toggleProgressUI(false);
     }
   },

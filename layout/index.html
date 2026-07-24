@@ -10,7 +10,150 @@
     <title>Card layout tool</title>
 
     <link rel="icon" href="assets/favicon.png" type="image/png" />
-    <link rel="stylesheet" href="style.css" />
+    <!-- Tailwind v4 CDN & Configuration -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+      @theme {
+        --font-display: "Bungee", cursive;
+        --font-ui: "Inter", sans-serif;
+
+        --color-theme-bg: #ECF0DD;
+        --color-theme-dark: #1C111F;
+        --color-theme-muted: #554B59;
+        --color-theme-pink: #DF2CD4;
+        --color-theme-teal: #3DDDB2;
+        --color-theme-yellow: #F7E517;
+        --color-theme-indigo: #4E63C5;
+        --color-theme-green: #9EEA84;
+      }
+
+      .file-count {
+        color: var(--color-theme-indigo);
+        font-size: 1.2rem;
+        font-weight: bold;
+      }
+
+      /* Base custom forms styling */
+      input[type="number"],
+      input[type="text"],
+      select {
+        border: 2px solid var(--color-theme-dark);
+        border-radius: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        font-family: var(--font-ui);
+        transition: all 0.2s;
+      }
+
+      input[type="number"]:focus,
+      input[type="text"]:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--color-theme-pink);
+        box-shadow: 2px 2px 0 var(--color-theme-pink);
+      }
+
+      input[type="checkbox"] {
+        width: 1.5rem;
+        height: 1.5rem;
+        border: 2px solid var(--color-theme-dark);
+        border-radius: 0.25rem;
+        cursor: pointer;
+      }
+
+      .mode-indicator {
+        transition: all 0.3s ease;
+      }
+
+      .mode-indicator.inactive {
+        background-color: #f0f0f0;
+        border-color: var(--color-theme-muted);
+      }
+
+      .mode-indicator.active {
+        background-color: var(--color-theme-teal);
+        border-color: var(--color-theme-dark);
+        box-shadow: 4px 4px 0 var(--color-theme-dark);
+      }
+
+      .mode-indicator.error {
+        background-color: var(--color-theme-pink);
+        border-color: var(--color-theme-dark);
+        box-shadow: 4px 4px 0 var(--color-theme-dark);
+      }
+
+      /* Buttons */
+      .btn-primary {
+        @apply bg-theme-yellow border-3 border-theme-dark font-ui font-bold px-6 py-3 rounded-xl transition-all duration-200;
+        box-shadow: 4px 4px 0 var(--color-theme-dark);
+      }
+
+      .btn-primary:hover {
+        @apply -translate-x-1 -translate-y-1;
+        box-shadow: 6px 6px 0 var(--color-theme-dark);
+      }
+
+      .btn-secondary {
+        @apply bg-white border-3 border-theme-dark font-ui font-medium px-4 py-2 rounded-xl transition-all duration-200;
+        box-shadow: 3px 3px 0 var(--color-theme-dark);
+      }
+
+      .btn-secondary:hover {
+        @apply -translate-x-1 -translate-y-1;
+        box-shadow: 5px 5px 0 var(--color-theme-dark);
+      }
+
+      /* Cards (Bento Boxes) */
+      .bento-box {
+        @apply bg-white border-3 border-theme-dark rounded-xl p-4 md:p-6 mb-6;
+        box-shadow: 4px 4px 0 var(--color-theme-dark);
+      }
+
+      /* Dropzones */
+      .dropzone-neo {
+        @apply border-3 border-dashed border-theme-dark bg-white rounded-xl p-6 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center min-h-[150px];
+        box-shadow: 4px 4px 0 var(--color-theme-dark);
+        position: relative;
+      }
+
+      .dropzone-neo:hover {
+        @apply border-theme-indigo bg-theme-bg -translate-x-1 -translate-y-1;
+        box-shadow: 6px 6px 0 var(--color-theme-indigo);
+      }
+
+      .dropzone-neo input[type="file"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      /* Form Groups Layout */
+      .settings-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+      }
+
+      /* Preview Panel */
+      .preview-panel {
+        margin-top: 1rem;
+      }
+
+      .preview-content {
+        display: none;
+      }
+
+      .preview-pairs-container {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        padding-bottom: 1rem;
+        min-height: 180px;
+      }
+    </style>
 
     <!-- font awesome -->
     <link
@@ -22,53 +165,47 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib@2.4.1/dist/pdf-lib.min.js"></script>
   </head>
-  <body>
-    <div class="container">
-      <div class="header">
-        <h1>Card layout tool v2.1</h1>
+  <body class="bg-theme-bg font-ui text-theme-dark antialiased">
+    <div class="max-w-6xl mx-auto px-4 py-8">
+      <div class="text-center mb-8">
+        <h1 class="text-4xl md:text-5xl font-display text-theme-dark uppercase">Card layout tool v2.1</h1>
       </div>
 
-      <!-- drop zone -->
-      <div class="form-group">
-        <div class="dropzone" id="frontDropzone">
-          <label for="frontImages">Fronts</label>
-          <p>
-            <i class="fa-regular fa-file-image icon"></i>
-          </p>
-          <span class="file-count" id="fileCount">0 files selected</span>
-          <input
-            type="file"
-            id="frontImages"
-            accept=".png, .jpg, .jpeg"
-            multiple
-          />
-        </div>
+      <!-- Upload Zone Bento -->
+      <div class="bento-box">
+        <h2 class="text-2xl font-display mb-4 text-center">1. Upload Cards</h2>
+        <div class="flex flex-col md:flex-row gap-6">
+          <div class="dropzone-neo flex-1" id="frontDropzone">
+            <label for="frontImages" class="text-xl font-bold cursor-pointer">Fronts</label>
+            <p class="text-3xl my-2">
+              <i class="fa-regular fa-file-image text-theme-indigo"></i>
+            </p>
+            <span class="file-count" id="fileCount">0 files selected</span>
+            <input type="file" id="frontImages" accept=".png, .jpg, .jpeg" multiple />
+          </div>
 
-        <div class="dropzone" id="backDropzone">
-          <label for="backImages">Backs</label>
-          <p>
-            <i class="fa-regular fa-file-image icon"></i>
-          </p>
-          <span class="file-count" id="fileCountBack">0 files selected</span>
-          <input
-            type="file"
-            id="backImages"
-            accept=".png, .jpg, .jpeg"
-            multiple
-          />
+          <div class="dropzone-neo flex-1" id="backDropzone">
+            <label for="backImages" class="text-xl font-bold cursor-pointer">Backs</label>
+            <p class="text-3xl my-2">
+              <i class="fa-regular fa-file-image text-theme-pink"></i>
+            </p>
+            <span class="file-count" id="fileCountBack">0 files selected</span>
+            <input type="file" id="backImages" accept=".png, .jpg, .jpeg" multiple />
+          </div>
         </div>
       </div>
 
-      <!-- Integrated Preview Panel -->
-      <div id="previewPanel" class="preview-panel collapsed">
-        <button type="button" id="previewToggle" class="preview-toggle">
-          Image Preview & Ordering <span id="previewToggleIcon">▼</span>
+      <!-- Integrated Preview Panel Bento -->
+      <div id="previewPanel" class="bento-box preview-panel collapsed">
+        <button type="button" id="previewToggle" class="w-full text-left font-display text-xl bg-theme-bg border-3 border-theme-dark rounded-xl px-4 py-3 flex justify-between items-center transition-all hover:bg-theme-yellow shadow-[4px_4px_0_var(--color-theme-dark)]">
+          <span>2. Image Preview & Ordering</span>
+          <span id="previewToggleIcon">▼</span>
         </button>
-        <div id="previewContent" class="preview-content">
-          <div class="preview-controls">
-            <button type="button" id="clearFronts">Clear Fronts</button>
-            <button type="button" id="clearBacks">Clear Backs</button>
-            <button type="button" id="clearAll">Clear All</button>
+        <div id="previewContent" class="preview-content mt-4 pt-4 border-t-3 border-theme-dark">
+          <div class="flex gap-4 mb-4">
+            <button type="button" id="clearFronts" class="btn-secondary">Clear Fronts</button>
+            <button type="button" id="clearBacks" class="btn-secondary">Clear Backs</button>
+            <button type="button" id="clearAll" class="btn-secondary text-theme-pink">Clear All</button>
           </div>
           <div id="previewPairs" class="preview-pairs-container">
             <!-- Dynamically rendered card pairs -->
@@ -76,284 +213,300 @@
         </div>
       </div>
 
-      <!-- mode indicator -->
-      <div class="form-group mode">
-        <div class="mode-item">
-          <div id="mode1" class="mode-indicator inactive">
-            <h2>No backs</h2>
+      <!-- Mode Indicator Bento -->
+      <div class="bento-box">
+        <h2 class="text-2xl font-display mb-4 text-center">3. Layout Mode</h2>
+        <div class="flex flex-wrap justify-around items-center gap-4 mb-6">
+          <div class="text-center">
+            <div id="mode1" class="mode-indicator inactive w-24 h-24 border-3 rounded-xl flex items-center justify-center mb-2 mx-auto">
+              <h3 class="font-bold">No backs</h3>
+            </div>
+          </div>
+          <div class="text-center">
+            <div id="mode2" class="mode-indicator inactive w-24 h-24 border-3 rounded-xl flex items-center justify-center mb-2 mx-auto">
+              <h3 class="font-bold">Same backs</h3>
+            </div>
+          </div>
+          <div class="text-center">
+            <div id="mode3" class="mode-indicator inactive w-24 h-24 border-3 rounded-xl flex items-center justify-center mb-2 mx-auto">
+              <h3 class="font-bold">Unique backs</h3>
+            </div>
           </div>
         </div>
-        <div class="mode-item">
-          <div id="mode2" class="mode-indicator inactive">
-            <h2>Same backs</h2>
-          </div>
-        </div>
-        <div class="mode-item">
-          <div id="mode3" class="mode-indicator inactive">
-            <h2>Unique backs</h2>
-          </div>
-        </div>
-        <div class="box settings">
-          <input
-            type="radio"
-            id="doubleSided"
-            name="layoutMode"
-            value="doubleSided"
-            checked
-          />
-          <label for="doubleSided">Double-Sided (Grid)</label>
-          <input
-            type="radio"
-            id="foldable"
-            name="layoutMode"
-            value="foldable"
-          />
-          <label for="foldable">Single-Page (Foldable)</label>
+
+        <div class="flex justify-center gap-4 text-lg font-medium">
+          <label class="flex items-center gap-2 cursor-pointer p-2 border-3 border-transparent rounded-xl hover:bg-theme-bg transition-colors">
+            <input type="radio" id="doubleSided" name="layoutMode" value="doubleSided" checked class="w-5 h-5 accent-theme-indigo" />
+            Double-Sided (Grid)
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer p-2 border-3 border-transparent rounded-xl hover:bg-theme-bg transition-colors">
+            <input type="radio" id="foldable" name="layoutMode" value="foldable" class="w-5 h-5 accent-theme-indigo" />
+            Single-Page (Foldable)
+          </label>
         </div>
       </div>
-    </div>
 
-    <div id="doubleSidedModeUI">
-      <div class="container">
-        <div class="form-group">
-          <div class="box">
-            <h2>Page size:</h2>
-            <select id="pageSize" name="pageSize">
+    <div id="doubleSidedModeUI" class="bento-box">
+      <h2 class="text-2xl font-display mb-6 border-b-3 border-theme-dark pb-2">Double-Sided Settings</h2>
+      
+      <div class="settings-grid mb-6">
+        <div class="flex flex-col gap-2">
+          <label class="font-bold">Page Size</label>
+          <select id="pageSize" name="pageSize">
               <option value="A4 Portrait" selected>A4 Portrait</option>
               <option value="A4 Landscape">A4 Landscape</option>
               <option value="Letter Portrait">Letter Portrait</option>
-              <option value="Letter Landscape">Letter Landscape</option>
-              <option value="Custom">Custom</option>
-            </select>
-            <label for="pageWidth">Page width (mm)</label>
-            <input
-              type="number"
-              id="pageWidth"
-              value="210"
-              step="0.1"
-              disabled
-            />
-            <label for="pageHeight">Page height (mm)</label>
-            <input
-              type="number"
-              id="pageHeight"
-              value="297"
-              step="0.1"
-              disabled
-            />
+          </select>
+          <div class="flex gap-4 mt-2">
+            <div class="flex flex-col">
+              <label for="pageWidth" class="text-sm">Width (mm)</label>
+              <input type="number" id="pageWidth" value="210" step="0.1" disabled class="w-24" />
+            </div>
+            <div class="flex flex-col">
+              <label for="pageHeight" class="text-sm">Height (mm)</label>
+              <input type="number" id="pageHeight" value="297" step="0.1" disabled class="w-24" />
+            </div>
           </div>
+        </div>
 
-          <!-- Preset naming menu    -->
-          <div class="box preset">
-            <h2>Select preset loadout:</h2>
-            <select id="preset"></select>
-            <input type="text" id="presetName" placeholder="Preset Name" />
-            <button id="savePresetButton">Save Preset</button>
-            <button id="deletePresetButton">Delete Preset</button>
+        <div class="flex flex-col gap-2">
+          <label class="font-bold">Presets</label>
+          <select id="preset"></select>
+          <div class="flex gap-2 mt-2">
+            <input type="text" id="presetName" placeholder="Preset Name" class="flex-1" />
+            <button id="savePresetButton" class="btn-secondary px-2 py-1 text-sm">Save</button>
+            <button id="deletePresetButton" class="btn-secondary px-2 py-1 text-sm text-theme-pink border-theme-pink">Delete</button>
           </div>
         </div>
       </div>
 
-      <div class="container">
-        <h2>Basic settings</h2>
-        <div class="form-group basic">
-          <div class="iconbox">
-            <i class="fa-solid fa-table-cells icon" title="Grid layout"></i>
+      <div class="settings-grid mb-6">
+        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-table-cells text-2xl text-theme-indigo"></i>
+            <h3 class="font-bold text-lg">Grid Layout</h3>
           </div>
-          <p>Grid layout</p>
-          <div class="box settings">
-            <label for="rows">Rows</label>
-            <input type="number" id="rows" value="3" />
-            <label for="columns">Columns</label>
-            <input type="number" id="columns" value="3" />
+          <div class="flex gap-4">
+            <div class="flex flex-col">
+              <label for="rows">Rows</label>
+              <input type="number" id="rows" value="3" class="w-20" />
+            </div>
+            <div class="flex flex-col">
+              <label for="columns">Columns</label>
+              <input type="number" id="columns" value="3" class="w-20" />
+            </div>
           </div>
         </div>
 
-        <div class="form-group basic">
-          <div class="iconbox">
-            <i class="fa-solid fa-ruler-combined icon" title="Measurements"></i>
+        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-ruler-combined text-2xl text-theme-indigo"></i>
+            <h3 class="font-bold text-lg">Card Size</h3>
           </div>
-          <p>Measurements</p>
-          <div class="box settings">
-            <select id="cardSize" name="cardSize">
+          <select id="cardSize" name="cardSize">
               <option value="Poker" selected>Poker (63x88mm)</option>
               <option value="Bridge">Bridge (57x88mm)</option>
               <option value="Tarot">Tarot (70x120mm)</option>
-              <option value="Custom">Custom</option>
-            </select>
-            <label for="imageWidth">Card width</label>
-            <input type="number" id="imageWidth" value="63" disabled />
-            <label for="imageHeight">Card height</label>
-            <input type="number" id="imageHeight" value="88" disabled />
-            <label for="bleed">Bleed</label>
-            <input type="number" id="bleed" value="0" />
+          </select>
+          <div class="flex gap-4 mt-2">
+            <div class="flex flex-col">
+              <label for="imageWidth" class="text-sm">Width</label>
+              <input type="number" id="imageWidth" value="63" disabled class="w-20" />
+            </div>
+            <div class="flex flex-col">
+              <label for="imageHeight" class="text-sm">Height</label>
+              <input type="number" id="imageHeight" value="88" disabled class="w-20" />
+            </div>
+            <div class="flex flex-col">
+              <label for="bleed" class="text-sm">Bleed</label>
+              <input type="number" id="bleed" value="0" class="w-20" />
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="container">
-        <h2>Advanced settings</h2>
-        <div class="form-group advanced">
-          <div class="iconbox">
-            <i
-              class="fa-solid fa-crosshairs icon"
-              title="Crosshair settings"
-            ></i>
+      <div class="settings-grid">
+        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-crosshairs text-2xl text-theme-pink"></i>
+            <h3 class="font-bold text-lg">Crosshairs</h3>
           </div>
-          <p>Crosshair settings</p>
-          <div class="box settings">
-            <label for="frontCheckbox">Front</label>
-            <input
-              type="checkbox"
-              id="frontCheckbox"
-              name="frontCheckbox"
-              checked
-            />
-            <label for="backCheckbox">Back</label>
-            <input
-              type="checkbox"
-              id="backCheckbox"
-              name="backCheckbox"
-              unchecked
-            />
-            <label for="crosswidth">Line width</label>
-            <input type="number" id="crosswidth" value="0.5" step="0.1" />
-            <label for="crosssize">Size</label>
-            <input type="number" id="crosssize" value="4" step="0.5" />
-            <label for="crosshaircolor">Color</label>
-            <input
-              type="color"
-              id="crosshaircolor"
-              value="#000000"
-              placeholder="Select a color"
-            />
+          
+          <div class="flex gap-4">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" id="frontCheckbox" name="frontCheckbox" checked class="accent-theme-pink" /> Front
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" id="backCheckbox" name="backCheckbox" class="accent-theme-pink" /> Back
+            </label>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-2 mt-2">
+            <div class="flex flex-col">
+              <label for="crosswidth" class="text-sm">Line Width</label>
+              <input type="number" id="crosswidth" value="0.5" step="0.1" />
+            </div>
+            <div class="flex flex-col">
+              <label for="crosssize" class="text-sm">Size</label>
+              <input type="number" id="crosssize" value="4" step="0.5" />
+            </div>
+            <div class="flex flex-col col-span-2">
+              <label for="crosshaircolor" class="text-sm">Color</label>
+              <input type="color" id="crosshaircolor" value="#000000" class="w-full h-10 border-3 border-theme-dark rounded-md p-0" />
+            </div>
           </div>
         </div>
-        <div class="form-group advanced">
-          <div class="iconbox">
-            <i
-              class="fa-solid fa-border-top-left icon"
-              title="Border settings"
-            ></i>
-          </div>
-          <p>Border settings</p>
-          <div class="box settings">
-            <label for="frontBorderCheckbox">Front</label>
-            <input type="checkbox" id="frontBorderCheckbox" />
-            <label for="backBorderCheckbox">Back</label>
-            <input type="checkbox" id="backBorderCheckbox" />
-            <label for="borderWidth">Border width</label>
-            <input type="number" id="borderWidth" value="3" />
-            <label for="borderColor">Color</label>
-            <input type="color" id="borderColor" value="#ffffff" />
 
-            <br /><br />
-            <label for="cornerRadius">Corner Radius:</label>
-            <select id="cornerRadius">
-              <option value="0">None</option>
-              <option value="3">S (3mm)</option>
-              <option value="5">M (5mm)</option>
-              <option value="8">L (8mm)</option>
-              <option value="10">XL (10mm)</option>
-            </select>
-            <br /><br />
+        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-border-top-left text-2xl text-theme-pink"></i>
+            <h3 class="font-bold text-lg">Borders</h3>
+          </div>
+
+          <div class="flex gap-4">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" id="frontBorderCheckbox" class="accent-theme-pink" /> Front
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" id="backBorderCheckbox" class="accent-theme-pink" /> Back
+            </label>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mt-2">
+            <div class="flex flex-col">
+              <label for="borderWidth" class="text-sm">Width</label>
+              <input type="number" id="borderWidth" value="3" />
+            </div>
+            <div class="flex flex-col">
+              <label for="cornerRadius" class="text-sm">Radius</label>
+              <select id="cornerRadius">
+                <option value="0">None</option>
+                <option value="3">S (3mm)</option>
+                <option value="5">M (5mm)</option>
+                <option value="8">L (8mm)</option>
+                <option value="10">XL (10mm)</option>
+              </select>
+            </div>
+            <div class="flex flex-col col-span-2">
+              <label for="borderColor" class="text-sm">Color</label>
+              <input type="color" id="borderColor" value="#ffffff" class="w-full h-10 border-3 border-theme-dark rounded-md p-0" />
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div id="foldableModeUI" style="display: none">
-      <div class="container">
-        <div class="form-group">
-          <div class="box">
-            <h2>Page size:</h2>
-            <select id="foldable_pageSize" name="foldable_pageSize">
+    <div id="foldableModeUI" style="display: none" class="bento-box">
+      <h2 class="text-2xl font-display mb-6 border-b-3 border-theme-dark pb-2">Single-Page Settings</h2>
+      
+      <div class="settings-grid mb-6">
+        <div class="flex flex-col gap-2">
+          <label class="font-bold">Page Size</label>
+          <select id="foldable_pageSize" name="foldable_pageSize">
               <option value="A4 Portrait" selected>A4</option>
               <option value="Letter Portrait">Letter</option>
-              <option value="Custom">Custom</option>
-            </select>
-            <label for="foldable_pageWidth">Page width (mm)</label>
-            <input
-              type="number"
-              id="foldable_pageWidth"
-              value="210"
-              step="0.1"
-              disabled
-            />
-            <label for="foldable_pageHeight">Page height (mm)</label>
-            <input
-              type="number"
-              id="foldable_pageHeight"
-              value="297"
-              step="0.1"
-              disabled
-            />
+          </select>
+          <div class="flex gap-4 mt-2">
+            <div class="flex flex-col">
+              <label for="foldable_pageWidth" class="text-sm">Width</label>
+              <input type="number" id="foldable_pageWidth" value="210" step="0.1" disabled class="w-24" />
+            </div>
+            <div class="flex flex-col">
+              <label for="foldable_pageHeight" class="text-sm">Height</label>
+              <input type="number" id="foldable_pageHeight" value="297" step="0.1" disabled class="w-24" />
+            </div>
           </div>
-          <p>Page Margins</p>
-          <div class="box settings">
-            <label for="foldable_printerMargin">Printer</label>
-            <input type="number" id="foldable_printerMargin" value="5" />
-            <label for="foldable_foldingMargin">Folding</label>
-            <input type="number" id="foldable_foldingMargin" value="5" />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="font-bold">Margins</label>
+          <div class="flex gap-4 mt-2">
+            <div class="flex flex-col">
+              <label for="foldable_printerMargin" class="text-sm">Printer</label>
+              <input type="number" id="foldable_printerMargin" value="5" class="w-24" />
+            </div>
+            <div class="flex flex-col">
+              <label for="foldable_foldingMargin" class="text-sm">Folding</label>
+              <input type="number" id="foldable_foldingMargin" value="5" class="w-24" />
+            </div>
           </div>
         </div>
       </div>
-      <div class="container">
-        <h2>Card & Margin Settings (in mm)</h2>
-        <div class="form-group basic">
-          <p>Card Dimensions</p>
-          <div class="box settings">
-            <select id="foldable_cardSize" name="foldable_cardSize">
+
+      <div class="settings-grid mb-6">
+        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-lg">Card Dimensions</h3>
+          </div>
+          <select id="foldable_cardSize" name="foldable_cardSize">
               <option value="Poker" selected>Poker (63x88mm)</option>
               <option value="Bridge">Bridge (57x88mm)</option>
               <option value="Tarot">Tarot (70x120mm)</option>
-              <option value="Custom">Custom</option>
-            </select>
-            <label for="foldable_cardWidth">Width</label>
-            <input type="number" id="foldable_cardWidth" value="63" disabled />
-            <label for="foldable_cardHeight">Height</label>
-            <input type="number" id="foldable_cardHeight" value="88" disabled />
+          </select>
+          <div class="flex gap-4 mt-2">
+            <div class="flex flex-col">
+              <label for="foldable_cardWidth" class="text-sm">Width</label>
+              <input type="number" id="foldable_cardWidth" value="63" disabled class="w-20" />
+            </div>
+            <div class="flex flex-col">
+              <label for="foldable_cardHeight" class="text-sm">Height</label>
+              <input type="number" id="foldable_cardHeight" value="88" disabled class="w-20" />
+            </div>
           </div>
         </div>
-        <div class="form-group basic">
-          <p>Card Spacing</p>
-          <div class="box settings">
-            <label for="foldable_cardMargin">Card</label>
-            <input type="number" id="foldable_cardMargin" value="0" />
-            <label for="foldable_cutMargin">Bleed</label>
-            <input type="number" id="foldable_cutMargin" value="0" />
+
+        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-lg">Spacing & Bleed</h3>
+          </div>
+          <div class="flex gap-4">
+            <div class="flex flex-col">
+              <label for="foldable_cardMargin" class="text-sm">Margin</label>
+              <input type="number" id="foldable_cardMargin" value="0" class="w-20" />
+            </div>
+            <div class="flex flex-col">
+              <label for="foldable_cutMargin" class="text-sm">Bleed</label>
+              <input type="number" id="foldable_cutMargin" value="0" class="w-20" />
+            </div>
           </div>
         </div>
       </div>
-      <div class="container">
-        <h2>Advanced Foldable Settings</h2>
-        <div class="form-group advanced">
-          <p>Border</p>
-          <div class="box settings">
-            <label for="foldable_innerBorder">Border width</label>
-            <input type="number" id="foldable_innerBorder" value="0" />
-            <label for="foldable_cornerRadius">Corner Radius</label>
-            <select id="foldable_cornerRadius">
+
+      <div class="settings-grid">
+        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-lg">Border</h3>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mt-2">
+            <div class="flex flex-col">
+              <label for="foldable_innerBorder" class="text-sm">Width</label>
+              <input type="number" id="foldable_innerBorder" value="0" />
+            </div>
+            <div class="flex flex-col">
+              <label for="foldable_cornerRadius" class="text-sm">Radius</label>
+              <select id="foldable_cornerRadius">
               <option value="0">None</option>
               <option value="3">S (3mm)</option>
               <option value="5">M (5mm)</option>
               <option value="8">L (8mm)</option>
-              <option value="10">XL (10mm)</option>
-            </select>
-            <label for="foldable_borderColorFront">Front</label>
-            <input
-              type="color"
-              id="foldable_borderColorFront"
-              value="#000000"
-            />
-            <label for="foldable_borderColorBack">Back</label>
-            <input type="color" id="foldable_borderColorBack" value="#000000" />
+              </select>
+            </div>
+            <div class="flex flex-col">
+              <label for="foldable_borderColorFront" class="text-sm">Front Color</label>
+              <input type="color" id="foldable_borderColorFront" value="#000000" class="w-full h-10 border-3 border-theme-dark rounded-md p-0" />
+            </div>
+            <div class="flex flex-col">
+              <label for="foldable_borderColorBack" class="text-sm">Back Color</label>
+              <input type="color" id="foldable_borderColorBack" value="#000000" class="w-full h-10 border-3 border-theme-dark rounded-md p-0" />
+            </div>
           </div>
         </div>
-        <div class="form-group advanced">
-          <p>Layout</p>
-          <div class="box settings">
-            <label for="foldable_foldLinePreference">Fold</label>
+
+        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-lg">Layout</h3>
+          </div>
+          <div class="flex flex-col">
+            <label for="foldable_foldLinePreference" class="text-sm">Fold Preference</label>
             <select id="foldable_foldLinePreference">
               <option value="auto">Auto</option>
               <option value="vertical">Vertical</option>
@@ -364,26 +517,25 @@
       </div>
     </div>
 
-    <div class="container">
-      <div class="foot">
-        <button id="generatePdfButton">Generate PDF</button>
-        <div id="progressContainer">
-          <span id="progressStatus"></span>
-          <progress
-            id="progressBar"
-            value="0"
-            max="100"
-          ></progress>
-        </div>
-
-        <a
-          href="https://www.buymeacoffee.com/pnpbuddy"
-          title="Support PnPBuddy by buying me a coffee"
-          ><img
-            src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=pnpbuddy&button_colour=FFDD00&font_colour=000000&font_family=Arial&outline_colour=000000&coffee_colour=ffffff"
-        /></a>
+    <!-- Generate Button Area -->
+    <div class="bento-box flex flex-col md:flex-row items-center justify-between gap-6 bg-theme-bg border-theme-dark mt-8">
+      <button id="generatePdfButton" class="btn-primary text-xl w-full md:w-auto text-theme-dark">
+        Generate PDF
+      </button>
+      
+      <div id="progressContainer" class="flex-1 w-full" style="display: none;">
+        <span id="progressStatus" class="font-bold text-theme-indigo block mb-2"></span>
+        <progress id="progressBar" value="0" max="100" class="w-full h-4 rounded-full overflow-hidden border-2 border-theme-dark [&::-webkit-progress-bar]:bg-white [&::-webkit-progress-value]:bg-theme-teal"></progress>
       </div>
+
+      <a href="https://www.buymeacoffee.com/pnpbuddy" title="Support PnPBuddy by buying me a coffee" class="shrink-0 transition-transform hover:-translate-y-1">
+        <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=pnpbuddy&button_colour=FFDD00&font_colour=000000&font_family=Arial&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a coffee" class="h-12 border-3 border-theme-dark rounded-lg shadow-[3px_3px_0_var(--color-theme-dark)]" />
+      </a>
+    </div>
+
+    </div> <!-- Close max-w-6xl -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="notifications.js"></script>
     <script src="preview-panel.js"></script>
     <script src="layout-master.js"></script>
     <script src="layout-ui.js"></script>
