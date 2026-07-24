@@ -166,46 +166,26 @@ const LayoutToolPDF = {
 
     const settings = window.LayoutToolUI.getSettings();
     const layoutMode = settings.layoutMode;
-    const usePreviewer = window.LayoutToolUI.elements.usePreviewer.checked;
 
     try {
-        let frontImageUrls = [];
-        let backImageUrls = [];
+        const mode = window.PreviewPanel.getMode();
+        if (mode === 'empty') {
+            alert("Error: No front images loaded.");
+            window.LayoutToolUI.ui.toggleProgressUI(false);
+            return;
+        }
+        if (mode === 'error') {
+            alert("Error: Number of backs must be 0, 1, or equal to the number of fronts.");
+            window.LayoutToolUI.ui.toggleProgressUI(false);
+            return;
+        }
 
-        if (usePreviewer) {
-            // New flow: Get data from the iframe
-            const previewData = await this.getPreviewData();
-            frontImageUrls = previewData.frontImages;
-            backImageUrls = previewData.backImages;
+        const { frontImages: frontImageUrls, backImages: backImageUrls } = window.PreviewPanel.getImageData();
 
-            if (frontImageUrls.length === 0) {
-                alert("Error: No valid image pairs were finalized in the previewer.");
-                window.LayoutToolUI.ui.toggleProgressUI(false);
-                return;
-            }
-
-        } else {
-            // Original flow: Read from file inputs
-            const { frontImages, backImages } = window.LayoutToolUI.elements;
-            const frontFiles = frontImages.files;
-            const backFiles = backImages.files;
-
-            if (frontFiles.length < 1) {
-                alert("Error: No front images selected.");
-                window.LayoutToolUI.ui.toggleProgressUI(false);
-                return;
-            }
-
-            const singleBack = backFiles.length === 1;
-            const noBack = backFiles.length === 0;
-            if (frontFiles.length !== backFiles.length && !singleBack && !noBack) {
-                alert("Error: Number of backs must be 0, 1, or the same as fronts.");
-                window.LayoutToolUI.ui.toggleProgressUI(false);
-                return;
-            }
-
-            frontImageUrls = await this.readFiles(frontFiles);
-            backImageUrls = await this.readFiles(backFiles);
+        if (frontImageUrls.length < 1) {
+            alert("Error: No front images selected.");
+            window.LayoutToolUI.ui.toggleProgressUI(false);
+            return;
         }
 
         // --- Common logic for sending to worker ---
@@ -224,8 +204,6 @@ const LayoutToolPDF = {
             let cards = [];
             for (let i = 0; i < frontImageUrls.length; i++) {
                 const front = frontImageUrls[i];
-                // In foldable mode, the number of backs must match fronts (or be 1 or 0)
-                // The previewer already handles this logic for us.
                 const back = backImageUrls[i] || (backImageUrls.length === 1 ? backImageUrls[0] : front);
                 cards.push({ front, back });
             }

@@ -1,45 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PNP Buddy Tools</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div class="container">
-      <h1>PNP Tools - WIP</h1>
-      <p>
-        This repository hosts a collection of web-based tools designed to help
-        users with tasks related to Print and Play (PNP) game creation. These
-        tools aim to simplify common preparation steps for game components.
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PNP Buddy 2.0 | Print and Play Game Creation Tools</title>
+  <meta name="description" content="A collection of web-based tools for Print & Play (PNP) game creation. Layout cards, align PDFs, extract images, and more." />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Print Registration Marks -->
+  <div class="registration-mark mark-tl"></div>
+  <div class="registration-mark mark-tr"></div>
+  <div class="registration-mark mark-bl"></div>
+  <div class="registration-mark mark-br"></div>
+
+  <div class="container">
+
+    <!-- Header -->
+    <header>
+      <a href="#" class="logo-badge">
+        <img src="assets/favicon.svg" alt="PNP Buddy Logo" class="logo-icon" />
+        PNP BUDDY 2.0
+      </a>
+      <div class="social-links">
+        <a href="https://discord.gg" target="_blank" rel="noopener" class="social-icon" title="Discord" aria-label="Discord">💬</a>
+        <a href="https://instagram.com" target="_blank" rel="noopener" class="social-icon" title="Instagram" aria-label="Instagram">📸</a>
+        <a href="https://buymeacoffee.com" target="_blank" rel="noopener" class="social-icon" title="Buy Me a Coffee" aria-label="Buy Me a Coffee">☕</a>
+        <a href="mailto:contact@pnpbuddy.com" class="social-icon" title="Email Us" aria-label="Email">✉️</a>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="mascot-wrapper">
+        <img src="assets/bg1.png" alt="PNP Buddy Robot Mascot" class="mascot-img" />
+      </div>
+
+      <h1 class="hero-title">PNP BUDDY 2.0</h1>
+      
+      <p class="hero-subtitle">
+        The site is getting a fresh new look! I'm working on visual updates, tool improvements, and a few exciting new features for the Print & Play community.
       </p>
 
-      <div class="tool-list">
-        <div class="tool">
-          <a href="./align/" class="button">PDF Alignment <span>&rarr;</span></a>
-          <p>
-            This tool allows you to shift the content of pages within a PDF
-            document. This is particularly useful for correcting alignment
-            issues before printing.
-          </p>
-        </div>
-        <div class="tool">
-          <a href="./layout/" class="button">Card layout <span>&rarr;</span></a>
-          <p>
-            This tool helps you arrange images into a grid layout on standard
-            page sizes (A4, Letter) for printing game cards. It supports duplex
-            printing by allowing separate image sets for fronts and backs.
-          </p>
-        </div>
-        <div class="tool">
-          <a href="./extract/" class="button">PDF Image extractor <span>&rarr;</span></a>
-          <p>
-            This tool extracts images from a PDF can save them individually or in bulk.
-          </p>
-        </div>
+      <!-- Email Octopus Signup Form -->
+      <div class="signup-box">
+        <form 
+          action="https://e-2.emailoctopus.com/lists/YOUR_LIST_ID/members/embedded/1.3/add"
+          method="post"
+          class="signup-form"
+          target="_blank">
+          <input 
+            type="email" 
+            name="field_0" 
+            class="email-input" 
+            placeholder="Enter your email address..." 
+            required 
+            aria-label="Email address for newsletter" />
+          <button type="submit" class="signup-btn">
+            Sign Up <span>&rarr;</span>
+          </button>
+        </form>
+        <p class="signup-disclaimer">
+          * I respect your inbox — your email will only be used for PnP updates and news. Never shared.
+        </p>
       </div>
+    </section>
+
+    <!-- Bento Grid Section for Tools -->
+    <section class="tools-section">
+      <h2 class="section-title">THE TOOLS</h2>
+
+      <div class="bento-grid">
+
+        <!-- Card Layout Tool (Featured) -->
+        <a href="./layout/" class="tool-card card-featured">
+          <span class="card-tag">Core Tool</span>
+          <h3 class="card-title">CARD LAYOUT TOOL</h3>
+          <p class="card-desc">
+            Arrange card front & back images into printable grids on A4 or Letter. Supports duplex printing, custom card sizes, bleed areas, borders, and crosshair guides.
+          </p>
+          <span class="card-action">Launch Card Layout Tool &rarr;</span>
+        </a>
+
+        <!-- PDF Alignment Tool -->
+        <a href="./align/" class="tool-card card-medium">
+          <span class="card-tag">PDF Utility</span>
+          <h3 class="card-title">PDF ALIGNMENT TOOL</h3>
+          <p class="card-desc">
+            Shift PDF page contents along X and Y axes to fix odd/even duplex alignment issues before printing.
+          </p>
+          <span class="card-action">Launch Align Tool &rarr;</span>
+        </a>
+
+        <!-- PDF Image Extractor -->
+        <a href="./extract/" class="tool-card card-small">
+          <span class="card-tag">Extractor</span>
+          <h3 class="card-title">PDF IMAGE EXTRACTOR</h3>
+          <p class="card-desc">
+            Extract graphics and card art directly from PDF files in bulk or individually.
+          </p>
+          <span class="card-action">Launch Extractor &rarr;</span>
+        </a>
+
+        <!-- Behold: Scoring -->
+        <a href="#" class="tool-card card-small">
+          <span class="card-tag">WIP / Fun</span>
+          <h3 class="card-title">BEHOLD: SCORING</h3>
+          <p class="card-desc">
+            Keep track of scores and endgame calculations for board game playtests.
+          </p>
+          <span class="card-action">Coming Soon &rarr;</span>
+        </a>
+
+        <!-- Corner Cutting Game -->
+        <a href="#" class="tool-card card-small">
+          <span class="card-tag">Mini-Game</span>
+          <h3 class="card-title">CORNER CUTTING GAME</h3>
+          <p class="card-desc">
+            Test your precision and speed in this fun card-trimming mini-game!
+          </p>
+          <span class="card-action">Play Game &rarr;</span>
+        </a>
+
       </div>
-    </div>
-  </body>
+    </section>
+
+    <!-- Lab / Experimental Banner -->
+    <section class="lab-banner">
+      <div class="lab-content">
+        <h3>TESTING SITE FOR NEW TOOLS</h3>
+        <p>
+          New tools are actively being developed. Want to test unreleased builds or leave feedback on development? Join our Discord community!
+        </p>
+      </div>
+      <a href="https://discord.gg" target="_blank" rel="noopener" class="discord-btn">
+        Join Discord Server
+      </a>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <p>&copy; PNP Buddy Tools. Built for Print & Play enthusiasts.</p>
+    </footer>
+
+  </div>
+
+</body>
 </html>

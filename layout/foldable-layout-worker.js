@@ -1,6 +1,7 @@
 if (typeof importScripts === "function") {
   importScripts(
-    "https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib@2.4.1/dist/pdf-lib.min.js"
+    "https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib@2.4.1/dist/pdf-lib.min.js",
+    "shared-worker-utils.js"
   );
 
   const withDefault = (value, defaultValue) => {
@@ -94,35 +95,34 @@ if (typeof importScripts === "function") {
     }
   };
 
-  const drawMarkup = (
-    page,
-    orientation,
-    rotate,
-    pageWidth,
-    pageHeight,
-    cardWidth,
-    cardHeight,
-    totalWidth,
-    totalHeight,
-    cardMargin,
-    foldingMargin,
-    cutMargin,
-    printerMargin,
-    cutterOffset,
-    cardColumnsPerPage,
-    cardRowsPerPage
-  ) => {
-    if (!page) return;
+  const drawMarkup = (page, options) => {
+    if (!page || !options) return;
 
-    const mmFactor = 2.83464567;
+    const {
+      orientation,
+      rotate,
+      pageWidth,
+      pageHeight,
+      cardWidth,
+      cardHeight,
+      totalWidth,
+      totalHeight,
+      cardMargin,
+      foldingMargin,
+      cutMargin,
+      printerMargin,
+      cutterOffset,
+      cardColumnsPerPage,
+      cardRowsPerPage,
+    } = options;
 
-    const cardWidthDoc = cardWidth * mmFactor;
-    const cardHeightDoc = cardHeight * mmFactor;
-    const cardMarginDoc = cardMargin * mmFactor;
-    const foldingMarginDoc = foldingMargin * mmFactor;
-    const cutMarginDoc = cutMargin * mmFactor;
-    const printerMarginDoc = printerMargin * mmFactor;
-    const cutterOffsetDoc = cutterOffset * mmFactor;
+    const cardWidthDoc = cardWidth * mmToPt;
+    const cardHeightDoc = cardHeight * mmToPt;
+    const cardMarginDoc = cardMargin * mmToPt;
+    const foldingMarginDoc = foldingMargin * mmToPt;
+    const cutMarginDoc = cutMargin * mmToPt;
+    const printerMarginDoc = printerMargin * mmToPt;
+    const cutterOffsetDoc = cutterOffset * mmToPt;
 
     const unitWidthDoc = rotate ? cardHeightDoc : cardWidthDoc;
     const unitHeightDoc = rotate ? cardWidthDoc : cardHeightDoc;
@@ -421,22 +421,21 @@ if (typeof importScripts === "function") {
     const foldLinePreference = withDefault(options.foldLinePreference, "auto");
     const allowMultipleRows = withDefault(options.allowMultipleRows, true);
 
-    const mmFactor = 2.83464567;
-    const pageWidth = options.pageWidth * mmFactor;
-    const pageHeight = options.pageHeight * mmFactor;
+    const pageWidth = options.pageWidth * mmToPt;
+    const pageHeight = options.pageHeight * mmToPt;
 
-    const printerMarginDoc = printerMargin * mmFactor;
+    const printerMarginDoc = printerMargin * mmToPt;
 
     const [usableWidth, usableHeight] = [
       pageWidth - 2 * printerMarginDoc,
       pageHeight - 2 * printerMarginDoc,
     ];
     const [cardWidthDoc, cardHeightDoc] = [
-      cardWidth * mmFactor,
-      cardHeight * mmFactor,
+      cardWidth * mmToPt,
+      cardHeight * mmToPt,
     ];
-    const cardMarginDoc = cardMargin * mmFactor;
-    const foldingMarginDoc = foldingMargin * mmFactor;
+    const cardMarginDoc = cardMargin * mmToPt;
+    const foldingMarginDoc = foldingMargin * mmToPt;
 
     const maxCoverage = (spaceX, spaceY, cardWidth, cardHeight, cardMargin) => {
       const cardsX = Math.floor(spaceX / (cardWidth + cardMargin));
@@ -617,6 +616,165 @@ if (typeof importScripts === "function") {
     return optimum;
   };
 
+  const calculateCardPosition = (params) => {
+    const {
+      orientation,
+      rotate,
+      count,
+      cardsPerPage,
+      cardColumnsPerPage,
+      pageWidth,
+      pageHeight,
+      totalWidth,
+      totalHeight,
+      effectiveFoldingMarginDoc,
+      cardWidthDoc,
+      cardHeightDoc,
+      effectiveCardMarginDoc,
+      innerBorderWidthDoc,
+      innerBorderHeightDoc,
+      outerBorderDoc,
+    } = params;
+
+    const row = Math.floor((count % cardsPerPage) / cardColumnsPerPage);
+    const col = count % cardColumnsPerPage;
+
+    let xFront, yFront, xBack, yBack, angleFront, angleBack;
+    let xOuterFront, yOuterFront, xOuterBack, yOuterBack;
+    let xInnerFront, yInnerFront, xInnerBack, yInnerBack;
+
+    if (orientation === "vertical") {
+      if (rotate) {
+        angleFront = PDFLib.degrees(90);
+        xFront =
+          pageWidth / 2 -
+          effectiveFoldingMarginDoc -
+          row * (cardHeightDoc + effectiveCardMarginDoc);
+        yFront =
+          (pageHeight + totalHeight) / 2 -
+          cardWidthDoc -
+          col * (cardWidthDoc + effectiveCardMarginDoc);
+
+        angleBack = PDFLib.degrees(-90);
+        xBack =
+          pageWidth / 2 +
+          effectiveFoldingMarginDoc +
+          row * (cardHeightDoc + effectiveCardMarginDoc);
+        yBack =
+          (pageHeight + totalHeight) / 2 -
+          col * (cardWidthDoc + effectiveCardMarginDoc);
+
+        xInnerFront = xFront - innerBorderHeightDoc;
+        yInnerFront = yFront + innerBorderWidthDoc;
+        xInnerBack = xBack + innerBorderHeightDoc;
+        yInnerBack = yBack - innerBorderWidthDoc;
+
+        xOuterFront = xFront + outerBorderDoc;
+        yOuterFront = yFront - outerBorderDoc;
+        xOuterBack = xBack - outerBorderDoc;
+        yOuterBack = yBack + outerBorderDoc;
+      } else {
+        angleFront = PDFLib.degrees(0);
+        xFront =
+          pageWidth / 2 -
+          effectiveFoldingMarginDoc -
+          cardWidthDoc -
+          row * (cardWidthDoc + effectiveCardMarginDoc);
+        yFront =
+          (pageHeight + totalHeight) / 2 -
+          cardHeightDoc -
+          col * (cardHeightDoc + effectiveCardMarginDoc);
+
+        angleBack = PDFLib.degrees(0);
+        xBack =
+          pageWidth / 2 +
+          effectiveFoldingMarginDoc +
+          row * (cardWidthDoc + effectiveCardMarginDoc);
+        yBack = yFront;
+
+        xInnerFront = xFront + innerBorderWidthDoc;
+        yInnerFront = yFront + innerBorderHeightDoc;
+        xInnerBack = xBack + innerBorderWidthDoc;
+        yInnerBack = yInnerFront;
+
+        xOuterFront = xFront - outerBorderDoc;
+        yOuterFront = yFront - outerBorderDoc;
+        xOuterBack = xBack - outerBorderDoc;
+        yOuterBack = yOuterFront;
+      }
+    } else {
+      if (!rotate) {
+        // heads-up, inverted logic!
+        angleFront = PDFLib.degrees(0);
+        xFront =
+          (pageWidth - totalWidth) / 2 +
+          col * (cardWidthDoc + effectiveCardMarginDoc);
+        yFront =
+          pageHeight / 2 +
+          effectiveFoldingMarginDoc +
+          row * (cardHeightDoc + effectiveCardMarginDoc);
+
+        angleBack = PDFLib.degrees(180);
+        xBack = xFront + cardWidthDoc;
+        yBack =
+          pageHeight / 2 -
+          effectiveFoldingMarginDoc -
+          row * (cardHeightDoc + effectiveCardMarginDoc);
+
+        xInnerFront = xFront + innerBorderWidthDoc;
+        yInnerFront = yFront + innerBorderHeightDoc;
+        xInnerBack = xBack - innerBorderWidthDoc;
+        yInnerBack = yBack - innerBorderHeightDoc;
+
+        xOuterFront = xFront - outerBorderDoc;
+        yOuterFront = yFront - outerBorderDoc;
+        xOuterBack = xBack + outerBorderDoc;
+        yOuterBack = yBack + outerBorderDoc;
+      } else {
+        angleFront = PDFLib.degrees(90);
+        xFront =
+          (pageWidth - totalWidth) / 2 +
+          cardHeightDoc +
+          col * (cardHeightDoc + effectiveCardMarginDoc);
+        yFront =
+          pageHeight / 2 +
+          effectiveFoldingMarginDoc +
+          row * (cardWidthDoc + effectiveCardMarginDoc);
+
+        angleBack = PDFLib.degrees(90);
+        xBack = xFront;
+        yBack =
+          pageHeight / 2 -
+          effectiveFoldingMarginDoc -
+          cardWidthDoc -
+          row * (cardWidthDoc + effectiveCardMarginDoc);
+
+        xInnerFront = xFront - innerBorderHeightDoc;
+        yInnerFront = yFront + innerBorderWidthDoc;
+        xInnerBack = xInnerFront;
+        yInnerBack = yBack + innerBorderWidthDoc;
+
+        xOuterFront = xFront + outerBorderDoc;
+        yOuterFront = yFront - outerBorderDoc;
+        xOuterBack = xOuterFront;
+        yOuterBack = yBack - outerBorderDoc;
+      }
+    }
+
+    return {
+      angleFront,
+      angleBack,
+      xInnerFront,
+      yInnerFront,
+      xInnerBack,
+      yInnerBack,
+      xOuterFront,
+      yOuterFront,
+      xOuterBack,
+      yOuterBack,
+    };
+  };
+
   const generatedPdf = async (cards, options) => {
     const cardWidth = options.cardWidth;
     const cardHeight = options.cardHeight;
@@ -646,24 +804,23 @@ if (typeof importScripts === "function") {
 
     const title = withDefault(options.title, "Layout PDF");
 
-    const mmFactor = 2.83464567;
-    const pageWidth = options.pageWidth * mmFactor;
-    const pageHeight = options.pageHeight * mmFactor;
+    const pageWidth = options.pageWidth * mmToPt;
+    const pageHeight = options.pageHeight * mmToPt;
 
-    const outerBorderDoc = outerBorder * mmFactor;
-    const innerBorderWidthDoc = innerBorderWidth * mmFactor;
-    const innerBorderHeightDoc = innerBorderHeight * mmFactor;
-    const cornerRadiusDoc = cornerRadius * mmFactor;
+    const outerBorderDoc = outerBorder * mmToPt;
+    const innerBorderWidthDoc = innerBorderWidth * mmToPt;
+    const innerBorderHeightDoc = innerBorderHeight * mmToPt;
+    const cornerRadiusDoc = cornerRadius * mmToPt;
 
     const [cardWidthDoc, cardHeightDoc] = [
-      cardWidth * mmFactor,
-      cardHeight * mmFactor,
+      cardWidth * mmToPt,
+      cardHeight * mmToPt,
     ];
 
-    const cardMarginDoc = cardMargin * mmFactor;
+    const cardMarginDoc = cardMargin * mmToPt;
     const effectiveCardMarginDoc = cardMarginDoc + 2 * outerBorderDoc;
 
-    const foldingMarginDoc = foldingMargin * mmFactor;
+    const foldingMarginDoc = foldingMargin * mmToPt;
     const effectiveFoldingMarginDoc = foldingMarginDoc + 2 * outerBorderDoc;
 
     const layoutSettings = findOptimalLayout({
@@ -697,33 +854,19 @@ if (typeof importScripts === "function") {
     pdfDoc.setCreationDate(now);
     pdfDoc.setModificationDate(now);
 
-    const deduplicationLUT = {};
-    const lookupCard = async (card) => {
-      if (!card) return;
-      if (!deduplicationLUT[card]) {
-        if (card.startsWith("data:image/png;base64,")) {
-          deduplicationLUT[card] = await pdfDoc.embedPng(card);
-        } else if (card.startsWith("data:image/jpeg;base64,")) {
-          deduplicationLUT[card] = await pdfDoc.embedJpg(card);
-        } else {
-          // Handle raw buffer if needed, or throw error
-        }
-      }
-      return deduplicationLUT[card];
-    };
+    const embedder = new ImageEmbedder(pdfDoc);
 
     let count = 0;
     let pages = 0;
     let page = null;
 
     for (const card of cards) {
-      const frontImage = await lookupCard(card.front);
-      const backImage = await lookupCard(card.back);
+      const frontImage = await embedder.lookupCard(card.front);
+      const backImage = await embedder.lookupCard(card.back);
 
       if (page == null || count % cardsPerPage === 0) {
         if (page)
-          drawMarkup(
-            page,
+          drawMarkup(page, {
             orientation,
             rotate,
             pageWidth,
@@ -732,144 +875,47 @@ if (typeof importScripts === "function") {
             cardHeight,
             totalWidth,
             totalHeight,
-            cardMargin + outerBorder * 2,
-            foldingMargin + 2 * outerBorder,
+            cardMargin: cardMargin + outerBorder * 2,
+            foldingMargin: foldingMargin + 2 * outerBorder,
             cutMargin,
             printerMargin,
             cutterOffset,
             cardColumnsPerPage,
-            cardRowsPerPage
-          );
+            cardRowsPerPage,
+          });
         pages++;
         page = pdfDoc.addPage([pageWidth, pageHeight]);
       }
 
-      let xFront, yFront, xBack, yBack, angleFront, angleBack;
-      let xOuterFront, yOuterFront, xOuterBack, yOuterBack;
-      let xInnerFront, yInnerFront, xInnerBack, yInnerBack;
-      const row = Math.floor((count % cardsPerPage) / cardColumnsPerPage);
-      if (orientation === "vertical") {
-        if (rotate) {
-          angleFront = PDFLib.degrees(90);
-          xFront =
-            pageWidth / 2 -
-            effectiveFoldingMarginDoc -
-            row * (cardHeightDoc + effectiveCardMarginDoc);
-          yFront =
-            (pageHeight + totalHeight) / 2 -
-            cardWidthDoc -
-            (count % cardColumnsPerPage) *
-              (cardWidthDoc + effectiveCardMarginDoc);
-
-          angleBack = PDFLib.degrees(-90);
-          xBack =
-            pageWidth / 2 +
-            effectiveFoldingMarginDoc +
-            row * (cardHeightDoc + effectiveCardMarginDoc);
-          yBack =
-            (pageHeight + totalHeight) / 2 -
-            (count % cardColumnsPerPage) *
-              (cardWidthDoc + effectiveCardMarginDoc);
-
-          xInnerFront = xFront - innerBorderHeightDoc;
-          yInnerFront = yFront + innerBorderWidthDoc;
-          xInnerBack = xBack + innerBorderHeightDoc;
-          yInnerBack = yBack - innerBorderWidthDoc;
-
-          xOuterFront = xFront + outerBorderDoc;
-          yOuterFront = yFront - outerBorderDoc;
-          xOuterBack = xBack - outerBorderDoc;
-          yOuterBack = yBack + outerBorderDoc;
-        } else {
-          angleFront = PDFLib.degrees(0);
-          xFront =
-            pageWidth / 2 -
-            effectiveFoldingMarginDoc -
-            cardWidthDoc -
-            row * (cardWidthDoc + effectiveCardMarginDoc);
-          yFront =
-            (pageHeight + totalHeight) / 2 -
-            cardHeightDoc -
-            (count % cardColumnsPerPage) *
-              (cardHeightDoc + effectiveCardMarginDoc);
-
-          angleBack = PDFLib.degrees(0);
-          xBack =
-            pageWidth / 2 +
-            effectiveFoldingMarginDoc +
-            row * (cardWidthDoc + effectiveCardMarginDoc);
-          yBack = yFront;
-
-          xInnerFront = xFront + innerBorderWidthDoc;
-          yInnerFront = yFront + innerBorderHeightDoc;
-          xInnerBack = xBack + innerBorderWidthDoc;
-          yInnerBack = yInnerFront;
-
-          xOuterFront = xFront - outerBorderDoc;
-          yOuterFront = yFront - outerBorderDoc;
-          xOuterBack = xBack - outerBorderDoc;
-          yOuterBack = yOuterFront;
-        }
-      } else {
-        if (!rotate) {
-          // heads-up, inverted logic!
-          angleFront = PDFLib.degrees(0);
-          xFront =
-            (pageWidth - totalWidth) / 2 +
-            (count % cardColumnsPerPage) *
-              (cardWidthDoc + effectiveCardMarginDoc);
-          yFront =
-            pageHeight / 2 +
-            effectiveFoldingMarginDoc +
-            row * (cardHeightDoc + effectiveCardMarginDoc);
-
-          angleBack = PDFLib.degrees(180);
-          xBack = xFront + cardWidthDoc;
-          yBack =
-            pageHeight / 2 -
-            effectiveFoldingMarginDoc -
-            row * (cardHeightDoc + effectiveCardMarginDoc);
-
-          xInnerFront = xFront + innerBorderWidthDoc;
-          yInnerFront = yFront + innerBorderHeightDoc;
-          xInnerBack = xBack - innerBorderWidthDoc;
-          yInnerBack = yBack - innerBorderHeightDoc;
-
-          xOuterFront = xFront - outerBorderDoc;
-          yOuterFront = yFront - outerBorderDoc;
-          xOuterBack = xBack + outerBorderDoc;
-          yOuterBack = yBack + outerBorderDoc;
-        } else {
-          angleFront = PDFLib.degrees(90);
-          xFront =
-            (pageWidth - totalWidth) / 2 +
-            cardHeightDoc +
-            (count % cardColumnsPerPage) *
-              (cardHeightDoc + effectiveCardMarginDoc);
-          yFront =
-            pageHeight / 2 +
-            effectiveFoldingMarginDoc +
-            row * (cardWidthDoc + effectiveCardMarginDoc);
-
-          angleBack = PDFLib.degrees(90);
-          xBack = xFront;
-          yBack =
-            pageHeight / 2 -
-            effectiveFoldingMarginDoc -
-            cardWidthDoc -
-            row * (cardWidthDoc + effectiveCardMarginDoc);
-
-          xInnerFront = xFront - innerBorderHeightDoc;
-          yInnerFront = yFront + innerBorderWidthDoc;
-          xInnerBack = xInnerFront;
-          yInnerBack = yBack + innerBorderWidthDoc;
-
-          xOuterFront = xFront + outerBorderDoc;
-          yOuterFront = yFront - outerBorderDoc;
-          xOuterBack = xOuterFront;
-          yOuterBack = yBack - outerBorderDoc;
-        }
-      }
+      const {
+        angleFront,
+        angleBack,
+        xInnerFront,
+        yInnerFront,
+        xInnerBack,
+        yInnerBack,
+        xOuterFront,
+        yOuterFront,
+        xOuterBack,
+        yOuterBack,
+      } = calculateCardPosition({
+        orientation,
+        rotate,
+        count,
+        cardsPerPage,
+        cardColumnsPerPage,
+        pageWidth,
+        pageHeight,
+        totalWidth,
+        totalHeight,
+        effectiveFoldingMarginDoc,
+        cardWidthDoc,
+        cardHeightDoc,
+        effectiveCardMarginDoc,
+        innerBorderWidthDoc,
+        innerBorderHeightDoc,
+        outerBorderDoc,
+      });
 
       page.drawImage(frontImage, {
         x: xInnerFront,
@@ -888,51 +934,25 @@ if (typeof importScripts === "function") {
       });
 
       if (outerBorder > 0 || innerBorderWidth > 0 || innerBorderHeight > 0) {
-        page.drawRectangle({
+        drawCardBorder(page, {
           x: xOuterFront,
           y: yOuterFront,
           width: cardWidthDoc + 2 * outerBorderDoc,
           height: cardHeightDoc + 2 * outerBorderDoc,
           borderColor: borderColorFront,
           borderWidth: 2 * innerBorderWidthDoc,
-          rx: 0,
-          ry: 0,
+          cornerRadius: cornerRadiusDoc,
           rotate: angleFront,
         });
 
-        page.drawRectangle({
+        drawCardBorder(page, {
           x: xOuterBack,
           y: yOuterBack,
           width: cardWidthDoc + 2 * outerBorderDoc,
           height: cardHeightDoc + 2 * outerBorderDoc,
           borderColor: borderColorBack,
           borderWidth: 2 * innerBorderWidthDoc,
-          rx: 0,
-          ry: 0,
-          rotate: angleBack,
-        });
-
-        page.drawRectangle({
-          x: xOuterFront,
-          y: yOuterFront,
-          width: cardWidthDoc + 2 * outerBorderDoc,
-          height: cardHeightDoc + 2 * outerBorderDoc,
-          borderColor: borderColorFront,
-          borderWidth: 2 * innerBorderWidthDoc,
-          rx: cornerRadiusDoc,
-          ry: cornerRadiusDoc,
-          rotate: angleFront,
-        });
-
-        page.drawRectangle({
-          x: xOuterBack,
-          y: yOuterBack,
-          width: cardWidthDoc + 2 * outerBorderDoc,
-          height: cardHeightDoc + 2 * outerBorderDoc,
-          borderColor: borderColorBack,
-          borderWidth: 2 * innerBorderWidthDoc,
-          rx: cornerRadiusDoc,
-          ry: cornerRadiusDoc,
+          cornerRadius: cornerRadiusDoc,
           rotate: angleBack,
         });
       }
@@ -941,8 +961,7 @@ if (typeof importScripts === "function") {
 
       reportProgress(count, cards.length);
     }
-    drawMarkup(
-      page,
+    drawMarkup(page, {
       orientation,
       rotate,
       pageWidth,
@@ -951,14 +970,14 @@ if (typeof importScripts === "function") {
       cardHeight,
       totalWidth,
       totalHeight,
-      cardMargin + 2 * outerBorder,
-      foldingMargin + 2 * outerBorder,
+      cardMargin: cardMargin + 2 * outerBorder,
+      foldingMargin: foldingMargin + 2 * outerBorder,
       cutMargin,
       printerMargin,
       cutterOffset,
       cardColumnsPerPage,
-      cardRowsPerPage
-    );
+      cardRowsPerPage,
+    });
 
     reportSaving();
     const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
@@ -975,21 +994,6 @@ if (typeof importScripts === "function") {
     );
   };
 
-  const reportProgress = (done, all) => {
-    postMessage({
-      state: "progress",
-      data: { done, all, progress: Math.round((done * 100) / all) },
-    });
-  };
-
-  const reportSaving = () => {
-    postMessage({ state: "saving" });
-  };
-
-  const reportDone = (cards, pages, bytes) => {
-    postMessage({ state: "done", data: { cards, pages, bytes } });
-  };
-
   const onmessage = async (e) => {
     if (e.data.generatePdf) {
       const { cards, options } = e.data.generatePdf;
@@ -1002,6 +1006,4 @@ if (typeof importScripts === "function") {
   };
 
   addEventListener("message", onmessage);
-} else {
-  // not in a worker
 }

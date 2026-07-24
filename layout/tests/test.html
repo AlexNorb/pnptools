@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>PreviewPanel Unit Tests</title>
+  <style>
+    :root {
+      --bg-color: #f4f6f9;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --pass-color: #2e7d32;
+      --pass-bg: #e8f5e9;
+      --pass-border: #a5d6a7;
+      --fail-color: #c62828;
+      --fail-bg: #ffebee;
+      --fail-border: #ef9a9a;
+      --border-color: #e0e0e0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 24px;
+    }
+
+    #summary {
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    #summary.pass {
+      background-color: var(--pass-bg);
+      color: var(--pass-color);
+      border: 1px solid var(--pass-border);
+    }
+
+    #summary.fail {
+      background-color: var(--fail-bg);
+      color: var(--fail-color);
+      border: 1px solid var(--fail-border);
+    }
+
+    .suite {
+      background: var(--card-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 20px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .suite-title {
+      background: #fafafa;
+      padding: 12px 16px;
+      font-size: 16px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+      color: #444;
+    }
+
+    .test-case {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .test-case:last-child {
+      border-bottom: none;
+    }
+
+    .test-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .test-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .test-status {
+      font-size: 13px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .test-case.pass .test-status {
+      background-color: var(--pass-bg);
+      color: var(--pass-color);
+    }
+
+    .test-case.fail .test-status {
+      background-color: var(--fail-bg);
+      color: var(--fail-color);
+    }
+
+    .test-error {
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--fail-color);
+      background: #fff0f0;
+      padding: 8px;
+      border-radius: 4px;
+      margin-top: 6px;
+      white-space: pre-wrap;
+    }
+  </style>
+  <script src="../preview-panel.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>PreviewPanel Automated Unit Tests</h1>
+    <div id="summary">Running tests...</div>
+    <div id="results"></div>
+  </div>
+
+  <script>
+    (async function () {
+      'use strict';
+
+      // Simple Assertion Helper
+      class AssertionError extends Error {
+        constructor(message) {
+          super(message);
+          this.name = 'AssertionError';
+        }
+      }
+
+      const assert = {
+        strictEqual(actual, expected, message) {
+          if (actual !== expected) {
+            throw new AssertionError(
+              message || `Expected ${JSON.stringify(expected)}, but got ${JSON.stringify(actual)}`
+            );
+          }
+        },
+        deepStrictEqual(actual, expected, message) {
+          const a = JSON.stringify(actual);
+          const e = JSON.stringify(expected);
+          if (a !== e) {
+            throw new AssertionError(
+              message || `Expected deep equality:\nExpected: ${e}\nActual:   ${a}`
+            );
+          }
+        },
+        isTrue(value, message) {
+          if (value !== true) {
+            throw new AssertionError(message || `Expected true, got ${value}`);
+          }
+        },
+        isFalse(value, message) {
+          if (value !== false) {
+            throw new AssertionError(message || `Expected false, got ${value}`);
+          }
+        }
+      };
+
+      const suites = [
+        {
+          name: 'State Management',
+          tests: [
+            {
+              name: 'addFronts adds images to state',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([
+                  { dataUrl: 'data:f1', name: 'front1' },
+                  { dataUrl: 'data:f2', name: 'front2' },
+                  { dataUrl: 'data:f3', name: 'front3' }
+                ]);
+                assert.strictEqual(PreviewPanel.state.fronts.length, 3, 'fronts.length should be 3');
+                assert.strictEqual(PreviewPanel.state.copies.length, 3, 'copies.length should be 3');
+                assert.deepStrictEqual(PreviewPanel.state.copies, [1, 1, 1], 'copies should default to 1 per front');
+              }
+            },
+            {
+              name: 'addBacks adds images to state',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addBacks([
+                  { dataUrl: 'data:b1', name: 'back1' },
+                  { dataUrl: 'data:b2', name: 'back2' }
+                ]);
+                assert.strictEqual(PreviewPanel.state.backs.length, 2, 'backs.length should be 2');
+              }
+            },
+            {
+              name: 'removePair removes correct pair',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([
+                  { dataUrl: 'data:f0', name: 'f0' },
+                  { dataUrl: 'data:f1', name: 'f1' },
+                  { dataUrl: 'data:f2', name: 'f2' }
+                ]);
+                await PreviewPanel.addBacks([
+                  { dataUrl: 'data:b0', name: 'b0' },
+                  { dataUrl: 'data:b1', name: 'b1' },
+                  { dataUrl: 'data:b2', name: 'b2' }
+                ]);
+                PreviewPanel.removePair(1);
+                assert.strictEqual(PreviewPanel.state.fronts.length, 2, 'fronts length should be 2');
+                assert.strictEqual(PreviewPanel.state.fronts[0].name, 'f0');
+                assert.strictEqual(PreviewPanel.state.fronts[1].name, 'f2');
+                assert.strictEqual(PreviewPanel.state.backs[0].name, 'b0');
+                assert.strictEqual(PreviewPanel.state.backs[1].name, 'b2');
+              }
+            },
+            {
+              name: 'clearFronts only clears fronts',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([{ dataUrl: 'data:f1', name: 'f1' }]);
+                await PreviewPanel.addBacks([{ dataUrl: 'data:b1', name: 'b1' }]);
+                PreviewPanel.clearFronts();
+                assert.strictEqual(PreviewPanel.state.fronts.length, 0, 'fronts should be empty');
+                assert.strictEqual(PreviewPanel.state.copies.length, 0, 'copies should be empty');
+                assert.strictEqual(PreviewPanel.state.backs.length, 1, 'backs should remain untouched');
+              }
+            },
+            {
+              name: 'clearBacks only clears backs',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([{ dataUrl: 'data:f1', name: 'f1' }]);
+                await PreviewPanel.addBacks([{ dataUrl: 'data:b1', name: 'b1' }]);
+                PreviewPanel.clearBacks();
+                assert.strictEqual(PreviewPanel.state.fronts.length, 1, 'fronts should remain untouched');
+                assert.strictEqual(PreviewPanel.state.backs.length, 0, 'backs should be empty');
+              }
+            },
+            {
+              name: 'clearAll clears everything',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([{ dataUrl: 'data:f1', name: 'f1' }]);
+                await PreviewPanel.addBacks([{ dataUrl: 'data:b1', name: 'b1' }]);
+                PreviewPanel.clearAll();
+                assert.strictEqual(PreviewPanel.state.fronts.length, 0, 'fronts should be empty');
+                assert.strictEqual(PreviewPanel.state.backs.length, 0, 'backs should be empty');
+                assert.strictEqual(PreviewPanel.state.copies.length, 0, 'copies should be empty');
+              }
+            },
+            {
+              name: 'setCopies updates copy count',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([{ dataUrl: 'data:f1', name: 'f1' }]);
+                PreviewPanel.setCopies(0, 5);
+                assert.strictEqual(PreviewPanel.state.copies[0], 5, 'copies[0] should be 5');
+              }
+            },
+            {
+              name: 'reorder moves pair correctly',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([
+                  { dataUrl: 'data:A', name: 'A' },
+                  { dataUrl: 'data:B', name: 'B' },
+                  { dataUrl: 'data:C', name: 'C' }
+                ]);
+                PreviewPanel.reorder(0, 2);
+                const names = PreviewPanel.state.fronts.map((f) => f.name);
+                assert.deepStrictEqual(names, ['B', 'C', 'A'], 'Reordered fronts should be [B, C, A]');
+              }
+            },
+            {
+              name: 'reorder moves copies with fronts',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([
+                  { dataUrl: 'data:A', name: 'A' },
+                  { dataUrl: 'data:B', name: 'B' },
+                  { dataUrl: 'data:C', name: 'C' }
+                ]);
+                PreviewPanel.setCopies(0, 10);
+                PreviewPanel.setCopies(1, 20);
+                PreviewPanel.setCopies(2, 30);
+                PreviewPanel.reorder(0, 2);
+                assert.deepStrictEqual(
+                  PreviewPanel.state.copies,
+                  [20, 30, 10],
+                  'Copies array must stay in sync with fronts'
+                );
+              }
+            }
+          ]
+        },
+        {
+          name: 'Mode Detection (getMode)',
+          tests: [
+            {
+              name: 'No images (0 fronts, 0 backs)',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                assert.strictEqual(PreviewPanel.getMode(), 'empty');
+              }
+            },
+            {
+              name: 'No backs (3 fronts, 0 backs)',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([
+                  { dataUrl: 'f1' },
+                  { dataUrl: 'f2' },
+                  { dataUrl: 'f3' }
+                ]);
+                assert.strictEqual(PreviewPanel.getMode(), 'no_backs');
+              }
+            },
+            {
+              name: 'Same back (3 fronts, 1 back)',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([
+                  { dataUrl: 'f1' },
+                  { dataUrl: 'f2' },
+                  { dataUrl: 'f3' }
+                ]);
+                await PreviewPanel.addBacks([{ dataUrl: 'b1' }]);
+                assert.strictEqual(PreviewPanel.getMode(), 'same_back');
+              }
+            },
+            {
+              name: 'Unique backs (3 fronts, 3 backs)',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([
+                  { dataUrl: 'f1' },
+                  { dataUrl: 'f2' },
+                  { dataUrl: 'f3' }
+                ]);
+                await PreviewPanel.addBacks([
+                  { dataUrl: 'b1' },
+                  { dataUrl: 'b2' },
+                  { dataUrl: 'b3' }
+                ]);
+                assert.strictEqual(PreviewPanel.getMode(), 'unique_backs');
+              }
+            },
+            {
+              name: 'Mismatch (3 fronts, 2 backs)',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([
+                  { dataUrl: 'f1' },
+                  { dataUrl: 'f2' },
+                  { dataUrl: 'f3' }
+                ]);
+                await PreviewPanel.addBacks([
+                  { dataUrl: 'b1' },
+                  { dataUrl: 'b2' }
+                ]);
+                assert.strictEqual(PreviewPanel.getMode(), 'error');
+              }
+            }
+          ]
+        },
+        {
+          name: 'Data Compilation (getImageData)',
+          tests: [
+            {
+              name: 'Basic output (2 fronts, 2 backs, copies [1,1])',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([{ dataUrl: 'f1' }, { dataUrl: 'f2' }]);
+                await PreviewPanel.addBacks([{ dataUrl: 'b1' }, { dataUrl: 'b2' }]);
+                const data = PreviewPanel.getImageData();
+                assert.deepStrictEqual(data.frontImages, ['f1', 'f2']);
+                assert.deepStrictEqual(data.backImages, ['b1', 'b2']);
+              }
+            },
+            {
+              name: 'Copy expansion (2 fronts, 2 backs, copies [3,1])',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([{ dataUrl: 'f1' }, { dataUrl: 'f2' }]);
+                await PreviewPanel.addBacks([{ dataUrl: 'b1' }, { dataUrl: 'b2' }]);
+                PreviewPanel.setCopies(0, 3);
+                PreviewPanel.setCopies(1, 1);
+                const data = PreviewPanel.getImageData();
+                assert.deepStrictEqual(data.frontImages, ['f1', 'f1', 'f1', 'f2']);
+                assert.deepStrictEqual(data.backImages, ['b1', 'b1', 'b1', 'b2']);
+              }
+            },
+            {
+              name: 'Same back expansion (3 fronts, 1 back, copies [1,1,1])',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([
+                  { dataUrl: 'f1' },
+                  { dataUrl: 'f2' },
+                  { dataUrl: 'f3' }
+                ]);
+                await PreviewPanel.addBacks([{ dataUrl: 'b1' }]);
+                const data = PreviewPanel.getImageData();
+                assert.deepStrictEqual(data.frontImages, ['f1', 'f2', 'f3']);
+                assert.deepStrictEqual(data.backImages, ['b1']);
+              }
+            },
+            {
+              name: 'No backs output (3 fronts, 0 backs, copies [1,1,1])',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([
+                  { dataUrl: 'f1' },
+                  { dataUrl: 'f2' },
+                  { dataUrl: 'f3' }
+                ]);
+                const data = PreviewPanel.getImageData();
+                assert.deepStrictEqual(data.frontImages, ['f1', 'f2', 'f3']);
+                assert.deepStrictEqual(data.backImages, []);
+              }
+            },
+            {
+              name: 'Order preserved (Reorder then getImageData)',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([
+                  { dataUrl: 'f1' },
+                  { dataUrl: 'f2' },
+                  { dataUrl: 'f3' }
+                ]);
+                await PreviewPanel.addBacks([
+                  { dataUrl: 'b1' },
+                  { dataUrl: 'b2' },
+                  { dataUrl: 'b3' }
+                ]);
+                PreviewPanel.reorder(0, 2);
+                const data = PreviewPanel.getImageData();
+                assert.deepStrictEqual(data.frontImages, ['f2', 'f3', 'f1']);
+                assert.deepStrictEqual(data.backImages, ['b2', 'b3', 'b1']);
+              }
+            }
+          ]
+        },
+        {
+          name: 'Edge Cases',
+          tests: [
+            {
+              name: 'Empty state (getImageData on fresh state)',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                const data = PreviewPanel.getImageData();
+                assert.deepStrictEqual(data.frontImages, []);
+                assert.deepStrictEqual(data.backImages, []);
+              }
+            },
+            {
+              name: 'Delete last pair',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([{ dataUrl: 'f1' }]);
+                await PreviewPanel.addBacks([{ dataUrl: 'b1' }]);
+                PreviewPanel.removePair(0);
+                assert.strictEqual(PreviewPanel.state.fronts.length, 0);
+                assert.strictEqual(PreviewPanel.state.backs.length, 0);
+                assert.strictEqual(PreviewPanel.getMode(), 'empty');
+              }
+            },
+            {
+              name: 'Copies min value (setCopies(0, 0) clamps to 1)',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([{ dataUrl: 'f1' }]);
+                PreviewPanel.setCopies(0, 0);
+                assert.strictEqual(PreviewPanel.state.copies[0], 1, '0 count should clamp to 1');
+                PreviewPanel.setCopies(0, -5);
+                assert.strictEqual(PreviewPanel.state.copies[0], 1, 'Negative count should clamp to 1');
+              }
+            },
+            {
+              name: 'Large copy count (setCopies(0, 99))',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                await PreviewPanel.addFronts([{ dataUrl: 'f1' }]);
+                PreviewPanel.setCopies(0, 99);
+                assert.strictEqual(PreviewPanel.state.copies[0], 99);
+                const data = PreviewPanel.getImageData();
+                assert.strictEqual(data.frontImages.length, 99);
+              }
+            }
+          ]
+        },
+        {
+          name: 'Async Operations & Event System',
+          tests: [
+            {
+              name: 'FileReader async Blob loading',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                const blob = new Blob(['sample image data'], { type: 'text/plain' });
+                await PreviewPanel.addFronts([blob]);
+                assert.strictEqual(PreviewPanel.state.fronts.length, 1);
+                assert.isTrue(
+                  PreviewPanel.state.fronts[0].dataUrl.startsWith('data:'),
+                  'FileReader should convert Blob to dataUrl'
+                );
+              }
+            },
+            {
+              name: 'onChange listener notifications',
+              fn: async () => {
+                PreviewPanel.clearAll();
+                let notified = false;
+                const unsubscribe = PreviewPanel.onChange((state) => {
+                  notified = true;
+                });
+                await PreviewPanel.addFronts([{ dataUrl: 'f1' }]);
+                assert.isTrue(notified, 'onChange listener should be called when state changes');
+                unsubscribe();
+              }
+            }
+          ]
+        }
+      ];
+
+      // Runner logic
+      const resultsContainer = document.getElementById('results');
+      const summaryEl = document.getElementById('summary');
+
+      let totalTests = 0;
+      let passCount = 0;
+      let failCount = 0;
+
+      for (const suite of suites) {
+        const suiteEl = document.createElement('div');
+        suiteEl.className = 'suite';
+
+        const suiteTitle = document.createElement('div');
+        suiteTitle.className = 'suite-title';
+        suiteTitle.textContent = suite.name;
+        suiteEl.appendChild(suiteTitle);
+
+        for (const test of suite.tests) {
+          totalTests++;
+          const testEl = document.createElement('div');
+          testEl.className = 'test-case';
+
+          const testHeader = document.createElement('div');
+          testHeader.className = 'test-header';
+
+          const testName = document.createElement('span');
+          testName.className = 'test-name';
+          testName.textContent = test.name;
+
+          const testStatus = document.createElement('span');
+          testStatus.className = 'test-status';
+
+          testHeader.appendChild(testName);
+          testHeader.appendChild(testStatus);
+          testEl.appendChild(testHeader);
+
+          try {
+            await test.fn();
+            passCount++;
+            testEl.classList.add('pass');
+            testStatus.textContent = 'PASS ✓';
+          } catch (err) {
+            failCount++;
+            testEl.classList.add('fail');
+            testStatus.textContent = 'FAIL ✗';
+
+            const errEl = document.createElement('div');
+            errEl.className = 'test-error';
+            errEl.textContent = err.stack || err.message || String(err);
+            testEl.appendChild(errEl);
+          }
+
+          suiteEl.appendChild(testEl);
+        }
+
+        resultsContainer.appendChild(suiteEl);
+      }
+
+      if (failCount === 0) {
+        summaryEl.className = 'pass';
+        summaryEl.textContent = `✓ All Tests Passed (${passCount}/${totalTests})`;
+      } else {
+        summaryEl.className = 'fail';
+        summaryEl.textContent = `✗ Tests Failed (${failCount} failed out of ${totalTests})`;
+      }
+    })();
+  </script>
+</body>
+</html>

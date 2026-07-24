@@ -14,7 +14,7 @@ p {
   font-size: 1rem;
 }
 
-p2 {
+.file-count {
   color: #3e97eb;
   font-size: 1.2rem;
   font-weight: bold;
@@ -74,6 +74,14 @@ body {
   box-shadow: inset 0px 0px 5px rgba(96, 94, 94, 0.514);
 }
 
+.form-group.mode {
+  justify-content: space-around;
+}
+
+.mode-item {
+  text-align: center;
+}
+
 .form-group label,
 .box label {
   flex-basis: auto;
@@ -103,7 +111,7 @@ body {
   vertical-align: top;
 }
 
-button {
+.container button {
   background-color: #4caf50; /* Green */
   border: none;
   color: white;
@@ -116,7 +124,11 @@ button {
   cursor: pointer;
 }
 
-button.survey {
+.container button:hover {
+  background-color: #286e2b;
+}
+
+.container button.survey {
   background-color: #fa0015;
   border: none;
   color: white;
@@ -129,7 +141,11 @@ button.survey {
   cursor: pointer;
 }
 
-input[type="checkbox"] {
+.container button.survey:hover {
+  background-color: #b8000f;
+}
+
+.settings input[type="checkbox"] {
   transform: scale(2);
 }
 
@@ -185,12 +201,58 @@ input[name="layoutMode"] + label:hover {
   background-color: #e0eaf3;
 }
 
-button:hover {
-  background-color: #286e2b;
+.preview-panel {
+  margin-top: 1rem;
 }
 
-button.survey:hover {
-  background-color: #b8000f;
+.container button.preview-toggle {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  background: #e0e0e0;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.container button.preview-toggle:hover {
+  background: #d0d0d0;
+}
+
+.preview-content {
+  display: none;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 0.5rem 0.5rem;
+  padding: 1rem;
+  background: #fafafa;
+}
+
+.preview-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.preview-pairs-container {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  min-height: 180px;
+}
+
+#progressContainer {
+  display: none;
+  text-align: center;
+  margin-top: 10px;
+}
+
+#progressBar {
+  width: 100%;
 }
 
 .dropzone {
@@ -306,3 +368,4 @@ i {
 #previewerFrame {
   pointer-events: auto;
 }
+

@@ -19,9 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
       mode1: document.getElementById("mode1"),
       mode2: document.getElementById("mode2"),
       mode3: document.getElementById("mode3"),
-      // Previewer
-      usePreviewer: document.getElementById("usePreviewer"),
-      previewerContainer: document.getElementById("previewerContainer"),
       // Grid Layout
       preset: document.getElementById("preset"),
       presetName: document.getElementById("presetName"),
@@ -98,7 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         this.ui.applySettings.call(this, lastUsedSettings); // Then apply the user's modifications
         this.ui.toggleModeUI();
-        this.ui.togglePreviewer();
       }
 
       this.elements.generatePdfButton.addEventListener("click", () => {
@@ -129,35 +125,22 @@ document.addEventListener("DOMContentLoaded", () => {
         this.ui.loadPresets(); // Reload presets to remove the deleted one
       });
 
-      this.elements.frontImages.addEventListener("change", (event) => {
-        this.ui.updateModeIndicator();
-        this.ui.updateFileCount(
-          this.elements.frontImages,
-          this.elements.fileCount
-        );
-        // If previewer is active, append the new files
-        if (this.elements.usePreviewer.checked) {
-          window.LayoutToolPDF.appendDataToPreviewer(
-            event.target.files,
-            "fronts"
-          );
+      this.elements.frontImages.addEventListener("change", async (event) => {
+        if (event.target.files && event.target.files.length > 0) {
+          await window.PreviewPanel.addFronts(event.target.files);
+          window.PreviewPanel.ui.toggleAccordion(true);
         }
+        this.ui.updateModeIndicator();
+        this.ui.updateFileCount();
       });
 
-      this.elements.backImages.addEventListener("change", (event) => {
-        this.ui.updateModeIndicator();
-        this.ui.updateFileCount(
-          this.elements.backImages,
-          this.elements.fileCountBack,
-          true
-        );
-        // If previewer is active, append the new files
-        if (this.elements.usePreviewer.checked) {
-          window.LayoutToolPDF.appendDataToPreviewer(
-            event.target.files,
-            "backs"
-          );
+      this.elements.backImages.addEventListener("change", async (event) => {
+        if (event.target.files && event.target.files.length > 0) {
+          await window.PreviewPanel.addBacks(event.target.files);
+          window.PreviewPanel.ui.toggleAccordion(true);
         }
+        this.ui.updateModeIndicator();
+        this.ui.updateFileCount();
       });
 
       this.elements.preset.addEventListener(
@@ -223,11 +206,6 @@ document.addEventListener("DOMContentLoaded", () => {
           this.elements.foldable_cardHeight
         )
       );
-
-      this.elements.usePreviewer.addEventListener(
-        "change",
-        this.ui.togglePreviewer.bind(this)
-      );
     },
 
     ui: {
@@ -267,17 +245,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       },
 
-      togglePreviewer() {
-        const isChecked = LayoutToolUI.elements.usePreviewer.checked;
-        LayoutToolUI.elements.previewerContainer.style.display = isChecked
-          ? "block"
-          : "none";
-
-        if (isChecked) {
-          // When showing the previewer for the first time, send all current files
-          window.LayoutToolPDF.sendDataToPreviewer();
-        }
-      },
       toggleModeUI() {
         const isDoubleSided = LayoutToolUI.elements.doubleSidedRadio.checked;
         LayoutToolUI.elements.doubleSidedModeUI.style.display = isDoubleSided
@@ -385,12 +352,32 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       },
 
+      _gatherFormValues(elementIds) {
+        const settings = {};
+        elementIds.forEach((id) => {
+          const element = LayoutToolUI.elements[id] || document.getElementById(id);
+          if (!element) return;
+          if (element.type === "checkbox") {
+            settings[id] = element.checked;
+          } else if (
+            element.type === "number" ||
+            element.tagName.toLowerCase() === "select"
+          ) {
+            const val = element.value.replace(",", ".");
+            settings[id] = isNaN(val) || val.trim() === "" ? val : parseFloat(val);
+          } else {
+            settings[id] = element.value;
+          }
+        });
+        return settings;
+      },
+
       getRawSettings() {
         const settings = {};
         settings.preset = this.elements.preset.value;
         for (const key in LayoutToolUI.elements) {
           const element = LayoutToolUI.elements[key];
-          if (element.type === "file") continue;
+          if (!element || element.type === "file") continue;
           if (element.type === "checkbox" || element.type === "radio") {
             settings[key] = element.checked;
           } else if (element.id) {
@@ -401,7 +388,6 @@ document.addEventListener("DOMContentLoaded", () => {
       },
 
       getRawGridSettings() {
-        const settings = {};
         const gridElementIds = [
           "rows",
           "columns",
@@ -423,18 +409,7 @@ document.addEventListener("DOMContentLoaded", () => {
           "crosssize",
           "cornerRadius",
         ];
-
-        gridElementIds.forEach((id) => {
-          const element = LayoutToolUI.elements[id];
-          if (element) {
-            if (element.type === "checkbox") {
-              settings[id] = element.checked;
-            } else {
-              settings[id] = element.value;
-            }
-          }
-        });
-        return settings;
+        return this._gatherFormValues(gridElementIds);
       },
 
       applySettings(settings) {
@@ -498,6 +473,7 @@ document.addEventListener("DOMContentLoaded", () => {
           presetSelect.add(defaultOption);
 
           for (const key in defaultPresets) {
+            if (defaultPresets[key].hidden) continue;
             const option = new Option(defaultPresets[key].name, key);
             presetSelect.add(option);
           }
@@ -519,8 +495,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       },
       updateModeIndicator() {
-        const { mode1, mode2, mode3, frontImages, backImages } =
-          LayoutToolUI.elements;
+        const { mode1, mode2, mode3 } = LayoutToolUI.elements;
+        if (!mode1 || !mode2 || !mode3) return;
 
         // Reset all to inactive
         mode1.classList.remove("active", "error");
@@ -530,16 +506,15 @@ document.addEventListener("DOMContentLoaded", () => {
         mode2.classList.add("inactive");
         mode3.classList.add("inactive");
 
-        const fileCountBack = backImages.files.length;
-        const fileCount = frontImages.files.length;
+        const mode = window.PreviewPanel ? window.PreviewPanel.getMode() : 'no_backs';
 
-        if (fileCountBack === 0) {
+        if (mode === 'no_backs' || mode === 'empty') {
           mode1.classList.remove("inactive");
           mode1.classList.add("active");
-        } else if (fileCountBack === 1) {
+        } else if (mode === 'same_back') {
           mode2.classList.remove("inactive");
           mode2.classList.add("active");
-        } else if (fileCountBack === fileCount) {
+        } else if (mode === 'unique_backs') {
           mode3.classList.remove("inactive");
           mode3.classList.add("active");
         } else {
@@ -551,18 +526,20 @@ document.addEventListener("DOMContentLoaded", () => {
           mode3.classList.add("error");
         }
       },
-      updateFileCount(fileInput, countElement, isBack = false) {
-        const fileCount = fileInput.files.length;
-        if (isBack) {
-          countElement.textContent = `${fileCount} file${
-            fileCount !== 1
+      updateFileCount() {
+        const frontsCount = window.PreviewPanel ? window.PreviewPanel.state.fronts.length : 0;
+        const backsCount = window.PreviewPanel ? window.PreviewPanel.state.backs.length : 0;
+        const { fileCount, fileCountBack } = LayoutToolUI.elements;
+
+        if (fileCount) {
+          fileCount.textContent = `${frontsCount} file${frontsCount !== 1 ? "s" : ""} selected`;
+        }
+        if (fileCountBack) {
+          fileCountBack.textContent = `${backsCount} file${
+            backsCount !== 1
               ? "s selected. Different backs mode."
               : " selected. Same backs mode."
           }`;
-        } else {
-          countElement.textContent = `${fileCount} file${
-            fileCount !== 1 ? "s" : ""
-          } selected`;
         }
       },
     },
@@ -605,12 +582,13 @@ document.addEventListener("DOMContentLoaded", () => {
     },
 
     getGridSettings() {
-      const settings = {};
-      const mmToPt = 2.83464567;
-
       const ids = [
         "rows",
         "columns",
+        "pageSize",
+        "pageWidth",
+        "pageHeight",
+        "cardSize",
         "imageWidth",
         "imageHeight",
         "bleed",
@@ -623,41 +601,15 @@ document.addEventListener("DOMContentLoaded", () => {
         "frontBorderCheckbox",
         "backBorderCheckbox",
       ];
-
-      ids.forEach((id) => {
-        const element = this.elements[id];
-        if (element) {
-          if (
-            element.type === "number" ||
-            element.tagName.toLowerCase() === "select"
-          ) {
-            settings[id] = parseFloat(element.value.replace(",", "."));
-          } else if (element.type === "checkbox") {
-            settings[id] = element.checked;
-          }
-        }
-      });
-
-      settings.imageWidth *= mmToPt;
-      settings.imageHeight *= mmToPt;
-      settings.bleed *= mmToPt;
-      settings.borderWidth *= mmToPt * 2;
-      settings.crosswidth *= mmToPt;
-      settings.crosssize = (settings.crosssize * mmToPt) / 2;
-      settings.cornerRadius *= mmToPt;
-
-      settings.imageWidth += settings.bleed * 2;
-      settings.imageHeight += settings.bleed * 2;
-
-      settings.pageWidth = parseFloat(this.elements.pageWidth.value);
-      settings.pageHeight = parseFloat(this.elements.pageHeight.value);
-
-      return settings;
+      return this.ui._gatherFormValues(ids);
     },
 
     getFoldableSettings() {
-      const settings = {};
       const ids = [
+        "foldable_pageSize",
+        "foldable_pageWidth",
+        "foldable_pageHeight",
+        "foldable_cardSize",
         "foldable_cardWidth",
         "foldable_cardHeight",
         "foldable_printerMargin",
@@ -671,41 +623,16 @@ document.addEventListener("DOMContentLoaded", () => {
         "foldable_cornerRadius",
       ];
 
-      ids.forEach((id) => {
-        const element = document.getElementById(id);
-        if (element) {
-          let key = id.replace("foldable_", "");
-          if (key === "innerBorder") {
-            settings["innerBorderWidth"] = element.value;
-            settings["innerBorderHeight"] = element.value;
-            return;
-          }
-          if (
-            element.type === "number" ||
-            element.type === "color" ||
-            element.tagName.toLowerCase() === "select"
-          ) {
-            settings[key] = element.value;
-          } else if (element.type === "checkbox") {
-            settings[key] = element.checked;
-          }
-        }
-      });
+      const raw = this.ui._gatherFormValues(ids);
+      const settings = {};
 
-      settings.pageWidth = parseFloat(
-        document.getElementById("foldable_pageWidth").value
-      );
-      settings.pageHeight = parseFloat(
-        document.getElementById("foldable_pageHeight").value
-      );
-
-      for (const key in settings) {
-        if (
-          !isNaN(settings[key]) &&
-          typeof settings[key] === "string" &&
-          settings[key].trim() !== ""
-        ) {
-          settings[key] = parseFloat(settings[key]);
+      for (const id in raw) {
+        let key = id.replace("foldable_", "");
+        if (key === "innerBorder") {
+          settings["innerBorderWidth"] = raw[id];
+          settings["innerBorderHeight"] = raw[id];
+        } else {
+          settings[key] = raw[id];
         }
       }
 

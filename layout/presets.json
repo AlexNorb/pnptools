@@ -50,7 +50,7 @@
     }
   },
   "preset4": {
-    "name": "Europan Standard 59x91mm (Dominion)",
+    "name": "European Standard 59x91mm (Dominion)",
     "settings": {
       "pageSize": "A4 Portrait",
       "cardSize": "Custom",
@@ -65,6 +65,7 @@
     }
   },
   "template": {
+    "hidden": true,
     "name": "TEMPLATE (Copy to create new presets)",
     "settings": {
       "pageSize": "A4",
