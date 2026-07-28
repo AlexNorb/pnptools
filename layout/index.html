@@ -149,7 +149,7 @@
         height: 0.65rem;
         transform: scale(0);
         transition: 120ms transform ease-in-out;
-        background-color: var(--color-theme-dark);
+        background-color: #ffffff;
         transform-origin: center;
         clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
       }
@@ -472,7 +472,7 @@
               </div>
               <select id="preset" class="w-full"></select>
               <div class="flex gap-2 items-center">
-                <input type="text" id="presetName" placeholder="Preset Name" class="flex-1 min-w-0" />
+                <input type="text" id="presetName" placeholder="Preset Name" maxlength="25" class="flex-1 min-w-0" />
                 <button id="savePresetButton" title="Save Preset" aria-label="Save Preset" class="btn-secondary w-[2rem] p-0 text-sm shrink-0">
                   <i class="fa-solid fa-floppy-disk text-theme-indigo"></i>
                 </button>
@@ -565,12 +565,15 @@
             <i class="fa-solid fa-ruler-combined text-2xl text-theme-indigo"></i>
             <h3 class="font-display text-lg text-theme-dark">Card Size</h3>
           </div>
-          <select id="cardSize" name="cardSize">
-              <option value="Poker" selected>Poker (63x88mm)</option>
-              <option value="Bridge">Bridge (57x88mm)</option>
-              <option value="Tarot">Tarot (70x120mm)</option>
-              <option value="Custom">Custom</option>
-          </select>
+          <div class="flex gap-2 items-center">
+            <select id="cardSize" name="cardSize" class="w-auto max-w-full"></select>
+            <button id="saveCardSizeButton" title="Save Card Size" aria-label="Save Card Size" class="btn-secondary w-[2rem] p-0 text-sm shrink-0">
+              <i class="fa-solid fa-floppy-disk text-theme-indigo"></i>
+            </button>
+            <button id="deleteCardSizeButton" title="Delete Card Size" aria-label="Delete Card Size" class="btn-secondary w-[2rem] p-0 text-sm text-theme-pink border-theme-pink shrink-0">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
           <div class="flex gap-4 mt-2">
             <div class="flex flex-col">
               <label for="imageWidth" class="text-sm">Width</label>
@@ -740,12 +743,15 @@
             <i class="fa-solid fa-ruler-combined text-2xl text-theme-indigo"></i>
             <h3 class="font-display text-lg text-theme-dark">Card Size</h3>
           </div>
-          <select id="foldable_cardSize" name="foldable_cardSize">
-              <option value="Poker" selected>Poker (63x88mm)</option>
-              <option value="Bridge">Bridge (57x88mm)</option>
-              <option value="Tarot">Tarot (70x120mm)</option>
-              <option value="Custom">Custom</option>
-          </select>
+          <div class="flex gap-2 items-center">
+            <select id="foldable_cardSize" name="foldable_cardSize" class="w-auto max-w-full"></select>
+            <button id="foldable_saveCardSizeButton" title="Save Card Size" aria-label="Save Card Size" class="btn-secondary w-[2rem] p-0 text-sm shrink-0">
+              <i class="fa-solid fa-floppy-disk text-theme-indigo"></i>
+            </button>
+            <button id="foldable_deleteCardSizeButton" title="Delete Card Size" aria-label="Delete Card Size" class="btn-secondary w-[2rem] p-0 text-sm text-theme-pink border-theme-pink shrink-0">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
           <div class="flex flex-wrap gap-4 mt-1">
             <div class="flex flex-col">
               <label for="foldable_cardWidth" class="text-sm">Width</label>

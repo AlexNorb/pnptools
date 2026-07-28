@@ -37,6 +37,8 @@ document.addEventListener("DOMContentLoaded", () => {
       prefixPageSize: document.getElementById("prefixPageSize"),
       fileNamePreview: document.getElementById("fileNamePreview"),
       cardSize: document.getElementById("cardSize"),
+      saveCardSizeButton: document.getElementById("saveCardSizeButton"),
+      deleteCardSizeButton: document.getElementById("deleteCardSizeButton"),
       imageWidth: document.getElementById("imageWidth"),
       imageHeight: document.getElementById("imageHeight"),
       bleed: document.getElementById("bleed"),
@@ -55,6 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
       foldable_pageWidth: document.getElementById("foldable_pageWidth"),
       foldable_pageHeight: document.getElementById("foldable_pageHeight"),
       foldable_cardSize: document.getElementById("foldable_cardSize"),
+      foldable_saveCardSizeButton: document.getElementById("foldable_saveCardSizeButton"),
+      foldable_deleteCardSizeButton: document.getElementById("foldable_deleteCardSizeButton"),
       foldable_cardWidth: document.getElementById("foldable_cardWidth"),
       foldable_cardHeight: document.getElementById("foldable_cardHeight"),
       foldable_printerMargin: document.getElementById("foldable_printerMargin"),
@@ -95,6 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
     },
 
     async init() {
+      this.ui.populateCardSizes.bind(this)();
       await this.ui.loadPresets.bind(this)();
 
       const lastUsedSettings = this.storage.load("layoutTool.lastUsedSettings");
@@ -137,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       this.elements.savePresetButton.addEventListener("click", () => {
-        const name = this.elements.presetName.value;
+        const name = (this.elements.presetName.value || "").trim().slice(0, 25);
         if (!name) {
           Toast.show("Please enter a name for the preset.", "error");
           return;
@@ -157,6 +162,66 @@ document.addEventListener("DOMContentLoaded", () => {
         this.storage.deleteUserPreset(presetKey);
         this.ui.loadPresets(); // Reload presets to remove the deleted one
       });
+
+      const handleSaveCardSize = (isFoldable) => {
+        const widthEl = isFoldable ? this.elements.foldable_cardWidth : this.elements.imageWidth;
+        const heightEl = isFoldable ? this.elements.foldable_cardHeight : this.elements.imageHeight;
+        
+        const wVal = parseFloat(widthEl.value);
+        const hVal = parseFloat(heightEl.value);
+        const isInch = LayoutToolUI.config.currentUnit === "in";
+        
+        const w_mm = isInch ? wVal * 25.4 : wVal;
+        const h_mm = isInch ? hVal * 25.4 : hVal;
+
+        const onSave = (name) => {
+          const cleanName = (name || "").trim().slice(0, 25);
+          if (!cleanName) return;
+
+          const key = this.storage.saveUserCardSize(cleanName, w_mm, h_mm);
+          this.ui.populateCardSizes();
+          
+          // Select the newly created size
+          if (isFoldable) {
+            this.elements.foldable_cardSize.value = key;
+            this.elements.foldable_cardSize.dispatchEvent(new Event("change"));
+          } else {
+            this.elements.cardSize.value = key;
+            this.elements.cardSize.dispatchEvent(new Event("change"));
+          }
+        };
+
+        if (window.Toast && typeof window.Toast.prompt === 'function') {
+          window.Toast.prompt("Enter a name for this custom card size:", onSave, "Save Card Size");
+        } else {
+          const name = prompt("Enter a name for the custom card size:");
+          onSave(name);
+        }
+      };
+
+      const handleDeleteCardSize = (isFoldable) => {
+        const selectEl = isFoldable ? this.elements.foldable_cardSize : this.elements.cardSize;
+        const key = selectEl.value;
+        if (!key.startsWith("userSize_")) {
+          Toast.show("You can only delete user-defined card sizes.", "error");
+          return;
+        }
+        this.storage.deleteUserCardSize(key);
+        this.ui.populateCardSizes();
+      };
+
+      if (this.elements.saveCardSizeButton) {
+        this.elements.saveCardSizeButton.addEventListener("click", () => handleSaveCardSize(false));
+      }
+      if (this.elements.deleteCardSizeButton) {
+        this.elements.deleteCardSizeButton.addEventListener("click", () => handleDeleteCardSize(false));
+      }
+      if (this.elements.foldable_saveCardSizeButton) {
+        this.elements.foldable_saveCardSizeButton.addEventListener("click", () => handleSaveCardSize(true));
+      }
+      if (this.elements.foldable_deleteCardSizeButton) {
+        this.elements.foldable_deleteCardSizeButton.addEventListener("click", () => handleDeleteCardSize(true));
+      }
 
       this.elements.frontImages.addEventListener("change", async (event) => {
         if (event.target.files && event.target.files.length > 0) {
@@ -523,6 +588,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           }
         });
+        
+        if (this.populateCardSizes) this.populateCardSizes();
       },
 
       convertValueToDisplay(valMM) {
@@ -632,8 +699,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
           // 3. Card Size icon: NxN (+N)
           const cardSize = LayoutToolUI.elements.cardSize ? LayoutToolUI.elements.cardSize.value : "Poker";
-          const w = cardSize === "Custom" ? (LayoutToolUI.elements.imageWidth?.value || 63) : (LayoutToolUI.config.cardSizesInMM[cardSize]?.width || 63);
-          const h = cardSize === "Custom" ? (LayoutToolUI.elements.imageHeight?.value || 88) : (LayoutToolUI.config.cardSizesInMM[cardSize]?.height || 88);
+          const dims = this.getCardSizeDimensions(cardSize);
+          const w = cardSize === "Custom" ? (LayoutToolUI.elements.imageWidth?.value || 63) : (dims?.width || 63);
+          const h = cardSize === "Custom" ? (LayoutToolUI.elements.imageHeight?.value || 88) : (dims?.height || 88);
           const bleed = LayoutToolUI.elements.bleed ? parseFloat(LayoutToolUI.elements.bleed.value || "0") : 0;
           const bleedText = bleed > 0 ? ` (+${bleed})` : "";
           addPart("fa-solid fa-ruler-combined", null, `${w}x${h}${bleedText}`);
@@ -672,9 +740,10 @@ document.addEventListener("DOMContentLoaded", () => {
           addPart("fa-solid fa-map", null, foldPref.charAt(0).toUpperCase() + foldPref.slice(1));
 
           // 3. Card Size icon: NxN (+N)
-          const cardSize = LayoutToolUI.elements.foldable_cardSize ? LayoutToolUI.elements.foldable_cardSize.value : "poker";
-          const w = cardSize === "Custom" ? (LayoutToolUI.elements.foldable_cardWidth?.value || 63.5) : (LayoutToolUI.config.cardSizesInMM[cardSize]?.width || 63.5);
-          const h = cardSize === "Custom" ? (LayoutToolUI.elements.foldable_cardHeight?.value || 88.9) : (LayoutToolUI.config.cardSizesInMM[cardSize]?.height || 88.9);
+          const cardSize = LayoutToolUI.elements.foldable_cardSize ? LayoutToolUI.elements.foldable_cardSize.value : "Poker";
+          const dims = this.getCardSizeDimensions(cardSize);
+          const w = cardSize === "Custom" ? (LayoutToolUI.elements.foldable_cardWidth?.value || 63.5) : (dims?.width || 63.5);
+          const h = cardSize === "Custom" ? (LayoutToolUI.elements.foldable_cardHeight?.value || 88.9) : (dims?.height || 88.9);
           const bleed = LayoutToolUI.elements.foldable_cutMargin ? parseFloat(LayoutToolUI.elements.foldable_cutMargin.value || "0") : 0;
           const bleedText = bleed > 0 ? ` (+${bleed})` : "";
           addPart("fa-solid fa-ruler-combined", null, `${w}x${h}${bleedText}`);
@@ -800,6 +869,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       },
 
+      getCardSizeDimensions(sizeKey) {
+        if (sizeKey === "Custom") return null;
+        const defaults = LayoutToolUI.config.cardSizesInMM;
+        if (defaults[sizeKey]) return defaults[sizeKey];
+        const userSizes = LayoutToolUI.storage.loadUserCardSizes() || {};
+        return userSizes[sizeKey] || null;
+      },
+
       updateCardSizeInputs(dropdown, widthInput, heightInput) {
         const selectedSize = dropdown.value;
         const customSize = "Custom";
@@ -808,7 +885,7 @@ document.addEventListener("DOMContentLoaded", () => {
           widthInput.disabled = false;
           heightInput.disabled = false;
         } else {
-          const dimensions = LayoutToolUI.config.cardSizesInMM[selectedSize];
+          const dimensions = this.getCardSizeDimensions(selectedSize);
           if (dimensions) {
             widthInput.value = this.convertValueToDisplay(dimensions.width);
             heightInput.value = this.convertValueToDisplay(dimensions.height);
@@ -1157,6 +1234,72 @@ document.addEventListener("DOMContentLoaded", () => {
           console.error("Failed to load or parse presets:", error);
         }
       },
+
+      populateCardSizes() {
+        const defaultSizes = LayoutToolUI.config.cardSizesInMM;
+        const userSizes = LayoutToolUI.storage.loadUserCardSizes() || {};
+        const unit = LayoutToolUI.config.currentUnit || "mm";
+
+        const buildOptions = () => {
+          const options = [];
+          
+          for (const key in defaultSizes) {
+            const size = defaultSizes[key];
+            const wDisplay = LayoutToolUI.ui.convertValueToDisplay(size.width);
+            const hDisplay = LayoutToolUI.ui.convertValueToDisplay(size.height);
+            const option = new Option(`${key} (${wDisplay}x${hDisplay}${unit})`, key);
+            options.push(option);
+          }
+          
+          if (Object.keys(userSizes).length > 0) {
+            const divider = new Option("--- Custom Sizes ---", "");
+            divider.disabled = true;
+            options.push(divider);
+            
+            for (const key in userSizes) {
+              const size = userSizes[key];
+              const wDisplay = LayoutToolUI.ui.convertValueToDisplay(size.width);
+              const hDisplay = LayoutToolUI.ui.convertValueToDisplay(size.height);
+              let cleanName = size.name.replace(/\s*\([\d.]+x[\d.]+(mm|in)\)$/, '');
+              const option = new Option(`${cleanName} (${wDisplay}x${hDisplay}${unit})`, key);
+              options.push(option);
+            }
+          }
+          
+          const custom = new Option("Custom", "Custom");
+          options.push(custom);
+          
+          return options;
+        };
+
+        const cardSizeSelect = LayoutToolUI.elements.cardSize;
+        const foldableCardSizeSelect = LayoutToolUI.elements.foldable_cardSize;
+
+        const currentVal = cardSizeSelect.value;
+        const currentFoldVal = foldableCardSizeSelect.value;
+
+        cardSizeSelect.innerHTML = "";
+        foldableCardSizeSelect.innerHTML = "";
+
+        const opts1 = buildOptions();
+        opts1.forEach(opt => cardSizeSelect.add(opt));
+        
+        const opts2 = buildOptions();
+        opts2.forEach(opt => foldableCardSizeSelect.add(opt));
+
+        // Restore values if possible
+        if (Array.from(cardSizeSelect.options).some(o => o.value === currentVal)) {
+          cardSizeSelect.value = currentVal;
+        } else {
+          cardSizeSelect.value = "Poker";
+        }
+
+        if (Array.from(foldableCardSizeSelect.options).some(o => o.value === currentFoldVal)) {
+          foldableCardSizeSelect.value = currentFoldVal;
+        } else {
+          foldableCardSizeSelect.value = "Poker";
+        }
+      },
       updateModeIndicator() {
         const { mode1, mode2, mode3 } = LayoutToolUI.elements;
         if (!mode1 || !mode2 || !mode3) return;
@@ -1237,6 +1380,28 @@ document.addEventListener("DOMContentLoaded", () => {
         const userPresets = this.loadUserPresets() || {};
         delete userPresets[presetKey];
         this.save("layoutTool.userPresets", userPresets);
+      },
+
+      loadUserCardSizes() {
+        return this.load("layoutTool.userCardSizes");
+      },
+
+      saveUserCardSize(name, width, height) {
+        const userSizes = this.loadUserCardSizes() || {};
+        const key = `userSize_${Date.now()}`;
+        userSizes[key] = {
+          name: name,
+          width: parseFloat(width),
+          height: parseFloat(height)
+        };
+        this.save("layoutTool.userCardSizes", userSizes);
+        return key;
+      },
+
+      deleteUserCardSize(key) {
+        const userSizes = this.loadUserCardSizes() || {};
+        delete userSizes[key];
+        this.save("layoutTool.userCardSizes", userSizes);
       },
     },
 
