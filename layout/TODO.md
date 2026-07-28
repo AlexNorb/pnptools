@@ -56,13 +56,20 @@
 - [x] 5.2 Replace radio buttons with a modern segmented control toggle for Grid vs Foldable
 - [x] 5.3 Re-architect layout structure for optimal space utilization (combining/reducing height of upload section & settings)
 
-## Phase 6 — Dynamic Unit Switcher `IN PROGRESS`
+## Phase 6 — Dynamic Unit Switcher `COMPLETED`
 
-- [ ] 6.1 Add global unit toggle `[ mm | in ]` next to Settings title
-- [ ] 6.2 Implement state management for currentUnit (mm default) in layout-ui.js
-- [ ] 6.3 Add conversion logic for input fields on toggle switch (mm ↔ in) and step updates
-- [ ] 6.4 Intercept `_gatherFormValues` to ensure workers only ever receive values in `mm`
-- [ ] 6.5 Update preset population to handle active unit conversion
+- [x] 6.1 Add global unit toggle `[ mm | in ]` next to Settings title
+- [x] 6.2 Implement state management for currentUnit (mm default) in layout-ui.js
+- [x] 6.3 Add conversion logic for input fields on toggle switch (mm ↔ in) and step updates
+- [x] 6.4 Intercept `_gatherFormValues` to ensure workers only ever receive values in `mm`
+- [x] 6.5 Update preset population to handle active unit conversion
+
+## Phase 7 — Live Sheet Preview (PDF.js) `UPCOMING`
+
+- [ ] 7.1 Integrate PDF.js library into the layout tool
+- [ ] 7.2 Implement background worker preview generator capped at Page 1–2 for low CPU impact
+- [ ] 7.3 Build responsive live preview canvas / viewer container in the layout UI
+- [ ] 7.4 Debounce settings changes to update sheet preview live on setting tweaks
 
 ## Ideas & Future Requests
 
@@ -70,4 +77,3 @@
 - Export/import user presets as JSON file
 - Future Evaluation: Consider incorporating conceptual features from Martin's Formatter (saved for reference in [`docs/reference/martins-formatter/`](docs/reference/martins-formatter/)):
   - **Back Nudge (Printer Drift Compensation)**: $\pm X / \pm Y$ back page offset calibration for consumer duplex printers.
-  - **Live Sheet Preview Strategy**: Evaluate a 1–2 page PDF preview (rendered via PDF.js from Web Worker output capped at Page 1-2) to reuse 100% of existing PDF drawing logic efficiently without CPU bloat, alongside our thumbnail reordering panel.
