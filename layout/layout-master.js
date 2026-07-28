@@ -34,10 +34,39 @@ const LayoutToolPDF = {
       }
 
       if (finalPdfBytes) {
+        const isFoldable = document.getElementById("foldable")?.checked;
+        const defaultFallback = isFoldable ? "fold" : "grid";
+        let baseName = (document.getElementById("customFileName")?.value || "").trim();
+        if (baseName.endsWith(".pdf")) baseName = baseName.slice(0, -4);
+        if (!baseName) baseName = defaultFallback;
+        
+        let prefix = "";
+        if (document.getElementById("prefixPageSize")?.checked) {
+          const isFoldable = document.getElementById("foldable")?.checked;
+          const pSize = isFoldable
+            ? document.getElementById("foldable_pageSize")?.value
+            : document.getElementById("pageSize")?.value;
+
+          if (pSize === "Custom") {
+            const widthVal = isFoldable
+              ? document.getElementById("foldable_pageWidth")?.value
+              : document.getElementById("pageWidth")?.value;
+            const heightVal = isFoldable
+              ? document.getElementById("foldable_pageHeight")?.value
+              : document.getElementById("pageHeight")?.value;
+            const w = Math.round(parseFloat(widthVal) || 0);
+            const h = Math.round(parseFloat(heightVal) || 0);
+            prefix = `${w}x${h}_`;
+          } else {
+            prefix = `${pSize}_`;
+          }
+        }
+        const finalFilename = `${prefix}${baseName}.pdf`.replace(/[^a-zA-Z0-9_\-\.]/g, "_");
+
         const blob = new Blob([finalPdfBytes], { type: "application/pdf" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "output.pdf";
+        link.download = finalFilename;
         link.click();
         window.LayoutToolUI.ui.toggleProgressUI(false);
       }

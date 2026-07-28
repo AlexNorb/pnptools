@@ -172,7 +172,10 @@
       }
       if (index >= 0 && index < this.state.copies.length) {
         this.state.copies[index] = num;
-        this._notify();
+        const el = document.getElementById(`pair-copy-${index}`);
+        if (el && parseInt(el.value, 10) !== num) {
+          el.value = num;
+        }
       }
     },
 
@@ -412,8 +415,8 @@
           html += `
             <div class="preview-pair" data-index="${i}" style="border: 1px solid #ccc; border-radius: 0.5rem; padding: 0.5rem; background: #fff; width: 140px; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.4rem; position: relative;">
               <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 0.25rem;">
-                <span class="pair-handle" style="cursor: move; font-weight: bold; background: #eee; padding: 0.1rem 0.4rem; border-radius: 0.25rem; font-size: 0.85rem;" title="Drag to reorder">⋮⋮ #${i + 1}</span>
-                <button type="button" onclick="PreviewPanel.removePair(${i})" style="background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; line-height: 1; font-weight: bold;" title="Delete pair">×</button>
+                <span class="pair-handle" tabindex="-1" style="cursor: move; font-weight: bold; background: #eee; padding: 0.1rem 0.4rem; border-radius: 0.25rem; font-size: 0.85rem;" title="Drag to reorder">⋮⋮ #${i + 1}</span>
+                <button type="button" tabindex="-1" onclick="PreviewPanel.removePair(${i})" class="text-theme-pink hover:opacity-75 transition-opacity" style="background: none; border: none; cursor: pointer; padding: 0.2rem; font-size: 0.85rem;" title="Delete pair"><i class="fa-solid fa-trash-can"></i></button>
               </div>
               
               <div class="pair-images" style="display: flex; gap: 0.25rem; height: 90px; justify-content: center; align-items: center; background: #f5f5f5; border-radius: 0.25rem; overflow: hidden; padding: 0.25rem;">

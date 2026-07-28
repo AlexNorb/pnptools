@@ -41,11 +41,27 @@
 - [x] 3.5 Add accessibility (ARIA labels, keyboard nav, focus styles)
 - [x] 3.6 Dark mode (bonus/optional)
 
-## Completed
+## Phase 4 — User Feedback & Functional Polish `COMPLETED`
 
-- [x] Add a visual progress bar during PDF generation
+- [x] 4.1 Update default crosshairs (Size: 3mm, Line width: 0.1mm)
+- [x] 4.2 Custom export filename input & page size prefix checkbox
+- [x] 4.3 Persist shared settings (Page size, Card size, Dimensions) between Grid and Foldable modes
+- [x] 4.4 Separate Page Size (A4/Letter/Custom) and Orientation toggle (Portrait/Landscape), updating presets.json and isolating foldable mode
+- [x] 4.5 Auto-calculate Grid layout capacity (rows & cols) with manual override toggle
+- [x] 4.6 Keyboard accessibility in image preview panel (`Tab` navigation between copies inputs)
+
+## Phase 5 — UI Layout & Compactness Refactor `COMPLETED`
+
+- [x] 5.1 Refactor Layout Mode section into compact horizontal informational badges
+- [x] 5.2 Replace radio buttons with a modern segmented control toggle for Grid vs Foldable
+- [x] 5.3 Re-architect layout structure for optimal space utilization (combining/reducing height of upload section & settings)
 
 ## Ideas & Future Requests
 
 - Add more presets for specific print services (manual — owner adds via presets.json)
 - Export/import user presets as JSON file
+- Future Evaluation: Consider incorporating conceptual features from Martin's Formatter (saved for reference in [`docs/reference/martins-formatter/`](docs/reference/martins-formatter/)):
+  - **Back Nudge (Printer Drift Compensation)**: $\pm X / \pm Y$ back page offset calibration for consumer duplex printers.
+  - **Automated Layout Solver**: Algorithm to auto-calculate optimal card capacity, page orientation, and safe margin bounds.
+  - **Dynamic Unit Switcher**: Toggle between `mm` and `in`.
+  - **Live Sheet Preview Strategy**: Evaluate a 1–2 page PDF preview (rendered via PDF.js from Web Worker output capped at Page 1-2) to reuse 100% of existing PDF drawing logic efficiently without CPU bloat, alongside our thumbnail reordering panel.
