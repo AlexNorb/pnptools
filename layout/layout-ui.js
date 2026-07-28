@@ -19,6 +19,8 @@ document.addEventListener("DOMContentLoaded", () => {
       mode1: document.getElementById("mode1"),
       mode2: document.getElementById("mode2"),
       mode3: document.getElementById("mode3"),
+      globalUnitRadios: document.querySelectorAll('input[name="globalUnit"]'),
+      resetSettingsButton: document.getElementById("resetSettings"),
       // Grid Layout
       preset: document.getElementById("preset"),
       presetName: document.getElementById("presetName"),
@@ -73,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     },
 
     config: {
+      currentUnit: "mm",
       crosshairColor: null,
       borderColor: null,
       presets: {},
@@ -96,12 +99,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const lastUsedSettings = this.storage.load("layoutTool.lastUsedSettings");
       if (lastUsedSettings) {
+        if (lastUsedSettings.currentUnit && lastUsedSettings.currentUnit === 'in') {
+          this.config.currentUnit = 'in';
+          const radioIn = Array.from(this.elements.globalUnitRadios).find(r => r.value === 'in');
+          if (radioIn) radioIn.checked = true;
+          this.ui.applyUnitConversion();
+        }
+        
         if (lastUsedSettings.preset) {
           this.elements.preset.value = lastUsedSettings.preset;
           this.ui.applyPreset.call(this); // Apply the preset first
         }
         this.ui.applySettings.call(this, lastUsedSettings); // Then apply the user's modifications
         this.ui.toggleModeUI();
+      }
+
+      this.elements.globalUnitRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          if (e.target.checked && this.config.currentUnit !== e.target.value) {
+            this.config.currentUnit = e.target.value;
+            this.ui.applyUnitConversion();
+            this.ui.updateSettingsSummary();
+          }
+        });
+      });
+
+      if (this.elements.resetSettingsButton) {
+        this.elements.resetSettingsButton.addEventListener("click", () => {
+          this.ui.resetAllSettings.call(this);
+        });
       }
 
       this.elements.generatePdfButton.addEventListener("click", () => {
@@ -418,6 +444,96 @@ document.addEventListener("DOMContentLoaded", () => {
     },
 
     ui: {
+      resetAllSettings() {
+        const doReset = () => {
+          // Reset unit to mm
+          if (LayoutToolUI.config.currentUnit !== "mm") {
+            LayoutToolUI.config.currentUnit = "mm";
+            const radioMm = Array.from(LayoutToolUI.elements.globalUnitRadios).find(r => r.value === "mm");
+            if (radioMm) radioMm.checked = true;
+            LayoutToolUI.ui.applyUnitConversion();
+          }
+
+          // Clear stored settings
+          try {
+            localStorage.removeItem("layoutTool.lastUsedSettings");
+          } catch (e) {}
+
+          // Apply default preset
+          if (LayoutToolUI.elements.preset) {
+            LayoutToolUI.elements.preset.value = "preset1";
+            LayoutToolUI.ui.applyPreset.call(LayoutToolUI);
+          }
+
+          // Reset inputs to clean defaults
+          if (LayoutToolUI.elements.bleed) LayoutToolUI.elements.bleed.value = 0;
+          if (LayoutToolUI.elements.crosswidth) LayoutToolUI.elements.crosswidth.value = 0.1;
+          if (LayoutToolUI.elements.crosssize) LayoutToolUI.elements.crosssize.value = 3;
+          if (LayoutToolUI.elements.frontCheckbox) LayoutToolUI.elements.frontCheckbox.checked = true;
+          if (LayoutToolUI.elements.backCheckbox) LayoutToolUI.elements.backCheckbox.checked = true;
+          if (LayoutToolUI.elements.frontBorderCheckbox) LayoutToolUI.elements.frontBorderCheckbox.checked = false;
+          if (LayoutToolUI.elements.backBorderCheckbox) LayoutToolUI.elements.backBorderCheckbox.checked = false;
+          if (LayoutToolUI.elements.borderWidth) LayoutToolUI.elements.borderWidth.value = 0;
+          if (LayoutToolUI.elements.foldable_printerMargin) LayoutToolUI.elements.foldable_printerMargin.value = 5;
+          if (LayoutToolUI.elements.doubleSidedRadio) {
+            LayoutToolUI.elements.doubleSidedRadio.checked = true;
+            LayoutToolUI.elements.doubleSidedRadio.dispatchEvent(new Event("change"));
+          }
+
+          // Dispatch change events across all setting elements to force segmented buttons & toggles to re-sync
+          document.querySelectorAll("input, select").forEach(input => {
+            input.dispatchEvent(new Event("change"));
+          });
+
+          LayoutToolUI.ui.updateGridAutoCalc();
+          LayoutToolUI.ui.updateSettingsSummary();
+          if (window.Toast) {
+            Toast.show("Settings reset to default.", "info");
+          }
+        };
+
+        if (window.Toast && typeof window.Toast.confirm === 'function') {
+          window.Toast.confirm("Are you sure you want to reset all settings to their default values?", doReset, "Reset Settings");
+        } else if (confirm("Are you sure you want to reset all settings to their default values?")) {
+          doReset();
+        }
+      },
+
+      applyUnitConversion() {
+        const isInch = LayoutToolUI.config.currentUnit === 'in';
+        const factor = isInch ? (1 / 25.4) : 25.4;
+        const newStep = isInch ? "0.01" : "1";
+        
+        const dimensionInputIds = [
+          "pageWidth", "pageHeight", "imageWidth", "imageHeight", "bleed", "borderWidth", "crosswidth", "crosssize", "cornerRadius",
+          "foldable_pageWidth", "foldable_pageHeight", "foldable_cardWidth", "foldable_cardHeight", 
+          "foldable_printerMargin", "foldable_foldingMargin", "foldable_cardMargin", "foldable_cutMargin", 
+          "foldable_innerBorder", "foldable_cornerRadius"
+        ];
+        
+        dimensionInputIds.forEach(id => {
+          const el = LayoutToolUI.elements[id];
+          if (el && el.value !== "") {
+            const val = parseFloat(el.value);
+            if (!isNaN(val)) {
+              el.value = parseFloat((val * factor).toFixed(isInch ? 2 : 1));
+            }
+            if (el.hasAttribute("step") || el.type === "number") {
+              el.setAttribute("step", newStep);
+            }
+          }
+        });
+      },
+
+      convertValueToDisplay(valMM) {
+        if (typeof valMM !== 'number' && isNaN(parseFloat(valMM))) return valMM;
+        const num = parseFloat(valMM);
+        if (LayoutToolUI.config.currentUnit === 'in') {
+          return parseFloat((num / 25.4).toFixed(2));
+        }
+        return parseFloat(num.toFixed(1));
+      },
+
       updatePageSizeInputs(dropdown, widthInput, heightInput, orientationSelect) {
         const selectedSize = dropdown.value;
         const customSize = "Custom";
@@ -436,8 +552,8 @@ document.addEventListener("DOMContentLoaded", () => {
               w = h;
               h = temp;
             }
-            widthInput.value = w;
-            heightInput.value = h;
+            widthInput.value = this.convertValueToDisplay(w);
+            heightInput.value = this.convertValueToDisplay(h);
           }
           widthInput.disabled = true;
           heightInput.disabled = true;
@@ -694,8 +810,8 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           const dimensions = LayoutToolUI.config.cardSizesInMM[selectedSize];
           if (dimensions) {
-            widthInput.value = dimensions.width;
-            heightInput.value = dimensions.height;
+            widthInput.value = this.convertValueToDisplay(dimensions.width);
+            heightInput.value = this.convertValueToDisplay(dimensions.height);
           }
           widthInput.disabled = true;
           heightInput.disabled = true;
@@ -765,6 +881,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // First, re-enable all form elements to reset the UI state
         for (const key in LayoutToolUI.elements) {
           const element = LayoutToolUI.elements[key];
+          if (!element || element instanceof NodeList || !element.tagName) continue;
           element.disabled = false;
           if (element.tagName.toLowerCase() === "select") {
             for (const option of element.options) {
@@ -813,9 +930,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
         for (const key in settings) {
           const element = LayoutToolUI.elements[key];
-          const value = settings[key];
+          let value = settings[key];
 
           if (element && key !== "pageSize" && key !== "cardSize") {
+            const dimensionIds = new Set([
+              "pageWidth", "pageHeight", "imageWidth", "imageHeight", "bleed", "borderWidth", "crosswidth", "crosssize", "cornerRadius",
+              "foldable_pageWidth", "foldable_pageHeight", "foldable_cardWidth", "foldable_cardHeight", 
+              "foldable_printerMargin", "foldable_foldingMargin", "foldable_cardMargin", "foldable_cutMargin", 
+              "foldable_innerBorder", "foldable_cornerRadius"
+            ]);
+            
+            if (dimensionIds.has(key) && typeof value === 'number') {
+              if (LayoutToolUI.config.currentUnit === 'in') {
+                value = parseFloat((value / 25.4).toFixed(2));
+              } else {
+                value = parseFloat(value.toFixed(1));
+              }
+            }
+
             // Standard element handling
             if (element.type === "checkbox" || element.type === "radio") {
               element.checked = value;
@@ -848,6 +980,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       _gatherFormValues(elementIds) {
         const settings = {};
+        const isInch = LayoutToolUI.config.currentUnit === 'in';
+        const dimensionIds = new Set([
+          "pageWidth", "pageHeight", "imageWidth", "imageHeight", "bleed", "borderWidth", "crosswidth", "crosssize", "cornerRadius",
+          "foldable_pageWidth", "foldable_pageHeight", "foldable_cardWidth", "foldable_cardHeight", 
+          "foldable_printerMargin", "foldable_foldingMargin", "foldable_cardMargin", "foldable_cutMargin", 
+          "foldable_innerBorder", "foldable_cornerRadius"
+        ]);
+
         elementIds.forEach((id) => {
           const element = LayoutToolUI.elements[id] || document.getElementById(id);
           if (!element) return;
@@ -858,7 +998,11 @@ document.addEventListener("DOMContentLoaded", () => {
             element.tagName.toLowerCase() === "select"
           ) {
             const val = element.value.replace(",", ".");
-            settings[id] = isNaN(val) || val.trim() === "" ? val : parseFloat(val);
+            let parsed = isNaN(val) || val.trim() === "" ? val : parseFloat(val);
+            if (isInch && dimensionIds.has(id) && typeof parsed === 'number') {
+               parsed = parseFloat((parsed * 25.4).toFixed(1));
+            }
+            settings[id] = parsed;
           } else {
             settings[id] = element.value;
           }
@@ -867,16 +1011,36 @@ document.addEventListener("DOMContentLoaded", () => {
       },
 
       getRawSettings() {
+        const isInch = LayoutToolUI.config.currentUnit === 'in';
+        const dimensionIds = new Set([
+          "pageWidth", "pageHeight", "imageWidth", "imageHeight", "bleed", "borderWidth", "crosswidth", "crosssize", "cornerRadius",
+          "foldable_pageWidth", "foldable_pageHeight", "foldable_cardWidth", "foldable_cardHeight", 
+          "foldable_printerMargin", "foldable_foldingMargin", "foldable_cardMargin", "foldable_cutMargin", 
+          "foldable_innerBorder", "foldable_cornerRadius"
+        ]);
         const settings = {};
         settings.preset = this.elements.preset.value;
+        settings.currentUnit = LayoutToolUI.config.currentUnit;
+
         for (const key in LayoutToolUI.elements) {
-          if (key === "customFileName") continue;
+          if (key === "customFileName" || key === "globalUnitRadios") continue;
           const element = LayoutToolUI.elements[key];
-          if (!element || element.type === "file") continue;
+          if (!element || element.type === "file" || element instanceof NodeList) continue;
+          
           if (element.type === "checkbox" || element.type === "radio") {
             settings[key] = element.checked;
           } else if (element.id) {
-            settings[element.id] = element.value;
+            let val = element.value;
+            if (element.type === "number") {
+                val = val.replace(",", ".");
+                let parsed = isNaN(val) || val.trim() === "" ? val : parseFloat(val);
+                if (isInch && dimensionIds.has(key) && typeof parsed === 'number') {
+                    parsed = parseFloat((parsed * 25.4).toFixed(1));
+                }
+                settings[element.id] = parsed;
+            } else {
+                settings[element.id] = val;
+            }
           }
         }
         return settings;
@@ -1034,11 +1198,7 @@ document.addEventListener("DOMContentLoaded", () => {
           fileCount.textContent = `${frontsCount} file${frontsCount !== 1 ? "s" : ""} selected`;
         }
         if (fileCountBack) {
-          fileCountBack.textContent = `${backsCount} file${
-            backsCount !== 1
-              ? "s selected. Different backs mode."
-              : " selected. Same backs mode."
-          }`;
+          fileCountBack.textContent = `${backsCount} file${backsCount !== 1 ? "s" : ""} selected`;
         }
       },
     },

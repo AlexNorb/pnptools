@@ -356,6 +356,16 @@
           btnClearAll.addEventListener('click', () => PreviewPanel.clearAll());
         }
 
+        const previewPairs = document.getElementById('previewPairs');
+        if (previewPairs) {
+          previewPairs.addEventListener('wheel', (e) => {
+            if (e.deltaY !== 0) {
+              e.preventDefault();
+              previewPairs.scrollLeft += e.deltaY;
+            }
+          }, { passive: false });
+        }
+
         PreviewPanel.onChange(() => this.render());
       },
 
@@ -380,6 +390,15 @@
       },
 
       render() {
+        if (window.LayoutToolUI && window.LayoutToolUI.ui) {
+          if (typeof window.LayoutToolUI.ui.updateModeIndicators === 'function') {
+            window.LayoutToolUI.ui.updateModeIndicators();
+          }
+          if (typeof window.LayoutToolUI.ui.updateFileCount === 'function') {
+            window.LayoutToolUI.ui.updateFileCount();
+          }
+        }
+
         const container = document.getElementById('previewPairs');
         if (!container) return;
 
@@ -389,7 +408,7 @@
         const mode = PreviewPanel.getMode();
 
         if (fronts.length === 0 && backs.length === 0) {
-          container.innerHTML = '<div style="color: #666; font-style: italic; padding: 1rem;">No images loaded yet. Upload fronts or backs above to preview.</div>';
+          container.innerHTML = '<div class="text-theme-muted italic p-4 font-medium text-sm text-center">No images loaded yet. Upload fronts or backs above to preview.</div>';
           return;
         }
 
@@ -413,21 +432,25 @@
           const copyCount = copies[i] !== undefined ? copies[i] : 1;
 
           html += `
-            <div class="preview-pair" data-index="${i}" style="border: 1px solid #ccc; border-radius: 0.5rem; padding: 0.5rem; background: #fff; width: 140px; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.4rem; position: relative;">
-              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 0.25rem;">
-                <span class="pair-handle" tabindex="-1" style="cursor: move; font-weight: bold; background: #eee; padding: 0.1rem 0.4rem; border-radius: 0.25rem; font-size: 0.85rem;" title="Drag to reorder">⋮⋮ #${i + 1}</span>
-                <button type="button" tabindex="-1" onclick="PreviewPanel.removePair(${i})" class="text-theme-pink hover:opacity-75 transition-opacity" style="background: none; border: none; cursor: pointer; padding: 0.2rem; font-size: 0.85rem;" title="Delete pair"><i class="fa-solid fa-trash-can"></i></button>
+            <div class="preview-pair border-2 border-theme-dark rounded-xl bg-white w-[145px] shrink-0 flex flex-col gap-2 p-2 relative shadow-[2px_2px_0_var(--color-theme-dark)] transition-transform has-[.pair-handle:hover]:-translate-y-1" data-index="${i}">
+              <div class="flex justify-between items-center">
+                <span class="pair-handle cursor-grab font-bold bg-theme-yellow border border-theme-dark text-theme-dark px-2 py-0.5 rounded-md text-xs shadow-[1px_1px_0_var(--color-theme-dark)] transition-transform hover:shadow-[2px_2px_0_var(--color-theme-dark)] select-none" tabindex="-1" title="Drag to reorder">
+                  <i class="fa-solid fa-grip-vertical text-[10px] mr-1 opacity-70"></i>#${i + 1}
+                </span>
+                <button type="button" tabindex="-1" onclick="PreviewPanel.removePair(${i})" class="w-6 h-6 rounded-md flex items-center justify-center text-theme-pink hover:bg-theme-pink/15 transition-colors text-xs" title="Delete pair">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
               </div>
               
-              <div class="pair-images" style="display: flex; gap: 0.25rem; height: 90px; justify-content: center; align-items: center; background: #f5f5f5; border-radius: 0.25rem; overflow: hidden; padding: 0.25rem;">
-                ${frontSrc ? `<img src="${frontSrc}" style="max-height: 100%; max-width: 48%; object-fit: contain; border: 1px solid #ddd;" title="Front" />` : `<div style="width: 48%; height: 100%; display: flex; align-items: center; justify-content: center; background: #eee; font-size: 0.7rem; color: #999;">No Front</div>`}
-                ${backSrc ? `<img src="${backSrc}" style="max-height: 100%; max-width: 48%; object-fit: contain; border: 1px solid #ddd;" title="Back" />` : `<div style="width: 48%; height: 100%; display: flex; align-items: center; justify-content: center; background: #eee; font-size: 0.7rem; color: #999;">No Back</div>`}
+              <div class="pair-images flex gap-1 h-[95px] justify-center items-center bg-theme-bg/60 border border-theme-dark/15 rounded-lg p-1 overflow-hidden">
+                ${frontSrc ? `<img src="${frontSrc}" class="max-h-full max-w-[48%] object-contain border border-theme-dark rounded shadow-sm bg-white" title="Front" />` : `<div class="w-[48%] h-full flex flex-col items-center justify-center bg-black/5 rounded text-[10px] font-bold text-theme-muted"><i class="fa-regular fa-image text-sm mb-0.5 opacity-40"></i>Front</div>`}
+                ${backSrc ? `<img src="${backSrc}" class="max-h-full max-w-[48%] object-contain border border-theme-dark rounded shadow-sm bg-white" title="Back" />` : `<div class="w-[48%] h-full flex flex-col items-center justify-center bg-black/5 rounded text-[10px] font-bold text-theme-muted"><i class="fa-regular fa-image text-sm mb-0.5 opacity-40"></i>Back</div>`}
               </div>
 
               ${frontObj ? `
-                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem;">
-                  <label for="pair-copy-${i}">Copies:</label>
-                  <input id="pair-copy-${i}" type="number" value="${copyCount}" min="1" max="99" onchange="PreviewPanel.setCopies(${i}, this.value)" style="width: 50px; text-align: center; padding: 0.15rem; border: 1px solid #ccc; border-radius: 0.25rem;" />
+                <div class="flex items-center justify-between text-xs pt-0.5">
+                  <label for="pair-copy-${i}" class="font-bold text-theme-dark">Copies:</label>
+                  <input id="pair-copy-${i}" type="number" value="${copyCount}" min="1" max="99" onchange="PreviewPanel.setCopies(${i}, this.value)" class="w-12 text-center py-0.5 px-1 font-bold border-[1.5px] border-theme-dark rounded-md text-xs focus:outline-none" />
                 </div>
               ` : ''}
             </div>

@@ -306,8 +306,11 @@
         display: flex;
         gap: 0.75rem;
         overflow-x: auto;
+        padding-top: 0.5rem;
         padding-bottom: 0.5rem;
-        min-height: 160px;
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+        min-height: 165px;
       }
 
       .preview-pairs-container::-webkit-scrollbar {
@@ -430,14 +433,32 @@
         </div>
 
         <div class="flex items-center justify-between border-b-3 border-theme-dark pb-3 mb-5 gap-3 flex-wrap sm:flex-nowrap">
-          <h2 class="text-2xl font-display text-theme-dark shrink-0">3. Settings</h2>
-          <div id="settingsSummary" class="flex items-center overflow-x-auto py-1 my-auto min-w-0 text-[11px] font-bold text-theme-dark">
+          <div class="flex items-center gap-3 shrink-0">
+            <h2 class="text-2xl font-display text-theme-dark">3. Settings</h2>
+            <div class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-8 items-center">
+              <label class="segmented-option cursor-pointer font-bold h-full rounded-[10px] text-xs transition-all flex items-center justify-center px-2.5">
+                <input type="radio" name="globalUnit" value="mm" checked class="hidden" />
+                <span>mm</span>
+              </label>
+              <label class="segmented-option cursor-pointer font-bold h-full rounded-[10px] text-xs transition-all flex items-center justify-center px-2.5">
+                <input type="radio" name="globalUnit" value="in" class="hidden" />
+                <span>in</span>
+              </label>
+            </div>
+          </div>
+          <div id="settingsSummary" class="flex flex-wrap items-center gap-y-1 py-1 my-auto min-w-0 text-[11px] font-bold text-theme-dark">
             <!-- Dynamic settings summary -->
           </div>
-          <button type="button" id="toggleSettingsCollapse" class="btn-secondary flex items-center gap-1.5 text-xs py-1 px-2.5 shrink-0" title="Toggle Settings Visibility">
-            <span id="settingsCollapseText" class="font-bold hidden sm:inline">Hide</span>
-            <i id="settingsCollapseIcon" class="fa-solid fa-chevron-up transition-transform duration-200 text-xs"></i>
-          </button>
+          <div class="flex items-center gap-2 shrink-0">
+            <button type="button" id="resetSettings" class="btn-secondary flex items-center gap-1.5 text-xs py-1 px-2.5" title="Reset all settings to default">
+              <i class="fa-solid fa-rotate-left text-xs"></i>
+              <span class="font-bold hidden sm:inline">Reset</span>
+            </button>
+            <button type="button" id="toggleSettingsCollapse" class="btn-secondary flex items-center gap-1.5 text-xs py-1 px-2.5" title="Toggle Settings Visibility">
+              <span id="settingsCollapseText" class="font-bold hidden sm:inline">Hide</span>
+              <i id="settingsCollapseIcon" class="fa-solid fa-chevron-up transition-transform duration-200 text-xs"></i>
+            </button>
+          </div>
         </div>
 
         <div id="settingsContent" class="collapsible-wrapper">
@@ -818,7 +839,7 @@
         <progress id="progressBar" value="0" max="100" class="w-full h-4 rounded-full overflow-hidden border-2 border-theme-dark [&::-webkit-progress-bar]:bg-white [&::-webkit-progress-value]:bg-theme-teal"></progress>
       </div>
 
-      <a href="https://www.buymeacoffee.com/pnpbuddy" title="Support PnPBuddy by buying me a dice" class="shrink-0 inline-flex items-center justify-center h-12 border-3 border-theme-dark rounded-xl shadow-[3px_3px_0_var(--color-theme-dark)] overflow-hidden bg-[#f7e517] transition-transform hover:-translate-y-1">
+      <a href="https://www.buymeacoffee.com/pnpbuddy" title="Support PnPBuddy by buying me a dice" class="shrink-0 inline-flex items-center justify-center h-12 border-3 border-theme-dark rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] overflow-hidden bg-[#f7e517] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)]">
         <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a dice&emoji=🎲&slug=pnpbuddy&button_colour=f7e517&font_colour=000000&font_family=Bree&outline_colour=000000&coffee_colour=FFDD00" alt="Buy me a dice" class="h-full w-auto object-cover scale-[1.08]" />
       </a>
     </div>

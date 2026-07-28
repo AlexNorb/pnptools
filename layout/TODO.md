@@ -56,12 +56,18 @@
 - [x] 5.2 Replace radio buttons with a modern segmented control toggle for Grid vs Foldable
 - [x] 5.3 Re-architect layout structure for optimal space utilization (combining/reducing height of upload section & settings)
 
+## Phase 6 — Dynamic Unit Switcher `IN PROGRESS`
+
+- [ ] 6.1 Add global unit toggle `[ mm | in ]` next to Settings title
+- [ ] 6.2 Implement state management for currentUnit (mm default) in layout-ui.js
+- [ ] 6.3 Add conversion logic for input fields on toggle switch (mm ↔ in) and step updates
+- [ ] 6.4 Intercept `_gatherFormValues` to ensure workers only ever receive values in `mm`
+- [ ] 6.5 Update preset population to handle active unit conversion
+
 ## Ideas & Future Requests
 
 - Add more presets for specific print services (manual — owner adds via presets.json)
 - Export/import user presets as JSON file
 - Future Evaluation: Consider incorporating conceptual features from Martin's Formatter (saved for reference in [`docs/reference/martins-formatter/`](docs/reference/martins-formatter/)):
   - **Back Nudge (Printer Drift Compensation)**: $\pm X / \pm Y$ back page offset calibration for consumer duplex printers.
-  - **Automated Layout Solver**: Algorithm to auto-calculate optimal card capacity, page orientation, and safe margin bounds.
-  - **Dynamic Unit Switcher**: Toggle between `mm` and `in`.
   - **Live Sheet Preview Strategy**: Evaluate a 1–2 page PDF preview (rendered via PDF.js from Web Worker output capped at Page 1-2) to reuse 100% of existing PDF drawing logic efficiently without CPU bloat, alongside our thumbnail reordering panel.
