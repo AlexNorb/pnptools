@@ -64,12 +64,12 @@
 - [x] 6.4 Intercept `_gatherFormValues` to ensure workers only ever receive values in `mm`
 - [x] 6.5 Update preset population to handle active unit conversion
 
-## Phase 7 — Live Sheet Preview (PDF.js) `UPCOMING`
+## Phase 7 — Live Sheet Preview (PDF.js) `COMPLETED`
 
-- [ ] 7.1 Integrate PDF.js library into the layout tool
-- [ ] 7.2 Implement background worker preview generator capped at Page 1–2 for low CPU impact
-- [ ] 7.3 Build responsive live preview canvas / viewer container in the layout UI
-- [ ] 7.4 Debounce settings changes to update sheet preview live on setting tweaks
+- [x] 7.1 Integrate PDF.js library into the layout tool
+- [x] 7.2 Implement background worker preview generator capped at Page 1–2 for low CPU impact
+- [x] 7.3 Build responsive live preview canvas / viewer container in the layout UI with Show/Hide toggle
+- [x] 7.4 Debounce settings changes to update sheet preview live on setting tweaks
 
 ## Ideas & Future Requests
 

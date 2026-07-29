@@ -498,10 +498,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
 
-      // Dynamic Filename & Settings Summary Listeners
+      // Dynamic Filename, Settings Summary & Live Sheet Preview Listeners
       const fnSync = () => {
         this.ui.updateFileNamePreview();
         this.ui.updateSettingsSummary();
+        if (window.SheetPreview) {
+          window.SheetPreview.requestUpdate();
+        }
       };
 
       document.querySelectorAll("input, select").forEach((input) => {

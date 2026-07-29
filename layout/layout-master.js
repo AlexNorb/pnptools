@@ -16,6 +16,14 @@ const LayoutToolPDF = {
         return;
       }
 
+      if (state === "preview_done") {
+        const previewPdfBytes = pdfBytes || (pdf && pdf.pdfBytes);
+        if (previewPdfBytes && window.SheetPreview) {
+          window.SheetPreview.onPdfReady(previewPdfBytes);
+        }
+        return;
+      }
+
       if (state === "progress") {
         window.LayoutToolUI.ui.updateProgress(data);
         return;
@@ -248,6 +256,49 @@ const LayoutToolPDF = {
       console.error("Error during PDF preparation:", error.message);
       Toast.show(`An unexpected error occurred: ${error.message}`, "error");
       window.LayoutToolUI.ui.toggleProgressUI(false);
+    }
+  },
+  generatePreview(settings) {
+    if (!settings && window.LayoutToolUI) {
+      settings = window.LayoutToolUI.getSettings();
+    }
+    if (!settings) return;
+
+    const mode = window.PreviewPanel ? window.PreviewPanel.getMode() : 'empty';
+    if (mode === 'empty' || mode === 'error') return;
+
+    const { frontImages: frontImageUrls, backImages: backImageUrls } = window.PreviewPanel.getImageData();
+    if (!frontImageUrls || frontImageUrls.length < 1) return;
+
+    const layoutMode = settings.layoutMode;
+    if (layoutMode === "doubleSided") {
+      const config = {
+        borderColor: this.utils.hexToRgb(document.getElementById("borderColor")?.value || "#000000"),
+        crosshairColor: this.utils.hexToRgb(document.getElementById("crosshaircolor")?.value || "#000000"),
+      };
+      this.workers.doubleSided.postMessage({
+        frontImages: frontImageUrls,
+        backImages: backImageUrls,
+        settings,
+        config,
+        preview: true,
+        maxPages: 2,
+      });
+    } else if (layoutMode === "foldable") {
+      let cards = [];
+      for (let i = 0; i < frontImageUrls.length; i++) {
+        const front = frontImageUrls[i];
+        const back = backImageUrls[i] || (backImageUrls.length === 1 ? backImageUrls[0] : front);
+        cards.push({ front, back });
+      }
+      this.workers.foldable.postMessage({
+        generatePdf: {
+          cards: cards,
+          options: settings,
+          preview: true,
+          maxPages: 2,
+        },
+      });
     }
   },
 };

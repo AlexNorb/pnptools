@@ -6,12 +6,10 @@ importScripts(
 
 // Listens for messages from the main thread.
 onmessage = async (event) => {
-  const { frontImages, backImages, settings, config } = event.data;
+  const { frontImages, backImages, settings, config, preview, maxPages } = event.data;
   try {
-    // The createPDF function will now handle sending the final message
-    await createPDF(frontImages, backImages, settings, config);
+    await createPDF(frontImages, backImages, settings, config, { preview, maxPages });
   } catch (error) {
-    // Sends an error message back to the main thread if something goes wrong.
     postMessage({ state: "error", error: error.message });
   }
 };
@@ -77,9 +75,11 @@ function drawCrosshairs(page, x, y, settings, config) {
   });
 }
 
-async function createPDF(frontImages, backImages, settings, config) {
+async function createPDF(frontImages, backImages, settings, config, previewOptions = {}) {
   const totalImages = frontImages.length;
-  reportProgress(0, totalImages);
+  if (!previewOptions.preview) {
+    reportProgress(0, totalImages);
+  }
 
   const { PDFDocument } = PDFLib;
   const pdfDoc = await PDFDocument.create();
@@ -124,6 +124,9 @@ async function createPDF(frontImages, backImages, settings, config) {
 
   let currentImageIndex = 0;
   while (currentImageIndex < totalImages) {
+    if (previewOptions.preview && pdfDoc.getPageCount() >= (previewOptions.maxPages || 2)) {
+      break;
+    }
     page = pdfDoc.addPage([pageWidth, pageHeight]);
 
     let x = (pageWidth - ptSettings.columns * ptSettings.imageWidth) / 2;
@@ -252,7 +255,15 @@ async function createPDF(frontImages, backImages, settings, config) {
       }
     }
     currentImageIndex += imagesOnThisPage;
-    reportProgress(currentImageIndex, totalImages);
+    if (!previewOptions.preview) {
+      reportProgress(currentImageIndex, totalImages);
+    }
+  }
+
+  if (previewOptions.preview) {
+    const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
+    postMessage({ state: "preview_done", pdfBytes: pdfBytes }, [pdfBytes.buffer]);
+    return;
   }
 
   reportSaving();

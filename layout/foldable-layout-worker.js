@@ -775,7 +775,7 @@ if (typeof importScripts === "function") {
     };
   };
 
-  const generatedPdf = async (cards, options) => {
+  const generatedPdf = async (cards, options, previewOptions = {}) => {
     const cardWidth = options.cardWidth;
     const cardHeight = options.cardHeight;
 
@@ -842,7 +842,9 @@ if (typeof importScripts === "function") {
       orientation,
     } = layoutSettings;
 
-    reportProgress(0, cards.length);
+    if (!previewOptions.preview) {
+      reportProgress(0, cards.length);
+    }
 
     const url = "https://pnpbuddy.com";
     const now = new Date();
@@ -884,6 +886,9 @@ if (typeof importScripts === "function") {
             cardRowsPerPage,
           });
         pages++;
+        if (previewOptions.preview && pages >= (previewOptions.maxPages || 2)) {
+          break;
+        }
         page = pdfDoc.addPage([pageWidth, pageHeight]);
       }
 
@@ -979,6 +984,21 @@ if (typeof importScripts === "function") {
       cardRowsPerPage,
     });
 
+    if (previewOptions.preview) {
+      const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
+      postMessage(
+        {
+          state: "preview_done",
+          pdf: {
+            pdfBytes: pdfBytes,
+            aspectRatio: pageWidth / pageHeight,
+          },
+        },
+        [pdfBytes.buffer]
+      );
+      return;
+    }
+
     reportSaving();
     const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
     reportDone(cards.length, pages, pdfBytes.byteLength);
@@ -996,9 +1016,9 @@ if (typeof importScripts === "function") {
 
   const onmessage = async (e) => {
     if (e.data.generatePdf) {
-      const { cards, options } = e.data.generatePdf;
+      const { cards, options, preview, maxPages } = e.data.generatePdf;
       try {
-        await generatedPdf(cards, options);
+        await generatedPdf(cards, options, { preview, maxPages });
       } catch (err) {
         postMessage({ error: err.message });
       }
