@@ -57,8 +57,8 @@ class NotificationSystem {
       </div>
       <p class="text-sm font-medium text-theme-dark/80">${message}</p>
       <div class="flex gap-3 justify-end pt-2">
-        <button type="button" id="confirm-cancel-btn" class="btn-secondary px-4 py-1.5 text-xs font-bold">Cancel</button>
-        <button type="button" id="confirm-ok-btn" class="btn-primary px-4 py-1.5 text-xs font-bold bg-theme-pink">Reset</button>
+        <button type="button" id="confirm-cancel-btn" class="bg-white text-theme-dark border-2 border-theme-dark rounded-lg px-4 h-9 text-xs font-bold shadow-[2px_2px_0_var(--color-theme-dark)] transition-all duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0_var(--color-theme-dark)] inline-flex items-center justify-center cursor-pointer">Cancel</button>
+        <button type="button" id="confirm-ok-btn" class="bg-theme-pink text-white border-2 border-theme-dark rounded-lg px-4 h-9 text-xs font-bold shadow-[2px_2px_0_var(--color-theme-dark)] transition-all duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0_var(--color-theme-dark)] inline-flex items-center justify-center cursor-pointer">Reset</button>
       </div>
     `;
 
@@ -92,7 +92,7 @@ class NotificationSystem {
     });
   }
 
-  prompt(message, onSubmit, title = "Save Card Size", defaultValue = "") {
+  prompt(message, onSubmit, title = "Save Preset", defaultValue = "") {
     const overlay = document.createElement('div');
     overlay.className = 'fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity duration-200 opacity-0';
     
@@ -108,11 +108,11 @@ class NotificationSystem {
       </div>
       ${message ? `<p class="text-sm font-medium text-theme-dark/80">${message}</p>` : ''}
       <div class="flex flex-col gap-1">
-        <input type="text" id="prompt-input" maxlength="25" value="${defaultValue}" placeholder="Enter name (max 25 chars)" class="w-full" />
+        <input type="text" id="prompt-input" maxlength="25" value="${defaultValue}" placeholder="Enter name (max 25 chars)" class="w-full h-9 px-3 text-xs rounded-lg border-2 border-theme-dark font-ui" />
       </div>
       <div class="flex gap-3 justify-end pt-2">
-        <button type="button" id="prompt-cancel-btn" class="btn-secondary px-4 py-1.5 text-xs font-bold">Cancel</button>
-        <button type="button" id="prompt-ok-btn" class="btn-primary px-4 py-1.5 text-xs font-bold">Save</button>
+        <button type="button" id="prompt-cancel-btn" class="bg-white text-theme-dark border-2 border-theme-dark rounded-lg px-4 h-9 text-xs font-bold shadow-[2px_2px_0_var(--color-theme-dark)] transition-all duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0_var(--color-theme-dark)] inline-flex items-center justify-center cursor-pointer">Cancel</button>
+        <button type="button" id="prompt-ok-btn" class="bg-theme-yellow text-theme-dark border-2 border-theme-dark rounded-lg px-4 h-9 text-xs font-bold shadow-[2px_2px_0_var(--color-theme-dark)] transition-all duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0_var(--color-theme-dark)] inline-flex items-center justify-center cursor-pointer">Save</button>
       </div>
     `;
 

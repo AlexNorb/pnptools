@@ -816,16 +816,16 @@
   </div>
 
     <!-- Generate Button Area -->
-    <div class="bento-box flex flex-col md:flex-row items-center justify-center md:justify-between gap-5 bg-theme-bg border-theme-dark mt-8">
+    <div class="bento-box grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-5 items-stretch bg-theme-bg border-theme-dark mt-8">
       <!-- Column 1: Generate PDF Button -->
-      <button id="generatePdfButton" class="bg-theme-pink text-white font-display text-xl border-3 border-theme-dark px-6 py-3 rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)] w-full max-w-sm md:w-auto shrink-0 flex items-center justify-center tracking-wide">
+      <button id="generatePdfButton" class="bg-theme-pink text-white font-display text-xl border-3 border-theme-dark px-6 py-3 rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)] w-full max-w-sm justify-self-center md:justify-self-auto flex items-center justify-center tracking-wide h-full min-h-[52px]">
         Generate PDF
       </button>
 
       <!-- Column 2: Filename Card & Progress Container (Shared Slot) -->
-      <div class="flex-1 w-full md:w-auto flex items-center justify-center">
+      <div class="w-full max-w-sm justify-self-center md:justify-self-auto flex items-stretch justify-center h-full">
         <!-- Filename Card (wraps internally to 2 rows when tight) -->
-        <div id="fileNameCard" class="bg-white border-3 border-theme-dark rounded-xl py-2 px-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 shadow-[4px_4px_0_var(--color-theme-dark)] w-full max-w-sm md:w-auto">
+        <div id="fileNameCard" class="bg-white border-3 border-theme-dark rounded-xl py-2 px-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 shadow-[4px_4px_0_var(--color-theme-dark)] w-full h-full">
           <!-- Item 1: Filename label + dynamic preview text -->
           <div class="flex items-center gap-1.5 text-xs shrink-0">
             <span class="font-bold shrink-0 text-theme-dark">Filename:</span>
@@ -842,15 +842,15 @@
         </div>
 
         <!-- Progress Container (Replaces Filename Card when generating) -->
-        <div id="progressContainer" class="bg-white border-3 border-theme-dark rounded-xl p-3 sm:px-4 flex flex-col justify-center shadow-[4px_4px_0_var(--color-theme-dark)] w-full max-w-md" style="display: none;">
+        <div id="progressContainer" class="bg-white border-3 border-theme-dark rounded-xl p-3 sm:px-4 flex flex-col justify-center shadow-[4px_4px_0_var(--color-theme-dark)] w-full max-w-md h-full" style="display: none;">
           <span id="progressStatus" class="font-bold text-xs text-theme-indigo block mb-1 text-center"></span>
           <progress id="progressBar" value="0" max="100" class="w-full h-3 rounded-full overflow-hidden border-2 border-theme-dark [&::-webkit-progress-bar]:bg-white [&::-webkit-progress-value]:bg-theme-teal"></progress>
         </div>
       </div>
 
       <!-- Column 3: Buy Me a Dice Link -->
-      <a href="https://www.buymeacoffee.com/pnpbuddy" title="Support PnPBuddy by buying me a dice" class="w-full max-w-sm md:w-auto shrink-0 inline-flex items-center justify-center h-12 border-3 border-theme-dark rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] overflow-hidden bg-[#f7e517] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)]">
-        <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a dice&emoji=🎲&slug=pnpbuddy&button_colour=f7e517&font_colour=000000&font_family=Bree&outline_colour=000000&coffee_colour=FFDD00" alt="Buy me a dice" class="h-full w-auto object-cover scale-[1.08]" />
+      <a href="https://www.buymeacoffee.com/pnpbuddy" title="Support PnPBuddy by buying me a dice" class="w-full max-w-sm justify-self-center md:justify-self-auto flex items-center justify-center border-3 border-theme-dark rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] overflow-hidden bg-[#f7e517] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)] h-full min-h-[52px] px-4 py-2">
+        <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a dice&emoji=🎲&slug=pnpbuddy&button_colour=f7e517&font_colour=000000&font_family=Bree&outline_colour=000000&coffee_colour=FFDD00" alt="Buy me a dice" class="h-9 w-auto object-contain" />
       </a>
     </div>
 
