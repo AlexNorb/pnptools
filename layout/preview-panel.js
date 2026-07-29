@@ -176,6 +176,7 @@
         if (el && parseInt(el.value, 10) !== num) {
           el.value = num;
         }
+        this._notify();
       }
     },
 
@@ -450,7 +451,7 @@
               ${frontObj ? `
                 <div class="flex items-center justify-between text-xs pt-0.5">
                   <label for="pair-copy-${i}" class="font-bold text-theme-dark">Copies:</label>
-                  <input id="pair-copy-${i}" type="number" value="${copyCount}" min="1" max="99" onchange="PreviewPanel.setCopies(${i}, this.value)" class="w-12 text-center py-0.5 px-1 font-bold border-[1.5px] border-theme-dark rounded-md text-xs focus:outline-none" />
+                  <input id="pair-copy-${i}" type="number" value="${copyCount}" min="1" max="99" oninput="PreviewPanel.setCopies(${i}, this.value)" onchange="PreviewPanel.setCopies(${i}, this.value)" class="w-12 text-center py-0.5 px-1 font-bold border-[1.5px] border-theme-dark rounded-md text-xs focus:outline-none" />
                 </div>
               ` : ''}
             </div>
