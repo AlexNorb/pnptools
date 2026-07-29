@@ -50,6 +50,7 @@ body::before {
   z-index: -1;
 }
 
+
 .registration-mark {
   position: fixed;
   width: 30px;

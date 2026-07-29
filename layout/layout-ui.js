@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     elements: {
       // Common
       progressContainer: document.getElementById("progressContainer"),
+      fileNameCard: document.getElementById("fileNameCard"),
       progressBar: document.getElementById("progressBar"),
       progressStatus: document.getElementById("progressStatus"),
 
@@ -23,7 +24,6 @@ document.addEventListener("DOMContentLoaded", () => {
       resetSettingsButton: document.getElementById("resetSettings"),
       // Grid Layout
       preset: document.getElementById("preset"),
-      presetName: document.getElementById("presetName"),
       savePresetButton: document.getElementById("savePresetButton"),
       deletePresetButton: document.getElementById("deletePresetButton"),
       rows: document.getElementById("rows"),
@@ -142,15 +142,21 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       this.elements.savePresetButton.addEventListener("click", () => {
-        const name = (this.elements.presetName.value || "").trim().slice(0, 25);
-        if (!name) {
-          Toast.show("Please enter a name for the preset.", "error");
-          return;
+        const onSave = (name) => {
+          const cleanName = (name || "").trim().slice(0, 25);
+          if (!cleanName) return;
+
+          const settings = this.ui.getRawAllSettings();
+          this.storage.saveUserPreset(cleanName, settings);
+          this.ui.loadPresets();
+        };
+
+        if (window.Toast && typeof window.Toast.prompt === "function") {
+          window.Toast.prompt("Enter a name for this preset:", onSave, "Save Preset");
+        } else {
+          const name = prompt("Enter a name for this preset:");
+          onSave(name);
         }
-        const settings = this.ui.getRawGridSettings();
-        this.storage.saveUserPreset(name, settings);
-        this.ui.loadPresets(); // Reload presets to include the new one
-        this.elements.presetName.value = "";
       });
 
       this.elements.deletePresetButton.addEventListener("click", () => {
@@ -930,9 +936,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (uiObj.updateSettingsSummary) uiObj.updateSettingsSummary();
       },
       toggleProgressUI(show) {
-        LayoutToolUI.elements.progressContainer.style.display = show
-          ? "block"
-          : "none";
+        if (LayoutToolUI.elements.progressContainer) {
+          LayoutToolUI.elements.progressContainer.style.display = show
+            ? "flex"
+            : "none";
+        }
+        if (LayoutToolUI.elements.fileNameCard) {
+          LayoutToolUI.elements.fileNameCard.style.display = show
+            ? "none"
+            : "flex";
+        }
         if (!show) {
           // Reset progress bar on hide
           LayoutToolUI.ui.updateProgress({ progress: 0, done: 0, all: 0 });
@@ -975,61 +988,91 @@ document.addEventListener("DOMContentLoaded", () => {
         const settings = presetData.settings;
         const disabled = presetData.disabled || {};
 
-        // Handle dropdowns first
-        if (settings.pageOrientation && this.elements.pageOrientation) {
-          this.elements.pageOrientation.value = settings.pageOrientation;
-        }
-        if (settings.pageSize) {
-          let pSize = settings.pageSize;
-          if (pSize.includes("Landscape")) {
-            if (this.elements.pageOrientation) this.elements.pageOrientation.value = "landscape";
-            pSize = pSize.replace(" Landscape", "");
-          } else if (pSize.includes("Portrait")) {
-            if (this.elements.pageOrientation) this.elements.pageOrientation.value = "portrait";
-            pSize = pSize.replace(" Portrait", "");
+        if (settings._version === 2) {
+          // --- V2 preset: full cross-mode ---
+          if (settings.layoutMode === "foldable") {
+            if (LayoutToolUI.elements.foldableRadio) LayoutToolUI.elements.foldableRadio.checked = true;
+          } else {
+            if (LayoutToolUI.elements.doubleSidedRadio) LayoutToolUI.elements.doubleSidedRadio.checked = true;
           }
-          this.elements.pageSize.value = pSize;
-          this.ui.updatePageSizeInputs(
-            this.elements.pageSize,
-            this.elements.pageWidth,
-            this.elements.pageHeight,
-            this.elements.pageOrientation
-          );
-        }
-        if (settings.cardSize) {
-          this.elements.cardSize.value = settings.cardSize;
-          this.ui.updateCardSizeInputs(
-            this.elements.cardSize,
-            this.elements.imageWidth,
-            this.elements.imageHeight
-          );
-        }
+          if (LayoutToolUI.elements.doubleSidedRadio) {
+            LayoutToolUI.elements.doubleSidedRadio.dispatchEvent(new Event("change"));
+          }
 
-        for (const key in settings) {
-          const element = LayoutToolUI.elements[key];
-          let value = settings[key];
-
-          if (element && key !== "pageSize" && key !== "cardSize") {
-            const dimensionIds = new Set([
-              "pageWidth", "pageHeight", "imageWidth", "imageHeight", "bleed", "borderWidth", "crosswidth", "crosssize", "cornerRadius",
-              "foldable_pageWidth", "foldable_pageHeight", "foldable_cardWidth", "foldable_cardHeight", 
-              "foldable_printerMargin", "foldable_foldingMargin", "foldable_cardMargin", "foldable_cutMargin", 
-              "foldable_innerBorder", "foldable_cornerRadius"
-            ]);
-            
-            if (dimensionIds.has(key) && typeof value === 'number') {
-              if (LayoutToolUI.config.currentUnit === 'in') {
-                value = parseFloat((value / 25.4).toFixed(2));
-              } else {
-                value = parseFloat(value.toFixed(1));
-              }
+          if (settings.grid) {
+            this.applySettings(settings.grid);
+          }
+          if (settings.foldable) {
+            this.applySettings(settings.foldable);
+          }
+          if (settings.pageOrientation && this.elements.pageOrientation) {
+            this.elements.pageOrientation.value = settings.pageOrientation;
+            if (this.elements.pageSize) {
+              this.ui.updatePageSizeInputs(
+                this.elements.pageSize,
+                this.elements.pageWidth,
+                this.elements.pageHeight,
+                this.elements.pageOrientation
+              );
             }
+          }
+        } else {
+          // --- V1 preset: legacy grid-only ---
+          if (settings.pageOrientation && this.elements.pageOrientation) {
+            this.elements.pageOrientation.value = settings.pageOrientation;
+          }
+          if (settings.pageSize) {
+            let pSize = settings.pageSize;
+            if (pSize.includes("Landscape")) {
+              if (this.elements.pageOrientation) this.elements.pageOrientation.value = "landscape";
+              pSize = pSize.replace(" Landscape", "");
+            } else if (pSize.includes("Portrait")) {
+              if (this.elements.pageOrientation) this.elements.pageOrientation.value = "portrait";
+              pSize = pSize.replace(" Portrait", "");
+            }
+            this.elements.pageSize.value = pSize;
+            this.ui.updatePageSizeInputs(
+              this.elements.pageSize,
+              this.elements.pageWidth,
+              this.elements.pageHeight,
+              this.elements.pageOrientation
+            );
+          }
+          if (settings.cardSize) {
+            this.elements.cardSize.value = settings.cardSize;
+            this.ui.updateCardSizeInputs(
+              this.elements.cardSize,
+              this.elements.imageWidth,
+              this.elements.imageHeight
+            );
+          }
 
-            // Standard element handling
-            if (element.type === "checkbox" || element.type === "radio") {
-              element.checked = value;
-            } else {
-              element.value = value;
+          for (const key in settings) {
+            const element = LayoutToolUI.elements[key];
+            let value = settings[key];
+
+            if (element && key !== "pageSize" && key !== "cardSize") {
+              const dimensionIds = new Set([
+                "pageWidth", "pageHeight", "imageWidth", "imageHeight", "bleed", "borderWidth", "crosswidth", "crosssize", "cornerRadius",
+                "foldable_pageWidth", "foldable_pageHeight", "foldable_cardWidth", "foldable_cardHeight", 
+                "foldable_printerMargin", "foldable_foldingMargin", "foldable_cardMargin", "foldable_cutMargin", 
+                "foldable_innerBorder", "foldable_cornerRadius"
+              ]);
+              
+              if (dimensionIds.has(key) && typeof value === 'number') {
+                if (LayoutToolUI.config.currentUnit === 'in') {
+                  value = parseFloat((value / 25.4).toFixed(2));
+                } else {
+                  value = parseFloat(value.toFixed(1));
+                }
+              }
+
+              // Standard element handling
+              if (element.type === "checkbox" || element.type === "radio") {
+                element.checked = value;
+              } else {
+                element.value = value;
+              }
             }
           }
         }
@@ -1053,6 +1096,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           }
         }
+
+        const uiObj = this.ui || this;
+        if (uiObj.updateFileNamePreview) uiObj.updateFileNamePreview();
+        if (uiObj.updateSettingsSummary) uiObj.updateSettingsSummary();
       },
 
       _gatherFormValues(elementIds) {
@@ -1148,14 +1195,61 @@ document.addEventListener("DOMContentLoaded", () => {
         return this._gatherFormValues(gridElementIds);
       },
 
+      getRawAllSettings() {
+        const gridSettings = this.getRawGridSettings();
+        const foldableElementIds = [
+          "foldable_pageSize",
+          "foldable_pageWidth",
+          "foldable_pageHeight",
+          "foldable_cardSize",
+          "foldable_cardWidth",
+          "foldable_cardHeight",
+          "foldable_printerMargin",
+          "foldable_foldingMargin",
+          "foldable_cardMargin",
+          "foldable_cutMargin",
+          "foldable_innerBorder",
+          "foldable_borderColorFront",
+          "foldable_borderColorBack",
+          "foldable_foldLinePreference",
+          "foldable_cornerRadius",
+        ];
+        const foldableSettings = this._gatherFormValues(foldableElementIds);
+
+        return {
+          _version: 2,
+          layoutMode: LayoutToolUI.elements.doubleSidedRadio.checked ? "doubleSided" : "foldable",
+          pageOrientation: LayoutToolUI.elements.pageOrientation ? LayoutToolUI.elements.pageOrientation.value : "portrait",
+          grid: gridSettings,
+          foldable: foldableSettings,
+        };
+      },
+
       applySettings(settings) {
+        if (!settings) return;
+        const dimensionIds = new Set([
+          "pageWidth", "pageHeight", "imageWidth", "imageHeight", "bleed", "borderWidth", "crosswidth", "crosssize", "cornerRadius",
+          "foldable_pageWidth", "foldable_pageHeight", "foldable_cardWidth", "foldable_cardHeight", 
+          "foldable_printerMargin", "foldable_foldingMargin", "foldable_cardMargin", "foldable_cutMargin", 
+          "foldable_innerBorder", "foldable_cornerRadius"
+        ]);
+
         for (const key in settings) {
-          if (key === "customFileName") continue;
+          if (key === "customFileName" || key === "_version" || key === "layoutMode" || key === "pageOrientation") continue;
           const element = LayoutToolUI.elements[key];
-          const value = settings[key];
+          let value = settings[key];
 
           if (element) {
             if (element.type === "file") continue;
+
+            if (dimensionIds.has(key) && typeof value === 'number') {
+              if (LayoutToolUI.config.currentUnit === 'in') {
+                value = parseFloat((value / 25.4).toFixed(2));
+              } else {
+                value = parseFloat(value.toFixed(1));
+              }
+            }
+
             if (element.type === "checkbox" || element.type === "radio") {
               element.checked = value;
             } else {

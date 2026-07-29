@@ -78,9 +78,9 @@
 - [ ] Future Evaluation: Consider incorporating conceptual features from Martin's Formatter (saved for reference in [`docs/reference/martins-formatter/`](docs/reference/martins-formatter/)):
   - **Back Nudge (Printer Drift Compensation)**: $\pm X / \pm Y$ back page offset calibration for consumer duplex printers.
 
-## Next Session — Layout & Preset Refactoring
+## Next Session — Layout & Preset Refactoring `COMPLETED`
 
-- [ ] Apply same modal styling to global layout preset saving function (remove visible text input, use custom prompt modal with 25-character limit)
-- [ ] Break out preset section from card and place it at the top under settings divider line (for both layout method views)
-- [ ] Presets should save & apply all settings across both layout method views
-- [ ] Combine Paper Size + Grid Layout into a single unified card
+- [x] Apply same modal styling to global layout preset saving function (remove visible text input, use custom prompt modal with 25-character limit)
+- [x] Break out preset section from card and place it at the top under settings divider line (for both layout method views)
+- [x] Presets should save & apply all settings across both layout method views
+- [x] Combine Paper Size + Grid Layout into a single unified card

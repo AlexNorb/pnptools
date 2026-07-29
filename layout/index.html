@@ -288,9 +288,7 @@
 
       /* Form Groups Layout */
       .settings-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 1.25rem;
+        display: none; /* replaced by tailwind utility classes */
       }
 
       /* Preview Panel */
@@ -432,7 +430,7 @@
           </div>
         </div>
 
-        <div class="flex items-center justify-between border-b-3 border-theme-dark pb-3 mb-5 gap-3 flex-wrap sm:flex-nowrap">
+        <div class="flex items-center justify-between border-b-3 border-theme-dark pb-3 mb-4 gap-3 flex-wrap sm:flex-nowrap">
           <div class="flex items-center gap-3 shrink-0">
             <h2 class="text-2xl font-display text-theme-dark">3. Settings</h2>
             <div class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-8 items-center">
@@ -461,138 +459,138 @@
           </div>
         </div>
 
-        <div id="settingsContent" class="collapsible-wrapper">
-          <div class="collapsible-inner">
-            <div id="doubleSidedModeUI">
-          <div class="settings-grid mb-6">
-            <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl min-w-0">
-              <div class="flex items-center gap-2">
-                <i class="fa-solid fa-bookmark text-2xl text-theme-indigo"></i>
-                <h3 class="font-display text-lg text-theme-dark">Presets</h3>
-              </div>
-              <select id="preset" class="w-full"></select>
-              <div class="flex gap-2 items-center">
-                <input type="text" id="presetName" placeholder="Preset Name" maxlength="25" class="flex-1 min-w-0" />
-                <button id="savePresetButton" title="Save Preset" aria-label="Save Preset" class="btn-secondary w-[2rem] p-0 text-sm shrink-0">
-                  <i class="fa-solid fa-floppy-disk text-theme-indigo"></i>
-                </button>
-                <button id="deletePresetButton" title="Delete Preset" aria-label="Delete Preset" class="btn-secondary w-[2rem] p-0 text-sm text-theme-pink border-theme-pink shrink-0">
-                  <i class="fa-solid fa-trash-can"></i>
-                </button>
-              </div>
-            </div>
-
-            <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
-              <div class="flex items-center gap-2">
-                <i class="fa-solid fa-file text-2xl text-theme-indigo"></i>
-                <h3 class="font-display text-lg text-theme-dark">Paper Size</h3>
-              </div>
-              <div class="flex flex-wrap gap-2 items-center">
-                <!-- Hidden selects for seamless JS compatibility -->
-                <select id="pageSize" name="pageSize" class="hidden">
-                  <option value="A4" selected>A4</option>
-                  <option value="Letter">Letter</option>
-                  <option value="Custom">Custom</option>
-                </select>
-                <select id="pageOrientation" name="pageOrientation" class="hidden">
-                  <option value="portrait" selected>Portrait</option>
-                  <option value="landscape">Landscape</option>
-                </select>
-
-                <!-- Segmented Page Size Toggle -->
-                <div class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center" id="pageSizeSegmented">
-                  <button type="button" data-val="A4" title="A4" class="btn-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">A4</button>
-                  <button type="button" data-val="Letter" title="Letter" class="btn-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center">Letter</button>
-                  <button type="button" data-val="Custom" title="Custom" class="btn-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center"><i class="fa-solid fa-sliders"></i></button>
-                </div>
-
-                <!-- Segmented Orientation Toggle -->
-                <div class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center" id="pageOrientationSegmented">
-                  <button type="button" data-val="portrait" title="Portrait" aria-label="Portrait" class="btn-page-orient font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">
-                    <i class="fa-solid fa-file"></i>
-                  </button>
-                  <button type="button" data-val="landscape" title="Landscape" aria-label="Landscape" class="btn-page-orient font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center">
-                    <i class="fa-solid fa-file fa-rotate-90"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="flex gap-4 mt-1">
-                <div class="flex flex-col">
-                  <label for="pageWidth" class="text-sm">Width</label>
-                  <input type="number" id="pageWidth" value="210" step="0.1" disabled class="w-16" />
-                </div>
-                <div class="flex flex-col">
-                  <label for="pageHeight" class="text-sm">Height</label>
-                  <input type="number" id="pageHeight" value="297" step="0.1" disabled class="w-16" />
-                </div>
-              </div>
-            </div>
+        <!-- Preset section — shared across both layout modes, visible even when settings collapsed -->
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+          <div class="flex items-center gap-2 shrink-0">
+            <i class="fa-solid fa-bookmark text-xl text-theme-indigo"></i>
+            <h3 class="font-display text-base text-theme-dark">Presets</h3>
           </div>
-
-      <div class="settings-grid mb-6">
-        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <i class="fa-solid fa-table-cells text-2xl text-theme-indigo"></i>
-              <h3 class="font-display text-lg text-theme-dark">Grid Layout</h3>
-            </div>
-            <div>
-              <input type="checkbox" id="autoGrid" checked class="hidden" />
-              <div class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center" id="autoGridSegmented">
-                <button type="button" data-val="false" title="Manual" aria-label="Manual Grid" class="btn-auto-grid font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center justify-center">
-                  <i class="fa-solid fa-lock-open"></i>
-                </button>
-                <button type="button" data-val="true" title="Auto-calculate" aria-label="Auto-calculate Grid" class="btn-auto-grid font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center justify-center">
-                  <i class="fa-solid fa-lock"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="flex gap-4">
-            <div class="flex flex-col">
-              <label for="rows">Rows</label>
-              <input type="number" id="rows" value="3" class="w-12" />
-            </div>
-            <div class="flex flex-col">
-              <label for="columns">Columns</label>
-              <input type="number" id="columns" value="3" class="w-12" />
-            </div>
-          </div>
-        </div>
-
-        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-ruler-combined text-2xl text-theme-indigo"></i>
-            <h3 class="font-display text-lg text-theme-dark">Card Size</h3>
-          </div>
-          <div class="flex gap-2 items-center">
-            <select id="cardSize" name="cardSize" class="w-auto max-w-full"></select>
-            <button id="saveCardSizeButton" title="Save Card Size" aria-label="Save Card Size" class="btn-secondary w-[2rem] p-0 text-sm shrink-0">
+          <select id="preset" class="flex-1 min-w-[180px]"></select>
+          <div class="flex gap-2 shrink-0">
+            <button id="savePresetButton" title="Save Preset" aria-label="Save Preset" class="btn-secondary w-[2rem] p-0 text-sm">
               <i class="fa-solid fa-floppy-disk text-theme-indigo"></i>
             </button>
-            <button id="deleteCardSizeButton" title="Delete Card Size" aria-label="Delete Card Size" class="btn-secondary w-[2rem] p-0 text-sm text-theme-pink border-theme-pink shrink-0">
+            <button id="deletePresetButton" title="Delete Preset" aria-label="Delete Preset" class="btn-secondary w-[2rem] p-0 text-sm text-theme-pink border-theme-pink">
               <i class="fa-solid fa-trash-can"></i>
             </button>
           </div>
-          <div class="flex gap-4 mt-2">
-            <div class="flex flex-col">
-              <label for="imageWidth" class="text-sm">Width</label>
-              <input type="number" id="imageWidth" value="63" disabled class="w-12" />
-            </div>
-            <div class="flex flex-col">
-              <label for="imageHeight" class="text-sm">Height</label>
-              <input type="number" id="imageHeight" value="88" disabled class="w-12" />
-            </div>
-            <div class="flex flex-col">
-              <label for="bleed" class="text-sm">Bleed</label>
-              <input type="number" id="bleed" value="0" class="w-12" />
-            </div>
-          </div>
         </div>
-      </div>
 
-      <div class="settings-grid">
-        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
+        <div id="settingsContent" class="collapsible-wrapper">
+          <div class="collapsible-inner">
+
+            <div id="doubleSidedModeUI">
+              <div class="flex flex-wrap items-stretch gap-5 mb-6">
+                <!-- Paper Size Card -->
+                <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl flex-1 min-w-[240px]">
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-file text-2xl text-theme-indigo"></i>
+                    <h3 class="font-display text-lg text-theme-dark">Paper Size</h3>
+                  </div>
+                  <div class="flex flex-wrap gap-2 items-center">
+                    <!-- Hidden selects for seamless JS compatibility -->
+                    <select id="pageSize" name="pageSize" class="hidden">
+                      <option value="A4" selected>A4</option>
+                      <option value="Letter">Letter</option>
+                      <option value="Custom">Custom</option>
+                    </select>
+                    <select id="pageOrientation" name="pageOrientation" class="hidden">
+                      <option value="portrait" selected>Portrait</option>
+                      <option value="landscape">Landscape</option>
+                    </select>
+
+                    <!-- Segmented Page Size Toggle -->
+                    <div class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center" id="pageSizeSegmented">
+                      <button type="button" data-val="A4" title="A4" class="btn-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">A4</button>
+                      <button type="button" data-val="Letter" title="Letter" class="btn-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center">Letter</button>
+                      <button type="button" data-val="Custom" title="Custom" class="btn-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center"><i class="fa-solid fa-sliders"></i></button>
+                    </div>
+
+                    <!-- Segmented Orientation Toggle -->
+                    <div class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center" id="pageOrientationSegmented">
+                      <button type="button" data-val="portrait" title="Portrait" aria-label="Portrait" class="btn-page-orient font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">
+                        <i class="fa-solid fa-file"></i>
+                      </button>
+                      <button type="button" data-val="landscape" title="Landscape" aria-label="Landscape" class="btn-page-orient font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center">
+                        <i class="fa-solid fa-file fa-rotate-90"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="flex gap-4 mt-1">
+                    <div class="flex flex-col">
+                      <label for="pageWidth" class="text-sm">Width</label>
+                      <input type="number" id="pageWidth" value="210" step="0.1" disabled class="w-16" />
+                    </div>
+                    <div class="flex flex-col">
+                      <label for="pageHeight" class="text-sm">Height</label>
+                      <input type="number" id="pageHeight" value="297" step="0.1" disabled class="w-16" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card Size Card -->
+                <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl flex-[1.2] min-w-[260px] max-w-full">
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-ruler-combined text-xl text-theme-indigo"></i>
+                    <h3 class="font-display text-lg text-theme-dark">Card Size</h3>
+                  </div>
+                  <div class="flex gap-2 items-center">
+                    <select id="cardSize" name="cardSize" class="flex-1 min-w-0 text-ellipsis"></select>
+                    <button id="saveCardSizeButton" title="Save Card Size" aria-label="Save Card Size" class="btn-secondary w-[2rem] p-0 text-sm shrink-0">
+                      <i class="fa-solid fa-floppy-disk text-theme-indigo"></i>
+                    </button>
+                    <button id="deleteCardSizeButton" title="Delete Card Size" aria-label="Delete Card Size" class="btn-secondary w-[2rem] p-0 text-sm text-theme-pink border-theme-pink shrink-0">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </div>
+                  <div class="flex flex-wrap gap-4 mt-1">
+                    <div class="flex flex-col">
+                      <label for="imageWidth" class="text-sm">Width</label>
+                      <input type="number" id="imageWidth" value="63" disabled class="w-12" />
+                    </div>
+                    <div class="flex flex-col">
+                      <label for="imageHeight" class="text-sm">Height</label>
+                      <input type="number" id="imageHeight" value="88" disabled class="w-12" />
+                    </div>
+                    <div class="flex flex-col">
+                      <label for="bleed" class="text-sm">Bleed</label>
+                      <input type="number" id="bleed" value="0" class="w-12" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Grid Card -->
+                <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl flex-1 min-w-[240px]">
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-table-cells text-xl text-theme-indigo"></i>
+                    <h3 class="font-display text-lg text-theme-dark">Grid Size</h3>
+                  </div>
+                  <div class="flex gap-2 items-center">
+                    <input type="checkbox" id="autoGrid" checked class="hidden" />
+                    <div class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center" id="autoGridSegmented">
+                      <button type="button" data-val="false" title="Manual" aria-label="Manual Grid" class="btn-auto-grid font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center justify-center">
+                        <i class="fa-solid fa-lock-open"></i>
+                      </button>
+                      <button type="button" data-val="true" title="Auto-calculate" aria-label="Auto-calculate Grid" class="btn-auto-grid font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center justify-center">
+                        <i class="fa-solid fa-lock"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="flex gap-4 mt-1">
+                    <div class="flex flex-col">
+                      <label for="rows" class="text-sm">Rows</label>
+                      <input type="number" id="rows" value="3" class="w-12" />
+                    </div>
+                    <div class="flex flex-col">
+                      <label for="columns" class="text-sm">Cols</label>
+                      <input type="number" id="columns" value="3" class="w-12" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+      <div class="flex flex-wrap items-stretch gap-5">
+        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl flex-1 min-w-[240px]">
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-crosshairs text-2xl text-theme-pink"></i>
             <h3 class="font-display text-lg text-theme-dark">Crosshairs</h3>
@@ -623,7 +621,7 @@
           </div>
         </div>
 
-        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
+        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl flex-[1.5] min-w-[280px]">
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-border-top-left text-2xl text-theme-pink"></i>
             <h3 class="font-display text-lg text-theme-dark">Borders</h3>
@@ -672,9 +670,9 @@
     </div>
 
     <div id="foldableModeUI" style="display: none">
-      <div class="settings-grid mb-6">
+      <div class="flex flex-wrap items-stretch gap-5 mb-6">
         <!-- Paper Size Card -->
-        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
+        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl flex-1 min-w-[240px]">
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-file text-2xl text-theme-indigo"></i>
             <h3 class="font-display text-lg text-theme-dark">Paper Size</h3>
@@ -705,8 +703,44 @@
           </div>
         </div>
 
+        <!-- Card Size Card -->
+        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl flex-[1.5] min-w-[280px]">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-ruler-combined text-2xl text-theme-indigo"></i>
+            <h3 class="font-display text-lg text-theme-dark">Card Size</h3>
+          </div>
+          <div class="flex gap-2 items-center">
+            <select id="foldable_cardSize" name="foldable_cardSize" class="flex-1 min-w-0 text-ellipsis"></select>
+            <button id="foldable_saveCardSizeButton" title="Save Card Size" aria-label="Save Card Size" class="btn-secondary w-[2rem] p-0 text-sm shrink-0">
+              <i class="fa-solid fa-floppy-disk text-theme-indigo"></i>
+            </button>
+            <button id="foldable_deleteCardSizeButton" title="Delete Card Size" aria-label="Delete Card Size" class="btn-secondary w-[2rem] p-0 text-sm text-theme-pink border-theme-pink shrink-0">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+          <div class="flex flex-wrap gap-4 mt-1">
+            <div class="flex flex-col">
+              <label for="foldable_cardWidth" class="text-sm">Width</label>
+              <input type="number" id="foldable_cardWidth" value="63" disabled class="w-12" />
+            </div>
+            <div class="flex flex-col">
+              <label for="foldable_cardHeight" class="text-sm">Height</label>
+              <input type="number" id="foldable_cardHeight" value="88" disabled class="w-12" />
+            </div>
+            <!-- Hidden spacing input defaulting to 0 -->
+            <input type="hidden" id="foldable_cardMargin" value="0" />
+            <div class="flex flex-col">
+              <label for="foldable_cutMargin" class="text-sm">Bleed</label>
+              <input type="number" id="foldable_cutMargin" value="0" class="w-12" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Grid for Card Size and Borders -->
+      <div class="flex flex-wrap items-stretch gap-5">
         <!-- Fold Preference Card -->
-        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
+        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl flex-1 min-w-[240px]">
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-map text-2xl text-theme-indigo"></i>
             <h3 class="font-display text-lg text-theme-dark">Fold Preference</h3>
@@ -733,45 +767,9 @@
             <input type="number" id="foldable_foldingMargin" value="5" class="w-12" />
           </div>
         </div>
-      </div>
-
-      <!-- Settings Grid for Card Size and Borders -->
-      <div class="settings-grid">
-        <!-- Card Size Card -->
-        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-ruler-combined text-2xl text-theme-indigo"></i>
-            <h3 class="font-display text-lg text-theme-dark">Card Size</h3>
-          </div>
-          <div class="flex gap-2 items-center">
-            <select id="foldable_cardSize" name="foldable_cardSize" class="w-auto max-w-full"></select>
-            <button id="foldable_saveCardSizeButton" title="Save Card Size" aria-label="Save Card Size" class="btn-secondary w-[2rem] p-0 text-sm shrink-0">
-              <i class="fa-solid fa-floppy-disk text-theme-indigo"></i>
-            </button>
-            <button id="foldable_deleteCardSizeButton" title="Delete Card Size" aria-label="Delete Card Size" class="btn-secondary w-[2rem] p-0 text-sm text-theme-pink border-theme-pink shrink-0">
-              <i class="fa-solid fa-trash-can"></i>
-            </button>
-          </div>
-          <div class="flex flex-wrap gap-4 mt-1">
-            <div class="flex flex-col">
-              <label for="foldable_cardWidth" class="text-sm">Width</label>
-              <input type="number" id="foldable_cardWidth" value="63" disabled class="w-12" />
-            </div>
-            <div class="flex flex-col">
-              <label for="foldable_cardHeight" class="text-sm">Height</label>
-              <input type="number" id="foldable_cardHeight" value="88" disabled class="w-12" />
-            </div>
-            <!-- Hidden spacing input defaulting to 0 -->
-            <input type="hidden" id="foldable_cardMargin" value="0" />
-            <div class="flex flex-col">
-              <label for="foldable_cutMargin" class="text-sm">Bleed</label>
-              <input type="number" id="foldable_cutMargin" value="0" class="w-12" />
-            </div>
-          </div>
-        </div>
 
         <!-- Borders Card -->
-        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl">
+        <div class="flex flex-col gap-4 p-4 border-3 border-theme-bg rounded-xl flex-1 min-w-[240px]">
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-border-top-left text-2xl text-theme-pink"></i>
             <h3 class="font-display text-lg text-theme-dark">Borders</h3>
@@ -818,34 +816,40 @@
   </div>
 
     <!-- Generate Button Area -->
-    <div class="bento-box flex flex-col md:flex-row items-center justify-between gap-6 bg-theme-bg border-theme-dark mt-8">
-      <div class="flex flex-col sm:flex-row items-stretch gap-4 w-full md:w-auto">
-        <button id="generatePdfButton" class="bg-theme-pink text-white font-display text-xl border-3 border-theme-dark px-6 py-3 rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)] w-full sm:w-auto shrink-0 flex items-center justify-center tracking-wide">
-          Generate PDF
-        </button>
-        <div class="bg-white border-3 border-theme-dark rounded-xl p-3 sm:px-4 flex flex-col justify-center gap-1.5 shadow-[4px_4px_0_var(--color-theme-dark)] w-full sm:w-auto">
-          <div class="flex items-center gap-3 flex-wrap sm:flex-nowrap">
-            <div class="flex items-center gap-1.5">
-              <label for="customFileName" class="font-bold text-xs shrink-0">Filename:</label>
-              <input type="text" id="customFileName" value="" placeholder="grid" class="px-2 text-xs w-28 shrink-0" />
-            </div>
-            <label class="flex items-center gap-1.5 cursor-pointer text-xs font-medium shrink-0" title="Prefix page size to filename">
-              <input type="checkbox" id="prefixPageSize" class="accent-theme-indigo" />
-              <span>Prefix</span>
-            </label>
+    <div class="bento-box flex flex-col md:flex-row items-center justify-center md:justify-between gap-5 bg-theme-bg border-theme-dark mt-8">
+      <!-- Column 1: Generate PDF Button -->
+      <button id="generatePdfButton" class="bg-theme-pink text-white font-display text-xl border-3 border-theme-dark px-6 py-3 rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)] w-full max-w-sm md:w-auto shrink-0 flex items-center justify-center tracking-wide">
+        Generate PDF
+      </button>
+
+      <!-- Column 2: Filename Card & Progress Container (Shared Slot) -->
+      <div class="flex-1 w-full md:w-auto flex items-center justify-center">
+        <!-- Filename Card (wraps internally to 2 rows when tight) -->
+        <div id="fileNameCard" class="bg-white border-3 border-theme-dark rounded-xl py-2 px-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 shadow-[4px_4px_0_var(--color-theme-dark)] w-full max-w-sm md:w-auto">
+          <!-- Item 1: Filename label + dynamic preview text -->
+          <div class="flex items-center gap-1.5 text-xs shrink-0">
+            <span class="font-bold shrink-0 text-theme-dark">Filename:</span>
+            <span id="fileNamePreview" class="font-bold text-theme-indigo truncate max-w-[180px]">cards.pdf</span>
           </div>
-          <div id="fileNamePreview" class="text-[11px] font-bold text-theme-indigo truncate">
-            cards.pdf
+          <!-- Item 2: Prefix (stacked label over checkbox) > text input -->
+          <div class="flex items-end gap-2 shrink-0">
+            <label for="prefixPageSize" class="flex flex-col items-center justify-center gap-0.5 cursor-pointer text-[10px] font-bold shrink-0 text-theme-dark" title="Prefix page size to filename">
+              <span class="leading-none">Prefix</span>
+              <input type="checkbox" id="prefixPageSize" class="accent-theme-indigo" />
+            </label>
+            <input type="text" id="customFileName" value="" placeholder="grid" class="px-2 text-xs w-28 shrink-0" />
           </div>
         </div>
-      </div>
-      
-      <div id="progressContainer" class="flex-1 w-full" style="display: none;">
-        <span id="progressStatus" class="font-bold text-theme-indigo block mb-2"></span>
-        <progress id="progressBar" value="0" max="100" class="w-full h-4 rounded-full overflow-hidden border-2 border-theme-dark [&::-webkit-progress-bar]:bg-white [&::-webkit-progress-value]:bg-theme-teal"></progress>
+
+        <!-- Progress Container (Replaces Filename Card when generating) -->
+        <div id="progressContainer" class="bg-white border-3 border-theme-dark rounded-xl p-3 sm:px-4 flex flex-col justify-center shadow-[4px_4px_0_var(--color-theme-dark)] w-full max-w-md" style="display: none;">
+          <span id="progressStatus" class="font-bold text-xs text-theme-indigo block mb-1 text-center"></span>
+          <progress id="progressBar" value="0" max="100" class="w-full h-3 rounded-full overflow-hidden border-2 border-theme-dark [&::-webkit-progress-bar]:bg-white [&::-webkit-progress-value]:bg-theme-teal"></progress>
+        </div>
       </div>
 
-      <a href="https://www.buymeacoffee.com/pnpbuddy" title="Support PnPBuddy by buying me a dice" class="shrink-0 inline-flex items-center justify-center h-12 border-3 border-theme-dark rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] overflow-hidden bg-[#f7e517] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)]">
+      <!-- Column 3: Buy Me a Dice Link -->
+      <a href="https://www.buymeacoffee.com/pnpbuddy" title="Support PnPBuddy by buying me a dice" class="w-full max-w-sm md:w-auto shrink-0 inline-flex items-center justify-center h-12 border-3 border-theme-dark rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] overflow-hidden bg-[#f7e517] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)]">
         <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a dice&emoji=🎲&slug=pnpbuddy&button_colour=f7e517&font_colour=000000&font_family=Bree&outline_colour=000000&coffee_colour=FFDD00" alt="Buy me a dice" class="h-full w-auto object-cover scale-[1.08]" />
       </a>
     </div>
