@@ -68,102 +68,7 @@
       }
 
       /* Container-query-driven 3-stage Bento card layout */
-      .bento-card-stage {
-        container-type: inline-size;
-      }
 
-      /* Default Stage 3 (< 360px): 1, 2, 3 all take 100% width */
-      .bento-card-stage .card-item-1,
-      .bento-card-stage .card-item-2,
-      .bento-card-stage .card-item-3 {
-        width: 100%;
-      }
-
-      .bento-card-stage .card-item-1 {
-        min-width: 200px;
-      }
-
-      .bento-card-stage .card-item-3 {
-        margin-left: auto;
-      }
-
-      /* Paper Size Card (T1=560px, T2=380px) */
-      @container (min-width: 380px) {
-        .card-paper .card-item-2,
-        .card-paper .card-item-3 {
-          width: auto;
-        }
-      }
-      @container (min-width: 560px) {
-        .card-paper .card-item-1 {
-          width: auto;
-        }
-      }
-
-      /* Borders Card (T1=640px, T2=420px) */
-      @container (min-width: 420px) {
-        .card-borders .card-item-2,
-        .card-borders .card-item-3 {
-          width: auto;
-        }
-      }
-      @container (min-width: 640px) {
-        .card-borders .card-item-1 {
-          width: auto;
-        }
-      }
-
-      /* Card Size Card (T1=610px, T2=400px) */
-      @container (min-width: 400px) {
-        .card-size .card-item-2,
-        .card-size .card-item-3 {
-          width: auto;
-        }
-      }
-      @container (min-width: 610px) {
-        .card-size .card-item-1 {
-          width: auto;
-        }
-      }
-
-      /* Crosshairs Card (T1=520px, T2=340px) */
-      @container (min-width: 340px) {
-        .card-crosshairs .card-item-2,
-        .card-crosshairs .card-item-3 {
-          width: auto;
-        }
-      }
-      @container (min-width: 520px) {
-        .card-crosshairs .card-item-1 {
-          width: auto;
-        }
-      }
-
-      /* Grid Size Card (T1=450px, T2=280px) */
-      @container (min-width: 280px) {
-        .card-grid .card-item-2,
-        .card-grid .card-item-3 {
-          width: auto;
-        }
-      }
-      @container (min-width: 450px) {
-        .card-grid .card-item-1 {
-          width: auto;
-        }
-      }
-
-      /* Fold Preference Card (T1=470px, T2=280px) */
-      @container (min-width: 280px) {
-        .card-fold .card-item-2,
-        .card-fold .card-item-3 {
-          width: auto;
-        }
-      }
-      @container (min-width: 470px) {
-        .card-fold .card-item-1 {
-          width: auto;
-        }
-      }
 
       /* Hide native number input spinners & center numbers */
       input[type="number"]::-webkit-outer-spin-button,
@@ -291,6 +196,10 @@
         border-color: var(--color-theme-dark);
         color: var(--color-theme-dark);
         box-shadow: 2px 2px 0 var(--color-theme-dark);
+      }
+
+      .mode-indicator.active i {
+        opacity: 1;
       }
 
       .mode-indicator.error {
@@ -634,13 +543,14 @@
             <div class="flex flex-col gap-3 mb-4">
               <!-- Paper Size Card -->
               <div
-                class="bento-card-stage card-paper flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
-                <div class="card-item-1 flex items-center gap-2 shrink-0">
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
                   <i class="fa-solid fa-file text-xl text-theme-indigo"></i>
                   <h3 class="font-display text-base text-theme-dark">Paper Size</h3>
                 </div>
 
-                <div class="card-item-2 flex flex-wrap gap-2 items-center shrink-0 justify-start">
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex flex-wrap gap-2 items-center shrink-0 justify-start">
                   <!-- Hidden selects for seamless JS compatibility -->
                   <select id="pageSize" name="pageSize" class="hidden">
                     <option value="A4" selected>A4</option>
@@ -680,27 +590,29 @@
                   </div>
                 </div>
 
-                <div class="card-item-3 flex flex-wrap gap-4 items-center shrink-0 justify-start">
-                  <div class="flex flex-col">
-                    <label for="pageWidth" class="text-xs font-bold text-theme-muted">Width</label>
+                <div class=" flex flex-wrap gap-4 items-center shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
+                    <label for="pageWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
                     <input type="number" id="pageWidth" value="210" step="0.1" disabled class="w-16" />
                   </div>
-                  <div class="flex flex-col">
-                    <label for="pageHeight" class="text-xs font-bold text-theme-muted">Height</label>
+                  <div class="flex flex-col items-center">
+                    <label for="pageHeight" class="text-xs font-bold text-theme-muted text-center">Height</label>
                     <input type="number" id="pageHeight" value="297" step="0.1" disabled class="w-16" />
                   </div>
+                </div>
                 </div>
               </div>
 
               <!-- Card Size Card -->
               <div
-                class="bento-card-stage card-size flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
-                <div class="card-item-1 flex items-center gap-2 shrink-0">
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
                   <i class="fa-solid fa-ruler-combined text-xl text-theme-indigo"></i>
                   <h3 class="font-display text-base text-theme-dark">Card Size</h3>
                 </div>
 
-                <div class="card-item-2 flex gap-2 items-center flex-1 min-w-[200px] max-w-md">
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex gap-2 items-center flex-1 min-w-[200px] max-w-md">
                   <select id="cardSize" name="cardSize" class="flex-1 min-w-0 text-ellipsis"></select>
                   <button id="saveCardSizeButton" title="Save Card Size" aria-label="Save Card Size"
                     class="btn-secondary w-[2rem] p-0 text-sm shrink-0">
@@ -712,31 +624,33 @@
                   </button>
                 </div>
 
-                <div class="card-item-3 flex flex-wrap gap-4 items-center shrink-0 justify-start">
-                  <div class="flex flex-col">
-                    <label for="imageWidth" class="text-xs font-bold text-theme-muted">Width</label>
+                <div class=" flex flex-wrap gap-4 items-center shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
+                    <label for="imageWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
                     <input type="number" id="imageWidth" value="63" disabled class="w-12" />
                   </div>
-                  <div class="flex flex-col">
-                    <label for="imageHeight" class="text-xs font-bold text-theme-muted">Height</label>
+                  <div class="flex flex-col items-center">
+                    <label for="imageHeight" class="text-xs font-bold text-theme-muted text-center">Height</label>
                     <input type="number" id="imageHeight" value="88" disabled class="w-12" />
                   </div>
-                  <div class="flex flex-col">
-                    <label for="bleed" class="text-xs font-bold text-theme-muted">Bleed</label>
+                  <div class="flex flex-col items-center">
+                    <label for="bleed" class="text-xs font-bold text-theme-muted text-center">Bleed</label>
                     <input type="number" id="bleed" value="0" class="w-12" />
                   </div>
+                </div>
                 </div>
               </div>
 
               <!-- Grid Card -->
               <div
-                class="bento-card-stage card-grid flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
-                <div class="card-item-1 flex items-center gap-2 shrink-0">
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
                   <i class="fa-solid fa-table-cells text-xl text-theme-indigo"></i>
                   <h3 class="font-display text-base text-theme-dark">Grid Size</h3>
                 </div>
 
-                <div class="card-item-2 flex gap-2 items-center shrink-0">
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex gap-2 items-center shrink-0">
                   <input type="checkbox" id="autoGrid" checked class="hidden" />
                   <div
                     class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center"
@@ -754,15 +668,16 @@
                   </div>
                 </div>
 
-                <div class="card-item-3 flex gap-4 items-center shrink-0 justify-start">
-                  <div class="flex flex-col">
-                    <label for="rows" class="text-xs font-bold text-theme-muted">Rows</label>
+                <div class=" flex gap-4 items-center shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
+                    <label for="rows" class="text-xs font-bold text-theme-muted text-center">Rows</label>
                     <input type="number" id="rows" value="3" class="w-12" />
                   </div>
-                  <div class="flex flex-col">
-                    <label for="columns" class="text-xs font-bold text-theme-muted">Cols</label>
+                  <div class="flex flex-col items-center">
+                    <label for="columns" class="text-xs font-bold text-theme-muted text-center">Cols</label>
                     <input type="number" id="columns" value="3" class="w-12" />
                   </div>
+                </div>
                 </div>
               </div>
             </div>
@@ -770,70 +685,73 @@
             <div class="flex flex-col gap-3">
               <!-- Crosshairs Card -->
               <div
-                class="bento-card-stage card-crosshairs flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
-                <div class="card-item-1 flex items-center gap-2 shrink-0">
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
                   <i class="fa-solid fa-crosshairs text-xl text-theme-pink"></i>
                   <h3 class="font-display text-base text-theme-dark">Crosshairs</h3>
                 </div>
 
-                <div class="card-item-2 flex gap-3 items-center shrink-0 flex-nowrap">
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex gap-3 items-center shrink-0 flex-nowrap">
                   <div class="flex flex-col items-center">
-                    <label for="frontCheckbox" class="text-xs font-bold text-theme-muted cursor-pointer">Front</label>
+                    <label for="frontCheckbox" class="text-xs font-bold text-theme-muted cursor-pointer text-center">Front</label>
                     <input type="checkbox" id="frontCheckbox" name="frontCheckbox" checked
                       class="accent-theme-pink cursor-pointer mt-1" />
                   </div>
                   <div class="flex flex-col items-center">
-                    <label for="backCheckbox" class="text-xs font-bold text-theme-muted cursor-pointer">Back</label>
+                    <label for="backCheckbox" class="text-xs font-bold text-theme-muted cursor-pointer text-center">Back</label>
                     <input type="checkbox" id="backCheckbox" name="backCheckbox"
                       class="accent-theme-pink cursor-pointer mt-1" />
                   </div>
                   <div class="flex flex-col items-center">
-                    <label class="text-xs font-bold text-theme-muted opacity-0 select-none">&nbsp;</label>
+                    <label class="text-xs font-bold text-theme-muted opacity-0 select-none text-center">&nbsp;</label>
                     <input type="color" id="crosshaircolor" value="#000000" class="mt-1" />
                   </div>
                 </div>
 
-                <div class="card-item-3 flex flex-wrap items-center gap-3 shrink-0 justify-start">
-                  <div class="flex flex-col">
-                    <label for="crosswidth" class="text-xs font-bold text-theme-muted">Width</label>
+                <div class=" flex flex-wrap items-center gap-3 shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
+                    <label for="crosswidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
                     <input type="number" id="crosswidth" value="0.1" step="0.05" class="w-12" />
                   </div>
-                  <div class="flex flex-col">
-                    <label for="crosssize" class="text-xs font-bold text-theme-muted">Size</label>
+                  <div class="flex flex-col items-center">
+                    <label for="crosssize" class="text-xs font-bold text-theme-muted text-center">Size</label>
                     <input type="number" id="crosssize" value="3" step="0.5" class="w-12" />
                   </div>
+                </div>
                 </div>
               </div>
 
               <!-- Borders Card -->
               <div
-                class="bento-card-stage card-borders flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
-                <div class="card-item-1 flex items-center gap-2 shrink-0">
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
                   <i class="fa-solid fa-border-top-left text-xl text-theme-pink"></i>
                   <h3 class="font-display text-base text-theme-dark">Borders</h3>
                 </div>
 
-                <div class="card-item-2 flex flex-wrap items-center gap-3 shrink-0">
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex flex-wrap items-center gap-3 shrink-0">
                   <div class="flex flex-col items-center">
                     <label for="frontBorderCheckbox"
-                      class="text-xs font-bold text-theme-muted cursor-pointer">Front</label>
+                      class="text-xs font-bold text-theme-muted cursor-pointer text-center">Front</label>
                     <input type="checkbox" id="frontBorderCheckbox" class="accent-theme-pink cursor-pointer mt-1" />
                   </div>
                   <div class="flex flex-col items-center">
                     <label for="backBorderCheckbox"
-                      class="text-xs font-bold text-theme-muted cursor-pointer">Back</label>
+                      class="text-xs font-bold text-theme-muted cursor-pointer text-center">Back</label>
                     <input type="checkbox" id="backBorderCheckbox" class="accent-theme-pink cursor-pointer mt-1" />
                   </div>
                   <div class="flex flex-col items-center">
-                    <label class="text-xs font-bold text-theme-muted opacity-0 select-none">&nbsp;</label>
+                    <label class="text-xs font-bold text-theme-muted opacity-0 select-none text-center">&nbsp;</label>
                     <input type="color" id="borderColor" value="#ffffff" class="mt-1" />
                   </div>
                 </div>
 
-                <div class="card-item-3 flex flex-wrap items-center gap-3 shrink-0 justify-start">
-                  <div class="flex flex-col">
+                <div class=" flex flex-wrap items-center gap-3 shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
                     <label for="cornerRadius"
-                      class="text-xs font-bold text-theme-muted flex justify-between items-center">
+                      class="text-xs font-bold text-theme-muted flex justify-between items-center text-center">
                       <span>Radius</span>
                       <span id="cornerRadiusVal" class="text-[10px] text-theme-dark font-bold ml-1">(0mm)</span>
                     </label>
@@ -859,10 +777,11 @@
                         class="btn-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">XL</button>
                     </div>
                   </div>
-                  <div class="flex flex-col">
-                    <label for="borderWidth" class="text-xs font-bold text-theme-muted">Width</label>
+                  <div class="flex flex-col items-center">
+                    <label for="borderWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
                     <input type="number" id="borderWidth" value="3" class="w-12" />
                   </div>
+                </div>
                 </div>
               </div>
             </div>
@@ -872,13 +791,14 @@
             <div class="flex flex-col gap-3 mb-3">
               <!-- Paper Size Card -->
               <div
-                class="bento-card-stage card-paper flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
-                <div class="card-item-1 flex items-center gap-2 shrink-0">
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
                   <i class="fa-solid fa-file text-xl text-theme-indigo"></i>
                   <h3 class="font-display text-base text-theme-dark">Paper Size</h3>
                 </div>
 
-                <div class="card-item-2 flex flex-wrap gap-2 items-center shrink-0 justify-start">
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex flex-wrap gap-2 items-center shrink-0 justify-start">
                   <!-- Hidden select for seamless JS compatibility -->
                   <select id="foldable_pageSize" name="foldable_pageSize" class="hidden">
                     <option value="A4" selected>A4</option>
@@ -900,27 +820,29 @@
                   </div>
                 </div>
 
-                <div class="card-item-3 flex flex-wrap gap-4 items-center shrink-0 justify-start">
-                  <div class="flex flex-col">
-                    <label for="foldable_pageWidth" class="text-xs font-bold text-theme-muted">Width</label>
+                <div class=" flex flex-wrap gap-4 items-center shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_pageWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
                     <input type="number" id="foldable_pageWidth" value="210" step="0.1" disabled class="w-16" />
                   </div>
-                  <div class="flex flex-col">
-                    <label for="foldable_pageHeight" class="text-xs font-bold text-theme-muted">Height</label>
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_pageHeight" class="text-xs font-bold text-theme-muted text-center">Height</label>
                     <input type="number" id="foldable_pageHeight" value="297" step="0.1" disabled class="w-16" />
                   </div>
+                </div>
                 </div>
               </div>
 
               <!-- Card Size Card -->
               <div
-                class="bento-card-stage card-size flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
-                <div class="card-item-1 flex items-center gap-2 shrink-0">
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
                   <i class="fa-solid fa-ruler-combined text-xl text-theme-indigo"></i>
                   <h3 class="font-display text-base text-theme-dark">Card Size</h3>
                 </div>
 
-                <div class="card-item-2 flex gap-2 items-center flex-1 min-w-[200px] max-w-md">
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex gap-2 items-center flex-1 min-w-[200px] max-w-md">
                   <select id="foldable_cardSize" name="foldable_cardSize" class="flex-1 min-w-0 text-ellipsis"></select>
                   <button id="foldable_saveCardSizeButton" title="Save Card Size" aria-label="Save Card Size"
                     class="btn-secondary w-[2rem] p-0 text-sm shrink-0">
@@ -932,21 +854,22 @@
                   </button>
                 </div>
 
-                <div class="card-item-3 flex flex-wrap gap-4 items-center shrink-0 justify-start">
-                  <div class="flex flex-col">
-                    <label for="foldable_cardWidth" class="text-xs font-bold text-theme-muted">Width</label>
+                <div class=" flex flex-wrap gap-4 items-center shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_cardWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
                     <input type="number" id="foldable_cardWidth" value="63" disabled class="w-12" />
                   </div>
-                  <div class="flex flex-col">
-                    <label for="foldable_cardHeight" class="text-xs font-bold text-theme-muted">Height</label>
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_cardHeight" class="text-xs font-bold text-theme-muted text-center">Height</label>
                     <input type="number" id="foldable_cardHeight" value="88" disabled class="w-12" />
                   </div>
                   <!-- Hidden spacing input defaulting to 0 -->
                   <input type="hidden" id="foldable_cardMargin" value="0" />
-                  <div class="flex flex-col">
-                    <label for="foldable_cutMargin" class="text-xs font-bold text-theme-muted">Bleed</label>
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_cutMargin" class="text-xs font-bold text-theme-muted text-center">Bleed</label>
                     <input type="number" id="foldable_cutMargin" value="0" class="w-12" />
                   </div>
+                </div>
                 </div>
               </div>
             </div>
@@ -955,13 +878,14 @@
             <div class="flex flex-col gap-3">
               <!-- Fold Preference Card -->
               <div
-                class="bento-card-stage card-fold flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
-                <div class="card-item-1 flex items-center gap-2 shrink-0">
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
                   <i class="fa-solid fa-map text-xl text-theme-indigo"></i>
                   <h3 class="font-display text-base text-theme-dark">Fold Preference</h3>
                 </div>
 
-                <div class="card-item-2 flex gap-2 items-center shrink-0">
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex gap-2 items-center shrink-0">
                   <!-- Hidden select for seamless JS compatibility -->
                   <select id="foldable_foldLinePreference" class="hidden">
                     <option value="auto" selected>Auto</option>
@@ -987,37 +911,39 @@
                   <input type="hidden" id="foldable_printerMargin" value="5" />
                 </div>
 
-                <div class="card-item-3 flex items-center gap-3 shrink-0 justify-start">
-                  <div class="flex flex-col">
-                    <label for="foldable_foldingMargin" class="text-xs font-bold text-theme-muted">Margin</label>
+                <div class=" flex items-center gap-3 shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_foldingMargin" class="text-xs font-bold text-theme-muted text-center">Margin</label>
                     <input type="number" id="foldable_foldingMargin" value="5" class="w-12" />
                   </div>
+                </div>
                 </div>
               </div>
 
               <!-- Borders Card -->
               <div
-                class="bento-card-stage card-borders flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
-                <div class="card-item-1 flex items-center gap-2 shrink-0">
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
                   <i class="fa-solid fa-border-top-left text-xl text-theme-pink"></i>
                   <h3 class="font-display text-base text-theme-dark">Borders</h3>
                 </div>
 
-                <div class="card-item-2 flex flex-wrap items-center gap-3 shrink-0">
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex flex-wrap items-center gap-3 shrink-0">
                   <div class="flex flex-col items-center">
-                    <label for="foldable_borderColorFront" class="text-xs font-bold text-theme-muted">Front</label>
+                    <label for="foldable_borderColorFront" class="text-xs font-bold text-theme-muted text-center">Front</label>
                     <input type="color" id="foldable_borderColorFront" value="#000000" class="mt-1" />
                   </div>
                   <div class="flex flex-col items-center">
-                    <label for="foldable_borderColorBack" class="text-xs font-bold text-theme-muted">Back</label>
+                    <label for="foldable_borderColorBack" class="text-xs font-bold text-theme-muted text-center">Back</label>
                     <input type="color" id="foldable_borderColorBack" value="#000000" class="mt-1" />
                   </div>
                 </div>
 
-                <div class="card-item-3 flex flex-wrap items-center gap-3 shrink-0 justify-start">
-                  <div class="flex flex-col">
+                <div class=" flex flex-wrap items-center gap-3 shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
                     <label for="foldable_cornerRadius"
-                      class="text-xs font-bold text-theme-muted flex justify-between items-center">
+                      class="text-xs font-bold text-theme-muted flex justify-between items-center text-center">
                       <span>Radius</span>
                       <span id="foldable_cornerRadiusVal"
                         class="text-[10px] text-theme-dark font-bold ml-1">(0mm)</span>
@@ -1044,10 +970,11 @@
                         class="btn-fold-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">XL</button>
                     </div>
                   </div>
-                  <div class="flex flex-col">
-                    <label for="foldable_innerBorder" class="text-xs font-bold text-theme-muted">Width</label>
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_innerBorder" class="text-xs font-bold text-theme-muted text-center">Width</label>
                     <input type="number" id="foldable_innerBorder" value="0" class="w-12" />
                   </div>
+                </div>
                 </div>
               </div>
             </div>
