@@ -11,6 +11,87 @@
     <link rel="icon" href="favicon.png" type="image/png" />
 
     <link rel="stylesheet" href="style.css" />
+    <style>
+      /* New style for the two-column layout */
+      .main-controls-grid {
+        display: flex;
+        justify-content: center;
+        gap: 40px; /* Increased space between columns */
+        margin-bottom: 20px;
+        flex-wrap: wrap; /* Allow wrapping on smaller screens */
+      }
+      .left-column {
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Center the content vertically */
+        flex-basis: 300px; /* Fixed width for the slider pad */
+        flex-shrink: 0; /* Prevent shrinking */
+      }
+      .right-column {
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Center the content vertically */
+        flex-basis: 420px; /* Sufficient width for inputs and radios */
+        flex-shrink: 0; /* Prevent shrinking */
+      }
+
+      .slider-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      .slider-pad {
+        width: 300px; /* Doubled width */
+        height: 424px; /* Doubled height for a ~1:1.414 aspect ratio */
+        background-color: #ffffff; /* Just white */
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        position: relative;
+        cursor: crosshair;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .slider-pad::before,
+      .slider-pad::after {
+        content: "";
+        position: absolute;
+        background-color: #bbb;
+      }
+      .slider-pad::before {
+        /* Vertical line */
+        left: 50%;
+        top: 0;
+        width: 1px;
+        height: 100%;
+        transform: translateX(-50%);
+      }
+      .slider-pad::after {
+        /* Horizontal line */
+        top: 50%;
+        left: 0;
+        height: 1px;
+        width: 100%;
+        transform: translateY(-50%);
+      }
+      .slider-handle {
+        width: 40px; /* Correct width for the "paper" */
+        height: 57px; /* Correct height for a ~1:1.414 aspect ratio */
+        background-color: #3498db;
+        border-radius: 4px; /* Correct radius for a rectangle */
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        cursor: grab;
+        border: 2px solid white;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      }
+      .slider-handle:active {
+        cursor: grabbing;
+        background-color: #2980b9;
+      }
+    </style>
     <!-- font awesome -->
     <link
       rel="stylesheet"
@@ -35,31 +116,48 @@
         Negative(-) numbers will shift it to the left/down instead.
       </p>
       <div class="form-group" style="justify-content: center">
-        <label for="pdfFile">Choose file:</label><br />
-        <input type="file" id="pdfFile" accept="application/pdf" />
+        <input type="file" id="pdfFile" accept="application/pdf" /><br />
       </div>
-      <div class="form-group" style="justify-content: center">
-        <div style="margin-inline: 20px">
-          <label for="shiftX">Shift right:</label>
-          <input type="number" id="shiftX" value="0" step="0.5" /><span
-            >mm</span
-          >
+
+      <div class="main-controls-grid">
+        <div class="left-column">
+          <div class="slider-container" style="margin-bottom: 0">
+            <div id="sliderPad" class="slider-pad">
+              <div id="sliderHandle" class="slider-handle"></div>
+            </div>
+          </div>
         </div>
-        <div style="margin-inline: 20px">
-          <label for="shiftY">Shift up:</label>
-          <input type="number" id="shiftY" value="0" step="0.5" /><span
-            >mm</span
-          >
-        </div>
-      </div>
-      <div class="form-group" style="justify-content: center">
-        <div style="margin-inline: 20px">
-          <input type="radio" id="odd" name="shiftPages" value="odd" checked />
-          <label for="odd">Odd pages</label>
-        </div>
-        <div style="margin-inline: 20px">
-          <input type="radio" id="even" name="shiftPages" value="even" />
-          <label for="even">Even pages</label>
+        <div class="right-column">
+          <div class="form-group" style="justify-content: center">
+            <div style="margin-inline: 20px">
+              <label for="shiftX">Shift Right (X):</label>
+              <input type="number" id="shiftX" value="0" step="0.5" /><span
+                >mm</span
+              >
+            </div>
+            <div style="margin-inline: 20px">
+              <label for="shiftY">Shift Up (Y):</label>
+              <input type="number" id="shiftY" value="0" step="0.5" /><span
+                >mm</span
+              >
+            </div>
+          </div>
+          <div class="form-group" style="justify-content: center">
+            <div style="margin-inline: 20px">
+              <input
+                type="radio"
+                id="odd"
+                name="shiftPages"
+                value="odd"
+                checked
+              />
+              <label for="odd">Odd pages</label>
+            </div>
+            <div style="margin-inline: 20px">
+              <input type="radio" id="even" name="shiftPages" value="even" />
+              <label for="even">Even pages</label>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -67,10 +165,6 @@
     <div class="container">
       <div class="foot">
         <button onclick="shiftPDFContent()">Shift PDF</button>
-
-        <a href="survey.html" target="_blank">
-          <button class="survey">Feedback</button>
-        </a>
 
         <a
           href="https://www.buymeacoffee.com/pnpbuddy"

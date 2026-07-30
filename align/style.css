@@ -193,7 +193,6 @@ button.survey:hover {
 }
 
 .box {
-  border: ;
   padding: 5px;
   margin: 5px auto;
   width: auto;
@@ -203,7 +202,6 @@ button.survey:hover {
 }
 
 .box.preset {
-  border: ;
   padding: 5px;
   margin: 5px auto;
   width: 60%;
@@ -213,8 +211,6 @@ button.survey:hover {
 }
 
 .box.settings {
-  border: ;
-  padding: ;
   margin: 5px auto;
   width: auto;
   text-align: right;
@@ -223,8 +219,6 @@ button.survey:hover {
 }
 
 .iconbox {
-  border: ;
-  padding: ;
   margin-left: 10px;
   margin-right: 10px;
   width: auto;
