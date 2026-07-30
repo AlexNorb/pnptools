@@ -11,8 +11,16 @@ const LayoutToolPDF = {
 
       if (error) {
         console.error("Error from PDF worker:", error);
-        alert(`An error occurred during PDF generation: ${error}`);
+        Toast.show(`An error occurred during PDF generation: ${error}`, "error");
         window.LayoutToolUI.ui.toggleProgressUI(false);
+        return;
+      }
+
+      if (state === "preview_done") {
+        const previewPdfBytes = pdfBytes || (pdf && pdf.pdfBytes);
+        if (previewPdfBytes && window.SheetPreview) {
+          window.SheetPreview.onPdfReady(previewPdfBytes);
+        }
         return;
       }
 
@@ -34,10 +42,39 @@ const LayoutToolPDF = {
       }
 
       if (finalPdfBytes) {
+        const isFoldable = document.getElementById("foldable")?.checked;
+        const defaultFallback = isFoldable ? "fold" : "grid";
+        let baseName = (document.getElementById("customFileName")?.value || "").trim();
+        if (baseName.endsWith(".pdf")) baseName = baseName.slice(0, -4);
+        if (!baseName) baseName = defaultFallback;
+        
+        let prefix = "";
+        if (document.getElementById("prefixPageSize")?.checked) {
+          const isFoldable = document.getElementById("foldable")?.checked;
+          const pSize = isFoldable
+            ? document.getElementById("foldable_pageSize")?.value
+            : document.getElementById("pageSize")?.value;
+
+          if (pSize === "Custom") {
+            const widthVal = isFoldable
+              ? document.getElementById("foldable_pageWidth")?.value
+              : document.getElementById("pageWidth")?.value;
+            const heightVal = isFoldable
+              ? document.getElementById("foldable_pageHeight")?.value
+              : document.getElementById("pageHeight")?.value;
+            const w = Math.round(parseFloat(widthVal) || 0);
+            const h = Math.round(parseFloat(heightVal) || 0);
+            prefix = `${w}x${h}_`;
+          } else {
+            prefix = `${pSize}_`;
+          }
+        }
+        const finalFilename = `${prefix}${baseName}.pdf`.replace(/[^a-zA-Z0-9_\-\.]/g, "_");
+
         const blob = new Blob([finalPdfBytes], { type: "application/pdf" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "output.pdf";
+        link.download = finalFilename;
         link.click();
         window.LayoutToolUI.ui.toggleProgressUI(false);
       }
@@ -114,7 +151,7 @@ const LayoutToolPDF = {
           }
       } catch (error) {
           console.error("Error reading files for previewer:", error);
-          alert("Could not read files for the previewer. Please check the console.");
+          Toast.show("Could not read files for the previewer. Please check the console.", "error");
       }
   },
 
@@ -136,7 +173,7 @@ const LayoutToolPDF = {
           }
       } catch (error) {
           console.error("Error reading files for previewer append:", error);
-          alert("Could not read new files for the previewer. Please check the console.");
+          Toast.show("Could not read new files for the previewer. Please check the console.", "error");
       }
   },
 
@@ -166,46 +203,26 @@ const LayoutToolPDF = {
 
     const settings = window.LayoutToolUI.getSettings();
     const layoutMode = settings.layoutMode;
-    const usePreviewer = window.LayoutToolUI.elements.usePreviewer.checked;
 
     try {
-        let frontImageUrls = [];
-        let backImageUrls = [];
+        const mode = window.PreviewPanel.getMode();
+        if (mode === 'empty') {
+            Toast.show("Error: No front images loaded.", "error");
+            window.LayoutToolUI.ui.toggleProgressUI(false);
+            return;
+        }
+        if (mode === 'error') {
+            Toast.show("Error: Number of backs must be 0, 1, or equal to the number of fronts.", "error");
+            window.LayoutToolUI.ui.toggleProgressUI(false);
+            return;
+        }
 
-        if (usePreviewer) {
-            // New flow: Get data from the iframe
-            const previewData = await this.getPreviewData();
-            frontImageUrls = previewData.frontImages;
-            backImageUrls = previewData.backImages;
+        const { frontImages: frontImageUrls, backImages: backImageUrls } = window.PreviewPanel.getImageData();
 
-            if (frontImageUrls.length === 0) {
-                alert("Error: No valid image pairs were finalized in the previewer.");
-                window.LayoutToolUI.ui.toggleProgressUI(false);
-                return;
-            }
-
-        } else {
-            // Original flow: Read from file inputs
-            const { frontImages, backImages } = window.LayoutToolUI.elements;
-            const frontFiles = frontImages.files;
-            const backFiles = backImages.files;
-
-            if (frontFiles.length < 1) {
-                alert("Error: No front images selected.");
-                window.LayoutToolUI.ui.toggleProgressUI(false);
-                return;
-            }
-
-            const singleBack = backFiles.length === 1;
-            const noBack = backFiles.length === 0;
-            if (frontFiles.length !== backFiles.length && !singleBack && !noBack) {
-                alert("Error: Number of backs must be 0, 1, or the same as fronts.");
-                window.LayoutToolUI.ui.toggleProgressUI(false);
-                return;
-            }
-
-            frontImageUrls = await this.readFiles(frontFiles);
-            backImageUrls = await this.readFiles(backFiles);
+        if (frontImageUrls.length < 1) {
+            Toast.show("Error: No front images selected.", "error");
+            window.LayoutToolUI.ui.toggleProgressUI(false);
+            return;
         }
 
         // --- Common logic for sending to worker ---
@@ -224,8 +241,6 @@ const LayoutToolPDF = {
             let cards = [];
             for (let i = 0; i < frontImageUrls.length; i++) {
                 const front = frontImageUrls[i];
-                // In foldable mode, the number of backs must match fronts (or be 1 or 0)
-                // The previewer already handles this logic for us.
                 const back = backImageUrls[i] || (backImageUrls.length === 1 ? backImageUrls[0] : front);
                 cards.push({ front, back });
             }
@@ -239,8 +254,51 @@ const LayoutToolPDF = {
 
     } catch (error) {
       console.error("Error during PDF preparation:", error.message);
-      alert(`An unexpected error occurred: ${error.message}`);
+      Toast.show(`An unexpected error occurred: ${error.message}`, "error");
       window.LayoutToolUI.ui.toggleProgressUI(false);
+    }
+  },
+  generatePreview(settings) {
+    if (!settings && window.LayoutToolUI) {
+      settings = window.LayoutToolUI.getSettings();
+    }
+    if (!settings) return;
+
+    const mode = window.PreviewPanel ? window.PreviewPanel.getMode() : 'empty';
+    if (mode === 'empty' || mode === 'error') return;
+
+    const { frontImages: frontImageUrls, backImages: backImageUrls } = window.PreviewPanel.getImageData();
+    if (!frontImageUrls || frontImageUrls.length < 1) return;
+
+    const layoutMode = settings.layoutMode;
+    if (layoutMode === "doubleSided") {
+      const config = {
+        borderColor: this.utils.hexToRgb(document.getElementById("borderColor")?.value || "#000000"),
+        crosshairColor: this.utils.hexToRgb(document.getElementById("crosshaircolor")?.value || "#000000"),
+      };
+      this.workers.doubleSided.postMessage({
+        frontImages: frontImageUrls,
+        backImages: backImageUrls,
+        settings,
+        config,
+        preview: true,
+        maxPages: 2,
+      });
+    } else if (layoutMode === "foldable") {
+      let cards = [];
+      for (let i = 0; i < frontImageUrls.length; i++) {
+        const front = frontImageUrls[i];
+        const back = backImageUrls[i] || (backImageUrls.length === 1 ? backImageUrls[0] : front);
+        cards.push({ front, back });
+      }
+      this.workers.foldable.postMessage({
+        generatePdf: {
+          cards: cards,
+          options: settings,
+          preview: true,
+          maxPages: 2,
+        },
+      });
     }
   },
 };

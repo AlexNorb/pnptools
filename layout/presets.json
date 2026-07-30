@@ -2,7 +2,8 @@
   "preset1": {
     "name": "Standard card 63x88mm",
     "settings": {
-      "pageSize": "A4 Portrait",
+      "pageSize": "A4",
+      "pageOrientation": "portrait",
       "cardSize": "Poker",
       "rows": 3,
       "columns": 3,
@@ -17,7 +18,8 @@
   "preset2": {
     "name": "Mini European 44x68mm",
     "settings": {
-      "pageSize": "A4 Portrait",
+      "pageSize": "A4",
+      "pageOrientation": "portrait",
       "cardSize": "Custom",
       "rows": 4,
       "columns": 4,
@@ -32,7 +34,8 @@
   "preset3": {
     "name": "Buttonshy 63x88mm with bleed",
     "settings": {
-      "pageSize": "Letter Landscape",
+      "pageSize": "Letter",
+      "pageOrientation": "landscape",
       "cardSize": "Poker",
       "rows": 2,
       "columns": 3,
@@ -46,13 +49,14 @@
       "backCheckbox": false
     },
     "disabled": {
-      "pageSize": ["A4 Portrait", "Letter Portrait"]
+      "pageSize": ["A4", "Letter"]
     }
   },
   "preset4": {
-    "name": "Europan Standard 59x91mm (Dominion)",
+    "name": "European Standard 59x91mm (Dominion)",
     "settings": {
-      "pageSize": "A4 Portrait",
+      "pageSize": "A4",
+      "pageOrientation": "portrait",
       "cardSize": "Custom",
       "rows": 2,
       "columns": 4,
@@ -65,9 +69,11 @@
     }
   },
   "template": {
+    "hidden": true,
     "name": "TEMPLATE (Copy to create new presets)",
     "settings": {
       "pageSize": "A4",
+      "pageOrientation": "portrait",
       "cardSize": "Poker",
       "rows": 3,
       "columns": 3,
@@ -76,8 +82,8 @@
       "bleed": 0,
       "frontCheckbox": true,
       "backCheckbox": false,
-      "crosswidth": 0.5,
-      "crosssize": 4,
+      "crosswidth": 0.1,
+      "crosssize": 3,
       "crosshaircolor": "#000000",
       "frontBorderCheckbox": false,
       "backBorderCheckbox": false,

@@ -49,6 +49,8 @@ This is a list of potential improvements and tasks to enhance the tools in this 
 
 ### PDF Alignment Tool (`align 1.1 wip`)
 
+- **OBS! Viktigt framöver:** Det finns en separat branch som heter `align-rework` där ett arbete med att bygga om UI:t (med DaisyUI m.m.) och refaktorera koden har påbörjats. Kika på den branchen framöver för att se om det är aktuellt att fortsätta på det spåret och merga in de ändringarna till `main`.
+
 ### Card Layout Tool (`layout - prettier - 1.71 wip`)
 
 - **JavaScript Versioning:** The main tool uses `layout_1.72.js`, while the `instructions/index.html` page links to `layout_1.71.js`. Verify if the instructions are up-to-date or if `layout_1.71.js` is an older, possibly unused file. Ensure consistency and remove any obsolete files.

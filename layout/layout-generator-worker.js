@@ -1,54 +1,18 @@
-// Imports the pdf-lib library into the worker's scope.
+// Imports the pdf-lib library and shared utilities into the worker's scope.
 importScripts(
-  "https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib@2.4.1/dist/pdf-lib.min.js"
+  "https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib@2.4.1/dist/pdf-lib.min.js",
+  "shared-worker-utils.js"
 );
-
-const reportProgress = (done, all) => {
-  postMessage({
-    state: "progress",
-    data: { done, all, progress: Math.round((done * 100) / all) },
-  });
-};
-
-const reportSaving = () => {
-  postMessage({ state: "saving" });
-};
 
 // Listens for messages from the main thread.
 onmessage = async (event) => {
-  const { frontImages, backImages, settings, config } = event.data;
+  const { frontImages, backImages, settings, config, preview, maxPages } = event.data;
   try {
-    // The createPDF function will now handle sending the final message
-    await createPDF(frontImages, backImages, settings, config);
+    await createPDF(frontImages, backImages, settings, config, { preview, maxPages });
   } catch (error) {
-    // Sends an error message back to the main thread if something goes wrong.
     postMessage({ state: "error", error: error.message });
   }
 };
-
-function _drawImageBorder(page, x, y, settings, config) {
-  const borderColor = PDFLib.rgb(...config.borderColor);
-  page.drawRectangle({
-    x: x,
-    y: y - settings.imageHeight,
-    width: settings.imageWidth,
-    height: settings.imageHeight,
-    borderColor: borderColor,
-    borderWidth: settings.borderWidth,
-    rx: 0,
-    ry: 0,
-  });
-  page.drawRectangle({
-    x: x,
-    y: y - settings.imageHeight,
-    width: settings.imageWidth,
-    height: settings.imageHeight,
-    borderColor: borderColor,
-    borderWidth: settings.borderWidth,
-    rx: settings.cornerRadius,
-    ry: settings.cornerRadius,
-  });
-}
 
 function drawCrosshairs(page, x, y, settings, config) {
   const { imageWidth, imageHeight, bleed, crosssize, crosswidth } = settings;
@@ -111,38 +75,44 @@ function drawCrosshairs(page, x, y, settings, config) {
   });
 }
 
-async function createPDF(frontImages, backImages, settings, config) {
+async function createPDF(frontImages, backImages, settings, config, previewOptions = {}) {
   const totalImages = frontImages.length;
-  reportProgress(0, totalImages);
+  if (!previewOptions.preview) {
+    reportProgress(0, totalImages);
+  }
 
   const { PDFDocument } = PDFLib;
   const pdfDoc = await PDFDocument.create();
   let page;
 
-  const deduplicationLUT = {};
-  const getOrEmbedImage = async (imageAsDataUrl) => {
-    if (!imageAsDataUrl) return;
-    if (!deduplicationLUT[imageAsDataUrl]) {
-      let embeddedImage;
-      if (imageAsDataUrl.startsWith("data:image/png;base64,")) {
-        embeddedImage = await pdfDoc.embedPng(imageAsDataUrl);
-      } else if (imageAsDataUrl.startsWith("data:image/jpeg;base64,")) {
-        embeddedImage = await pdfDoc.embedJpg(imageAsDataUrl);
-      }
-      if (embeddedImage) {
-        deduplicationLUT[imageAsDataUrl] = embeddedImage;
-      }
-    }
-    return deduplicationLUT[imageAsDataUrl];
-  };
+  const embedder = new ImageEmbedder(pdfDoc);
 
-  const mmToPt = 2.83464567;
   const pageWidth = settings.pageWidth * mmToPt;
   const pageHeight = settings.pageHeight * mmToPt;
+  const bleed = (settings.bleed || 0) * mmToPt;
+  const imageWidth = (settings.imageWidth || 0) * mmToPt + bleed * 2;
+  const imageHeight = (settings.imageHeight || 0) * mmToPt + bleed * 2;
+  const borderWidth = (settings.borderWidth || 0) * mmToPt * 2;
+  const crosswidth = (settings.crosswidth || 0) * mmToPt;
+  const crosssize = ((settings.crosssize || 0) * mmToPt) / 2;
+  const cornerRadius = (settings.cornerRadius || 0) * mmToPt;
+
+  const ptSettings = {
+    ...settings,
+    pageWidth,
+    pageHeight,
+    imageWidth,
+    imageHeight,
+    bleed,
+    borderWidth,
+    crosswidth,
+    crosssize,
+    cornerRadius,
+  };
 
   if (
-    settings.columns * settings.imageWidth > pageWidth ||
-    settings.rows * settings.imageHeight > pageHeight
+    ptSettings.columns * ptSettings.imageWidth > pageWidth ||
+    ptSettings.rows * ptSettings.imageHeight > pageHeight
   ) {
     throw new Error("The input grid size exceeds the page size.");
   }
@@ -150,69 +120,82 @@ async function createPDF(frontImages, backImages, settings, config) {
   const singleBack = backImages.length === 1;
   const noBack = backImages.length === 0;
 
+  const borderColor = PDFLib.rgb(...config.borderColor);
+
   let currentImageIndex = 0;
   while (currentImageIndex < totalImages) {
+    if (previewOptions.preview && pdfDoc.getPageCount() >= (previewOptions.maxPages || 2)) {
+      break;
+    }
     page = pdfDoc.addPage([pageWidth, pageHeight]);
 
-    let x = (pageWidth - settings.columns * settings.imageWidth) / 2;
-    let y = (pageHeight + settings.rows * settings.imageHeight) / 2;
+    let x = (pageWidth - ptSettings.columns * ptSettings.imageWidth) / 2;
+    let y = (pageHeight + ptSettings.rows * ptSettings.imageHeight) / 2;
 
     const imagesOnThisPage = Math.min(
       totalImages - currentImageIndex,
-      settings.rows * settings.columns
+      ptSettings.rows * ptSettings.columns
     );
 
     for (let i = 0; i < imagesOnThisPage; i++) {
       const imageUrl = frontImages[currentImageIndex + i];
-      const embeddedImage = await getOrEmbedImage(imageUrl);
+      const embeddedImage = await embedder.getOrEmbedImage(imageUrl);
       if (!embeddedImage) continue;
 
-      if (settings.frontBorderCheckbox) {
+      if (ptSettings.frontBorderCheckbox) {
         page.drawImage(embeddedImage, {
-          x: x + settings.borderWidth / 2,
-          y: y - settings.imageHeight + settings.borderWidth / 2,
-          width: settings.imageWidth - settings.borderWidth,
-          height: settings.imageHeight - settings.borderWidth,
+          x: x + ptSettings.borderWidth / 2,
+          y: y - ptSettings.imageHeight + ptSettings.borderWidth / 2,
+          width: ptSettings.imageWidth - ptSettings.borderWidth,
+          height: ptSettings.imageHeight - ptSettings.borderWidth,
         });
-        _drawImageBorder(page, x, y, settings, config);
+        drawCardBorder(page, {
+          x: x,
+          y: y - ptSettings.imageHeight,
+          width: ptSettings.imageWidth,
+          height: ptSettings.imageHeight,
+          borderColor: borderColor,
+          borderWidth: ptSettings.borderWidth,
+          cornerRadius: ptSettings.cornerRadius,
+        });
       } else {
         page.drawImage(embeddedImage, {
           x: x,
-          y: y - settings.imageHeight,
-          width: settings.imageWidth,
-          height: settings.imageHeight,
+          y: y - ptSettings.imageHeight,
+          width: ptSettings.imageWidth,
+          height: ptSettings.imageHeight,
         });
       }
 
-      x += settings.imageWidth;
-      if ((i + 1) % settings.columns === 0) {
-        x = (pageWidth - settings.columns * settings.imageWidth) / 2;
-        y -= settings.imageHeight;
+      x += ptSettings.imageWidth;
+      if ((i + 1) % ptSettings.columns === 0) {
+        x = (pageWidth - ptSettings.columns * ptSettings.imageWidth) / 2;
+        y -= ptSettings.imageHeight;
       }
     }
 
-    if (settings.frontCheckbox) {
-      let crosshairX = (pageWidth - settings.columns * settings.imageWidth) / 2;
-      let crosshairY = (pageHeight + settings.rows * settings.imageHeight) / 2;
+    if (ptSettings.frontCheckbox) {
+      let crosshairX = (pageWidth - ptSettings.columns * ptSettings.imageWidth) / 2;
+      let crosshairY = (pageHeight + ptSettings.rows * ptSettings.imageHeight) / 2;
       for (let i = 0; i < imagesOnThisPage; i++) {
-        drawCrosshairs(page, crosshairX, crosshairY, settings, config);
-        crosshairX += settings.imageWidth;
-        if ((i + 1) % settings.columns === 0) {
-          crosshairX = (pageWidth - settings.columns * settings.imageWidth) / 2;
-          crosshairY -= settings.imageHeight;
+        drawCrosshairs(page, crosshairX, crosshairY, ptSettings, config);
+        crosshairX += ptSettings.imageWidth;
+        if ((i + 1) % ptSettings.columns === 0) {
+          crosshairX = (pageWidth - ptSettings.columns * ptSettings.imageWidth) / 2;
+          crosshairY -= ptSettings.imageHeight;
         }
       }
     }
 
     if (!noBack) {
       page = pdfDoc.addPage([pageWidth, pageHeight]);
-      x = (pageWidth + settings.columns * settings.imageWidth) / 2 - settings.imageWidth;
-      y = (pageHeight + settings.rows * settings.imageHeight) / 2;
+      x = (pageWidth + ptSettings.columns * ptSettings.imageWidth) / 2 - ptSettings.imageWidth;
+      y = (pageHeight + ptSettings.rows * ptSettings.imageHeight) / 2;
 
       let singleBackImage;
       if (singleBack) {
         const backImageUrl = backImages[0];
-        singleBackImage = await getOrEmbedImage(backImageUrl);
+        singleBackImage = await embedder.getOrEmbedImage(backImageUrl);
       }
 
       for (let i = 0; i < imagesOnThisPage; i++) {
@@ -221,50 +204,66 @@ async function createPDF(frontImages, backImages, settings, config) {
           embeddedImage = singleBackImage;
         } else {
           const imageUrl = backImages[currentImageIndex + i];
-          embeddedImage = await getOrEmbedImage(imageUrl);
+          embeddedImage = await embedder.getOrEmbedImage(imageUrl);
         }
         
         if (!embeddedImage) continue;
 
-        if (settings.backBorderCheckbox) {
+        if (ptSettings.backBorderCheckbox) {
           page.drawImage(embeddedImage, {
-            x: x + settings.borderWidth / 2,
-            y: y - settings.imageHeight + settings.borderWidth / 2,
-            width: settings.imageWidth - settings.borderWidth,
-            height: settings.imageHeight - settings.borderWidth,
+            x: x + ptSettings.borderWidth / 2,
+            y: y - ptSettings.imageHeight + ptSettings.borderWidth / 2,
+            width: ptSettings.imageWidth - ptSettings.borderWidth,
+            height: ptSettings.imageHeight - ptSettings.borderWidth,
           });
-          _drawImageBorder(page, x, y, settings, config);
+          drawCardBorder(page, {
+            x: x,
+            y: y - ptSettings.imageHeight,
+            width: ptSettings.imageWidth,
+            height: ptSettings.imageHeight,
+            borderColor: borderColor,
+            borderWidth: ptSettings.borderWidth,
+            cornerRadius: ptSettings.cornerRadius,
+          });
         } else {
           page.drawImage(embeddedImage, {
             x: x,
-            y: y - settings.imageHeight,
-            width: settings.imageWidth,
-            height: settings.imageHeight,
+            y: y - ptSettings.imageHeight,
+            width: ptSettings.imageWidth,
+            height: ptSettings.imageHeight,
           });
         }
 
-        x -= settings.imageWidth;
-        if ((i + 1) % settings.columns === 0) {
-          x = (pageWidth + settings.columns * settings.imageWidth) / 2 - settings.imageWidth;
-          y -= settings.imageHeight;
+        x -= ptSettings.imageWidth;
+        if ((i + 1) % ptSettings.columns === 0) {
+          x = (pageWidth + ptSettings.columns * ptSettings.imageWidth) / 2 - ptSettings.imageWidth;
+          y -= ptSettings.imageHeight;
         }
       }
 
-      if (settings.backCheckbox) {
-        let crosshairX = (pageWidth + settings.columns * settings.imageWidth) / 2 - settings.imageWidth;
-        let crosshairY = (pageHeight + settings.rows * settings.imageHeight) / 2;
+      if (ptSettings.backCheckbox) {
+        let crosshairX = (pageWidth + ptSettings.columns * ptSettings.imageWidth) / 2 - ptSettings.imageWidth;
+        let crosshairY = (pageHeight + ptSettings.rows * ptSettings.imageHeight) / 2;
         for (let i = 0; i < imagesOnThisPage; i++) {
-          drawCrosshairs(page, crosshairX, crosshairY, settings, config);
-          crosshairX -= settings.imageWidth;
-          if ((i + 1) % settings.columns === 0) {
-            crosshairX = (pageWidth + settings.columns * settings.imageWidth) / 2 - settings.imageWidth;
-            crosshairY -= settings.imageHeight;
+          drawCrosshairs(page, crosshairX, crosshairY, ptSettings, config);
+          crosshairX -= ptSettings.imageWidth;
+          if ((i + 1) % ptSettings.columns === 0) {
+            crosshairX = (pageWidth + ptSettings.columns * ptSettings.imageWidth) / 2 - ptSettings.imageWidth;
+            crosshairY -= ptSettings.imageHeight;
           }
         }
       }
     }
     currentImageIndex += imagesOnThisPage;
-    reportProgress(currentImageIndex, totalImages);
+    if (!previewOptions.preview) {
+      reportProgress(currentImageIndex, totalImages);
+    }
+  }
+
+  if (previewOptions.preview) {
+    const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
+    postMessage({ state: "preview_done", pdfBytes: pdfBytes }, [pdfBytes.buffer]);
+    return;
   }
 
   reportSaving();
@@ -282,4 +281,4 @@ async function createPDF(frontImages, backImages, settings, config) {
     },
     [pdfBytes.buffer]
   );
-}
+}

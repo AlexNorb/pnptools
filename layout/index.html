@@ -1,396 +1,1102 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="cache-control" content="max-age=0" />
-    <meta http-equiv="cache-control" content="no-cache" />
-    <meta http-equiv="expires" content="0" />
-    <meta http-equiv="expires" content="Tue, 01 Jan 1990 12:00:00 GMT" />
-    <title>Card layout tool</title>
 
-    <link rel="icon" href="assets/favicon.png" type="image/png" />
-    <link rel="stylesheet" href="style.css" />
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="cache-control" content="max-age=0" />
+  <meta http-equiv="cache-control" content="no-cache" />
+  <meta http-equiv="expires" content="0" />
+  <meta http-equiv="expires" content="Tue, 01 Jan 1990 12:00:00 GMT" />
+  <title>Layout tool</title>
 
-    <!-- font awesome -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
-    <script src="https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib@2.4.1/dist/pdf-lib.min.js"></script>
-  </head>
-  <body>
-    <div class="container">
-      <div class="header">
-        <h1>Card layout tool v2.1</h1>
-      </div>
+  <link rel="icon" href="assets/favicon.png" type="image/png" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Bungee&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
 
-      <!-- drop zone -->
-      <div class="form-group">
-        <div class="dropzone" id="frontDropzone">
-          <label for="frontImages">Fronts</label>
-          <p>
-            <i class="fa-regular fa-file-image icon" style="color: #000000"></i>
-          </p>
-          <p2 id="fileCount">0 files selected</p2>
-          <input
-            type="file"
-            id="frontImages"
-            accept=".png, .jpg, .jpeg"
-            multiple
-          />
-        </div>
+  <!-- Tailwind v4 CDN & Configuration -->
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+        --font-display: "Bungee", cursive, sans-serif;
+        --font-body: "Averia Serif Libre", serif;
+        --font-ui: "Inter", system-ui, -apple-system, sans-serif;
 
-        <div class="dropzone" id="backDropzone">
-          <label for="backImages">Backs</label>
-          <p>
-            <i class="fa-regular fa-file-image icon" style="color: #000000"></i>
-          </p>
-          <p2 id="fileCountBack">0 files selected</p2>
-          <input
-            type="file"
-            id="backImages"
-            accept=".png, .jpg, .jpeg"
-            multiple
-          />
-        </div>
-      </div>
+        --color-theme-bg: #ECF0DD;
+        --color-theme-dark: #1C111F;
+        --color-theme-muted: #554B59;
+        --color-theme-pink: #DF2CD4;
+        --color-theme-teal: #3DDDB2;
+        --color-theme-yellow: #F7E517;
+        --color-theme-indigo: #4E63C5;
+        --color-theme-green: #9EEA84;
+      }
 
-      <div class="form-group">
-        <input type="checkbox" id="usePreviewer" style="margin-left: 1rem" />
-        <label for="usePreviewer">Use Advanced Image Preview</label>
-      </div>
+      .file-count {
+        color: var(--color-theme-dark);
+        font-size: 0.875rem;
+        font-weight: bold;
+      }
 
-      <div id="previewerContainer" style="display: none">
-        <iframe
-          id="previewerFrame"
-          src="preview.html"
-          style="
-            width: 100%;
-            height: 850px;
-            border: 1px solid #ccc;
-            border-radius: 1rem;
-            margin-top: 1rem;
-            overflow-y: hidden;
-          "
-        ></iframe>
-      </div>
+      /* Base custom forms styling - uniform height & de-bulked */
+      input[type="number"],
+      input[type="text"],
+      select {
+        border: 1.5px solid var(--color-theme-dark);
+        border-radius: 0.375rem;
+        padding: 0 0.45rem;
+        height: 2rem;
+        font-size: 0.875rem;
+        font-family: var(--font-ui);
+        transition: all 0.2s;
+        box-sizing: border-box;
+      }
 
-      <!-- mode indicator -->
-      <div class="form-group mode" style="justify-content: space-around">
-        <div style="text-align: center">
-          <div id="mode1" class="mode-indicator inactive">
-            <h2>No backs</h2>
+      /* Distinct disabled state for form controls */
+      input:disabled,
+      select:disabled {
+        background-color: #E2E8F0;
+        color: var(--color-theme-muted);
+        border-color: rgba(28, 17, 31, 0.3);
+        opacity: 0.7;
+        cursor: not-allowed;
+        box-shadow: none !important;
+      }
+
+      /* Container-query-driven 3-stage Bento card layout */
+
+
+      /* Hide native number input spinners & center numbers */
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+        text-align: center;
+      }
+
+      input[type="number"]:focus,
+      input[type="text"]:focus,
+      select:focus,
+      input[type="color"]:focus {
+        outline: none;
+        border-color: var(--color-theme-pink);
+        box-shadow: 2px 2px 0 var(--color-theme-pink);
+      }
+
+      /* Custom Color Input Styling */
+      input[type="color"] {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        border: 1.5px solid var(--color-theme-dark);
+        border-radius: 0.375rem;
+        padding: 2px;
+        height: 2rem;
+        width: 3rem;
+        cursor: pointer;
+        background-color: #ffffff;
+        box-shadow: 1px 1px 0 var(--color-theme-dark);
+        box-sizing: border-box;
+        transition: all 0.2s;
+      }
+      input[type="color"]::-webkit-color-swatch-wrapper {
+        padding: 0;
+      }
+      input[type="color"]::-webkit-color-swatch {
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        border-radius: 0.25rem;
+      }
+      input[type="color"]::-moz-color-swatch {
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        border-radius: 0.25rem;
+      }
+
+      /* Custom Neo-Brutalist Checkbox matching btn-secondary style */
+      input[type="checkbox"]:not(.sr-only):not(.hidden) {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 1.25rem;
+        height: 1.25rem;
+        border: 1.5px solid var(--color-theme-dark);
+        border-radius: 0.375rem;
+        background-color: #ffffff;
+        box-shadow: 2px 2px 0 var(--color-theme-dark);
+        cursor: pointer;
+        position: relative;
+        transition: all 0.15s ease;
+        display: inline-grid;
+        place-content: center;
+        margin: 0;
+        vertical-align: middle;
+      }
+
+      input[type="checkbox"]:not(.sr-only):not(.hidden):hover {
+        transform: translate(-1px, -1px);
+        box-shadow: 3px 3px 0 var(--color-theme-dark);
+      }
+
+      input[type="checkbox"]:not(.sr-only):not(.hidden):active {
+        transform: translate(0px, 0px);
+        box-shadow: 1px 1px 0 var(--color-theme-dark);
+      }
+
+      /* Bold checkmark icon */
+      input[type="checkbox"]:not(.sr-only):not(.hidden)::before {
+        content: "";
+        width: 0.65rem;
+        height: 0.65rem;
+        transform: scale(0);
+        transition: 120ms transform ease-in-out;
+        background-color: #ffffff;
+        transform-origin: center;
+        clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+      }
+
+      input[type="checkbox"]:not(.sr-only):not(.hidden):checked::before {
+        transform: scale(1);
+      }
+
+      /* Section colorized fill when checked */
+      input[type="checkbox"]:not(.hidden).accent-theme-pink:checked {
+        background-color: var(--color-theme-pink);
+      }
+
+      input[type="checkbox"]:not(.hidden).accent-theme-indigo:checked {
+        background-color: var(--color-theme-indigo);
+      }
+
+      input[type="checkbox"]:not(.hidden):checked:not(.accent-theme-pink):not(.accent-theme-indigo) {
+        background-color: var(--color-theme-yellow);
+      }
+
+      .mode-badge-container {
+        container-type: inline-size;
+      }
+
+      .mode-indicator {
+        transition: all 0.2s ease;
+      }
+
+      .mode-indicator.inactive {
+        background-color: #ffffff;
+        border-color: #d1d5db;
+        color: var(--color-theme-muted);
+      }
+
+      .mode-indicator.active {
+        background-color: var(--color-theme-teal);
+        border-color: var(--color-theme-dark);
+        color: var(--color-theme-dark);
+        box-shadow: 2px 2px 0 var(--color-theme-dark);
+      }
+
+      .mode-indicator.active i {
+        opacity: 1;
+      }
+
+      .mode-indicator.error {
+        background-color: var(--color-theme-pink);
+        border-color: var(--color-theme-dark);
+        color: white;
+        box-shadow: 2px 2px 0 var(--color-theme-dark);
+      }
+
+      /* When badge container is narrow (< 125px), hide text and center icons */
+      @container (max-width: 125px) {
+        .mode-badge-container .mode-indicator {
+          justify-content: center;
+          padding-left: 0.35rem;
+          padding-right: 0.35rem;
+        }
+        .mode-badge-container .mode-indicator .mode-text {
+          display: none;
+        }
+        .mode-badge-container .mode-indicator i {
+          margin-left: 0;
+        }
+      }
+
+      /* Segmented Control Styling */
+      .segmented-option:has(input:checked) {
+        background-color: var(--color-theme-yellow);
+        color: var(--color-theme-dark);
+        border: 1.5px solid var(--color-theme-dark);
+      }
+      .segmented-option:not(:has(input:checked)) {
+        color: var(--color-theme-muted);
+        border: 2px solid transparent;
+      }
+      .segmented-option:hover:not(:has(input:checked)) {
+        background-color: rgba(255, 255, 255, 0.6);
+      }
+
+      /* Smooth Accordion Animation */
+      .collapsible-wrapper {
+        display: grid;
+        grid-template-rows: 1fr;
+        transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+        opacity: 1;
+      }
+      .collapsible-wrapper.collapsed {
+        grid-template-rows: 0fr;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .collapsible-inner {
+        overflow: hidden;
+      }
+
+      /* Buttons */
+      .btn-primary {
+        @apply bg-theme-yellow border-3 border-theme-dark font-ui font-bold px-5 py-2.5 rounded-xl transition-all duration-200;
+        box-shadow: 4px 4px 0 var(--color-theme-dark);
+      }
+
+      .btn-primary:hover {
+        @apply -translate-x-1 -translate-y-1;
+        box-shadow: 6px 6px 0 var(--color-theme-dark);
+      }
+
+      .btn-secondary {
+        @apply bg-white font-ui font-medium px-3 text-sm rounded-lg transition-all duration-200 inline-flex items-center justify-center;
+        border: 1.5px solid var(--color-theme-dark);
+        height: 2rem;
+        box-shadow: 2px 2px 0 var(--color-theme-dark);
+        box-sizing: border-box;
+      }
+
+      .btn-secondary:hover {
+        @apply -translate-x-0.5 -translate-y-0.5;
+        box-shadow: 3px 3px 0 var(--color-theme-dark);
+      }
+
+      /* Cards (Bento Boxes) */
+      .bento-box {
+        @apply bg-white border-3 border-theme-dark rounded-xl p-4 md:p-5 mb-5;
+        box-shadow: 4px 4px 0 var(--color-theme-dark);
+      }
+
+      /* Dropzones - Smaller height and compact design */
+      .dropzone-neo {
+        @apply border-2 border-dashed border-theme-dark bg-white rounded-lg p-3 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center min-h-[90px];
+        box-shadow: 3px 3px 0 var(--color-theme-dark);
+        position: relative;
+      }
+
+      .dropzone-neo:hover {
+        @apply -translate-x-0.5 -translate-y-0.5;
+      }
+
+      #frontDropzone:hover {
+        @apply border-theme-indigo;
+        box-shadow: 4px 4px 0 var(--color-theme-indigo);
+      }
+
+      #backDropzone:hover {
+        @apply border-theme-teal;
+        box-shadow: 4px 4px 0 var(--color-theme-teal);
+      }
+
+      .dropzone-neo input[type="file"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      /* Form Groups Layout */
+      .settings-grid {
+        display: none; /* replaced by tailwind utility classes */
+      }
+
+      /* Preview Panel */
+      .preview-panel {
+        margin-top: 0.5rem;
+      }
+
+      .preview-content {
+        display: block;
+      }
+
+      .preview-pairs-container {
+        display: flex;
+        gap: 0.75rem;
+        overflow-x: auto;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+        min-height: 165px;
+      }
+
+      .custom-scrollbar,
+      .preview-pairs-container {
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-theme-indigo) var(--color-theme-bg);
+      }
+
+      .custom-scrollbar::-webkit-scrollbar,
+      .preview-pairs-container::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-track,
+      .preview-pairs-container::-webkit-scrollbar-track {
+        background: var(--color-theme-bg);
+        border-radius: 4px;
+        border: 1px solid var(--color-theme-dark);
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb,
+      .preview-pairs-container::-webkit-scrollbar-thumb {
+        background: var(--color-theme-indigo);
+        border-radius: 4px;
+      }
+    </style>
+
+  <!-- font awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib@2.4.1/dist/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+</head>
+
+<body class="bg-theme-bg font-ui text-theme-dark antialiased">
+  <div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="flex items-center justify-between mb-6 relative">
+      <a href="../index.html" class="btn-secondary font-bold gap-1.5 text-xs sm:text-sm py-1 px-3 flex items-center shrink-0" title="Back to Landing Page">
+        <i class="fa-solid fa-house"></i>
+        <span class="hidden sm:inline">Home</span>
+      </a>
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-display text-theme-dark uppercase text-center flex-1 mx-2 sm:mx-4">Layout tool</h1>
+      <div class="w-[38px] sm:w-[85px] shrink-0"></div>
+    </div>
+
+    <!-- Combined Upload & Layout Mode Bento -->
+    <div class="bento-box">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <!-- Upload Images Section -->
+        <div class="flex-1 shrink flex flex-col gap-2 min-w-[330px]">
+          <h2 class="text-xl font-display text-theme-dark">1. Upload Images</h2>
+          <div class="flex flex-wrap gap-2 sm:gap-4">
+            <div class="dropzone-neo flex-1 shrink p-2 sm:p-3 min-h-[70px] min-w-[160px]" id="frontDropzone">
+              <div class="flex items-center gap-1.5 sm:gap-3">
+                <i class="fa-regular fa-file-image text-lg sm:text-2xl text-theme-indigo shrink-0"></i>
+                <div class="text-left min-w-0 flex-1">
+                  <label for="frontImages"
+                    class="text-xs sm:text-base font-bold cursor-pointer block leading-tight truncate">Fronts</label>
+                  <span class="file-count text-[9px] sm:text-xs block truncate" id="fileCount">0 files selected</span>
+                </div>
+              </div>
+              <input type="file" id="frontImages" accept=".png, .jpg, .jpeg" multiple />
+            </div>
+
+            <div class="dropzone-neo flex-1 shrink p-2 sm:p-3 min-h-[70px] min-w-[160px]" id="backDropzone">
+              <div class="flex items-center gap-1.5 sm:gap-3">
+                <i class="fa-regular fa-file-image text-lg sm:text-2xl text-theme-teal shrink-0"></i>
+                <div class="text-left min-w-0 flex-1">
+                  <label for="backImages"
+                    class="text-xs sm:text-base font-bold cursor-pointer block leading-tight truncate">Backs</label>
+                  <span class="file-count text-[9px] sm:text-xs block truncate" id="fileCountBack">0 files
+                    selected</span>
+                </div>
+              </div>
+              <input type="file" id="backImages" accept=".png, .jpg, .jpeg" multiple />
+            </div>
           </div>
         </div>
-        <div style="text-align: center">
-          <div id="mode2" class="mode-indicator inactive">
-            <h2>Same backs</h2>
+
+        <!-- Back Configuration Badges Section -->
+        <div class="mode-badge-container shrink-0 min-w-[44px] sm:min-w-[155px] border-l-2 border-theme-dark/20 pl-3">
+          <div class="flex flex-col gap-1.5">
+            <div id="mode1" title="No backs"
+              class="mode-indicator inactive px-2.5 sm:px-3 py-1.5 border-2 rounded-lg flex items-center justify-between text-xs font-bold transition-all min-w-0 cursor-default">
+              <span class="mode-text truncate">No backs</span>
+              <i class="fa-solid fa-ban text-sm opacity-60 shrink-0 ml-1"></i>
+            </div>
+            <div id="mode2" title="Same back"
+              class="mode-indicator inactive px-2.5 sm:px-3 py-1.5 border-2 rounded-lg flex items-center justify-between text-xs font-bold transition-all min-w-0 cursor-default">
+              <span class="mode-text truncate">Same back</span>
+              <i class="fa-solid fa-clone text-sm opacity-60 shrink-0 ml-1"></i>
+            </div>
+            <div id="mode3" title="Unique backs"
+              class="mode-indicator inactive px-2.5 sm:px-3 py-1.5 border-2 rounded-lg flex items-center justify-between text-xs font-bold transition-all min-w-0 cursor-default">
+              <span class="mode-text truncate">Unique backs</span>
+              <i class="fa-solid fa-layer-group text-sm opacity-60 shrink-0 ml-1"></i>
+            </div>
           </div>
-        </div>
-        <div style="text-align: center">
-          <div id="mode3" class="mode-indicator inactive">
-            <h2>Unique backs</h2>
-          </div>
-        </div>
-        <div class="box settings">
-          <input
-            type="radio"
-            id="doubleSided"
-            name="layoutMode"
-            value="doubleSided"
-            checked
-          />
-          <label for="doubleSided">Double-Sided (Grid)</label>
-          <input
-            type="radio"
-            id="foldable"
-            name="layoutMode"
-            value="foldable"
-          />
-          <label for="foldable">Single-Page (Foldable)</label>
         </div>
       </div>
     </div>
 
-    <div id="doubleSidedModeUI">
-      <div class="container">
-        <div class="form-group">
-          <div class="box">
-            <h2>Page size:</h2>
-            <select id="pageSize" name="pageSize">
-              <option value="A4 Portrait" selected>A4 Portrait</option>
-              <option value="A4 Landscape">A4 Landscape</option>
-              <option value="Letter Portrait">Letter Portrait</option>
-              <option value="Letter Landscape">Letter Landscape</option>
-              <option value="Custom">Custom</option>
-            </select>
-            <label for="pageWidth">Page width (mm)</label>
-            <input
-              type="number"
-              id="pageWidth"
-              value="210"
-              step="0.1"
-              disabled
-            />
-            <label for="pageHeight">Page height (mm)</label>
-            <input
-              type="number"
-              id="pageHeight"
-              value="297"
-              step="0.1"
-              disabled
-            />
-          </div>
-
-          <!-- Preset naming menu    -->
-          <div class="box preset">
-            <h2>Select preset loadout:</h2>
-            <select id="preset"></select>
-            <input type="text" id="presetName" placeholder="Preset Name" />
-            <button id="savePresetButton">Save Preset</button>
-            <button id="deletePresetButton">Delete Preset</button>
-          </div>
+    <!-- Always-Visible Preview Panel Bento -->
+    <div id="previewPanel" class="bento-box preview-panel">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-xl font-display text-theme-dark">2. Image preview</h2>
+        <div class="flex gap-2">
+          <button type="button" tabindex="-1" id="clearFronts" class="btn-secondary flex items-center gap-1.5"><i
+              class="fa-solid fa-trash-can text-xs text-theme-indigo"></i> Fronts</button>
+          <button type="button" tabindex="-1" id="clearBacks" class="btn-secondary flex items-center gap-1.5"><i
+              class="fa-solid fa-trash-can text-xs text-theme-teal"></i> Backs</button>
         </div>
       </div>
-
-      <div class="container">
-        <h2>Basic settings</h2>
-        <div class="form-group basic">
-          <div class="iconbox">
-            <i class="fa-solid fa-table-cells icon" title="Grid layout"></i>
-          </div>
-          <p>Grid layout</p>
-          <div class="box settings">
-            <label for="rows">Rows</label>
-            <input type="number" id="rows" value="3" />
-            <label for="columns">Columns</label>
-            <input type="number" id="columns" value="3" />
-          </div>
-        </div>
-
-        <div class="form-group basic">
-          <div class="iconbox">
-            <i class="fa-solid fa-ruler-combined icon" title="Measurements"></i>
-          </div>
-          <p>Measurements</p>
-          <div class="box settings">
-            <select id="cardSize" name="cardSize">
-              <option value="Poker" selected>Poker (63x88mm)</option>
-              <option value="Bridge">Bridge (57x88mm)</option>
-              <option value="Tarot">Tarot (70x120mm)</option>
-              <option value="Custom">Custom</option>
-            </select>
-            <label for="imageWidth">Card width</label>
-            <input type="number" id="imageWidth" value="63" disabled />
-            <label for="imageHeight">Card height</label>
-            <input type="number" id="imageHeight" value="88" disabled />
-            <label for="bleed">Bleed</label>
-            <input type="number" id="bleed" value="0" />
-          </div>
-        </div>
-      </div>
-
-      <div class="container">
-        <h2>Advanced settings</h2>
-        <div class="form-group advanced">
-          <div class="iconbox">
-            <i
-              class="fa-solid fa-crosshairs icon"
-              title="Crosshair settings"
-            ></i>
-          </div>
-          <p>Crosshair settings</p>
-          <div class="box settings">
-            <label for="frontCheckbox">Front</label>
-            <input
-              type="checkbox"
-              id="frontCheckbox"
-              name="frontCheckbox"
-              checked
-            />
-            <label for="backCheckbox">Back</label>
-            <input
-              type="checkbox"
-              id="backCheckbox"
-              name="backCheckbox"
-              unchecked
-            />
-            <label for="crosswidth">Line width</label>
-            <input type="number" id="crosswidth" value="0.5" step="0.1" />
-            <label for="crosssize">Size</label>
-            <input type="number" id="crosssize" value="4" step="0.5" />
-            <label for="crosshaircolor">Color</label>
-            <input
-              type="color"
-              id="crosshaircolor"
-              value="#000000"
-              placeholder="Select a color"
-            />
-          </div>
-        </div>
-        <div class="form-group advanced">
-          <div class="iconbox">
-            <i
-              class="fa-solid fa-border-top-left icon"
-              title="Border settings"
-            ></i>
-          </div>
-          <p>Border settings</p>
-          <div class="box settings">
-            <label for="frontBorderCheckbox">Front</label>
-            <input type="checkbox" id="frontBorderCheckbox" />
-            <label for="backBorderCheckbox">Back</label>
-            <input type="checkbox" id="backBorderCheckbox" />
-            <label for="borderWidth">Border width</label>
-            <input type="number" id="borderWidth" value="3" />
-            <label for="borderColor">Color</label>
-            <input type="color" id="borderColor" value="#ffffff" />
-
-            <br /><br />
-            <label for="cornerRadius">Corner Radius:</label>
-            <select id="cornerRadius">
-              <option value="0">None</option>
-              <option value="3">S (3mm)</option>
-              <option value="5">M (5mm)</option>
-              <option value="8">L (8mm)</option>
-              <option value="10">XL (10mm)</option>
-            </select>
-            <br /><br />
-          </div>
+      <div id="previewContent" class="preview-content">
+        <div id="previewPairs" class="preview-pairs-container">
+          <!-- Dynamically rendered card pairs -->
         </div>
       </div>
     </div>
 
-    <div id="foldableModeUI" style="display: none">
-      <div class="container">
-        <div class="form-group">
-          <div class="box">
-            <h2>Page size:</h2>
-            <select id="foldable_pageSize" name="foldable_pageSize">
-              <option value="A4 Portrait" selected>A4</option>
-              <option value="Letter Portrait">Letter</option>
-              <option value="Custom">Custom</option>
-            </select>
-            <label for="foldable_pageWidth">Page width (mm)</label>
-            <input
-              type="number"
-              id="foldable_pageWidth"
-              value="210"
-              step="0.1"
-              disabled
-            />
-            <label for="foldable_pageHeight">Page height (mm)</label>
-            <input
-              type="number"
-              id="foldable_pageHeight"
-              value="297"
-              step="0.1"
-              disabled
-            />
-          </div>
-          <p>Page Margins</p>
-          <div class="box settings">
-            <label for="foldable_printerMargin">Printer</label>
-            <input type="number" id="foldable_printerMargin" value="5" />
-            <label for="foldable_foldingMargin">Folding</label>
-            <input type="number" id="foldable_foldingMargin" value="5" />
-          </div>
-        </div>
-      </div>
-      <div class="container">
-        <h2>Card & Margin Settings (in mm)</h2>
-        <div class="form-group basic">
-          <p>Card Dimensions</p>
-          <div class="box settings">
-            <select id="foldable_cardSize" name="foldable_cardSize">
-              <option value="Poker" selected>Poker (63x88mm)</option>
-              <option value="Bridge">Bridge (57x88mm)</option>
-              <option value="Tarot">Tarot (70x120mm)</option>
-              <option value="Custom">Custom</option>
-            </select>
-            <label for="foldable_cardWidth">Width</label>
-            <input type="number" id="foldable_cardWidth" value="63" disabled />
-            <label for="foldable_cardHeight">Height</label>
-            <input type="number" id="foldable_cardHeight" value="88" disabled />
-          </div>
-        </div>
-        <div class="form-group basic">
-          <p>Card Spacing</p>
-          <div class="box settings">
-            <label for="foldable_cardMargin">Card</label>
-            <input type="number" id="foldable_cardMargin" value="0" />
-            <label for="foldable_cutMargin">Bleed</label>
-            <input type="number" id="foldable_cutMargin" value="0" />
-          </div>
-        </div>
-      </div>
-      <div class="container">
-        <h2>Advanced Foldable Settings</h2>
-        <div class="form-group advanced">
-          <p>Border</p>
-          <div class="box settings">
-            <label for="foldable_innerBorder">Border width</label>
-            <input type="number" id="foldable_innerBorder" value="0" />
-            <label for="foldable_cornerRadius">Corner Radius</label>
-            <select id="foldable_cornerRadius">
-              <option value="0">None</option>
-              <option value="3">S (3mm)</option>
-              <option value="5">M (5mm)</option>
-              <option value="8">L (8mm)</option>
-              <option value="10">XL (10mm)</option>
-            </select>
-            <label for="foldable_borderColorFront">Front</label>
-            <input
-              type="color"
-              id="foldable_borderColorFront"
-              value="#000000"
-            />
-            <label for="foldable_borderColorBack">Back</label>
-            <input type="color" id="foldable_borderColorBack" value="#000000" />
-          </div>
-        </div>
-        <div class="form-group advanced">
-          <p>Layout</p>
-          <div class="box settings">
-            <label for="foldable_foldLinePreference">Fold</label>
-            <select id="foldable_foldLinePreference">
-              <option value="auto">Auto</option>
-              <option value="vertical">Vertical</option>
-              <option value="horizontal">Horizontal</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="container">
-      <div class="foot">
-        <button id="generatePdfButton">Generate PDF</button>
+    <!-- Settings Bento Box with Integrated Segmented Control Header -->
+    <div class="bento-box">
+      <!-- Full-width Layout Method Segmented Control Above Title -->
+      <div class="w-full mb-4">
         <div
-          id="progressContainer"
-          style="display: none; text-align: center; margin-top: 10px"
-        >
-          <span id="progressStatus"></span>
-          <progress
-            id="progressBar"
-            value="0"
-            max="100"
-            style="width: 100%"
-          ></progress>
+          class="flex w-full p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2.5rem] items-center">
+          <label
+            class="segmented-option cursor-pointer font-bold flex-1 h-full rounded-[10px] text-xs sm:text-sm transition-all flex items-center justify-center gap-2">
+            <input type="radio" id="doubleSided" name="layoutMode" value="doubleSided" checked class="hidden" />
+            <i class="fa-solid fa-table-cells text-base"></i>
+            <span>Double-Sided (Grid)</span>
+          </label>
+          <label
+            class="segmented-option cursor-pointer font-bold flex-1 h-full rounded-[10px] text-xs sm:text-sm transition-all flex items-center justify-center gap-2">
+            <input type="radio" id="foldable" name="layoutMode" value="foldable" class="hidden" />
+            <i class="fa-solid fa-map text-base"></i>
+            <span>One-Sided (Fold)</span>
+          </label>
         </div>
+      </div>
 
-        <a
-          href="https://www.buymeacoffee.com/pnpbuddy"
-          title="Support PnPBuddy by buying me a coffee"
-          ><img
-            src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=pnpbuddy&button_colour=FFDD00&font_colour=000000&font_family=Arial&outline_colour=000000&coffee_colour=ffffff"
-        /></a>
+      <div
+        class="flex items-center justify-between border-b-3 border-theme-dark pb-3 mb-4 gap-3 flex-wrap sm:flex-nowrap">
+        <div class="flex items-center gap-3 shrink-0">
+          <h2 class="text-xl font-display text-theme-dark">3. Settings</h2>
+          <div
+            class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-8 items-center">
+            <label
+              class="segmented-option cursor-pointer font-bold h-full rounded-[10px] text-xs transition-all flex items-center justify-center px-2.5">
+              <input type="radio" name="globalUnit" value="mm" checked class="hidden" />
+              <span>mm</span>
+            </label>
+            <label
+              class="segmented-option cursor-pointer font-bold h-full rounded-[10px] text-xs transition-all flex items-center justify-center px-2.5">
+              <input type="radio" name="globalUnit" value="in" class="hidden" />
+              <span>in</span>
+            </label>
+          </div>
+        </div>
+        <div id="settingsSummary"
+          class="flex flex-wrap items-center gap-y-1 py-1 my-auto min-w-0 text-[11px] font-bold text-theme-dark">
+          <!-- Dynamic settings summary -->
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button type="button" id="resetSettings" class="btn-secondary flex items-center gap-1.5 text-xs py-1 px-2.5"
+            title="Reset all settings to default">
+            <i class="fa-solid fa-rotate-left text-xs"></i>
+            <span class="font-bold hidden sm:inline">Reset</span>
+          </button>
+          <button type="button" id="toggleSettingsCollapse"
+            class="btn-secondary flex items-center gap-1.5 text-xs py-1 px-2.5" title="Toggle Settings Visibility">
+            <span id="settingsCollapseText" class="font-bold hidden sm:inline">Hide</span>
+            <i id="settingsCollapseIcon" class="fa-solid fa-chevron-up transition-transform duration-200 text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Preset section — shared across both layout modes, visible even when settings collapsed -->
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <div class="flex items-center gap-2 shrink-0">
+          <i class="fa-solid fa-bookmark text-xl text-theme-indigo"></i>
+          <h3 class="font-display text-base text-theme-dark">Presets</h3>
+        </div>
+        <select id="preset" class="flex-1 min-w-[180px]"></select>
+        <div class="flex gap-2 shrink-0">
+          <button id="savePresetButton" title="Save Preset" aria-label="Save Preset"
+            class="btn-secondary w-[2rem] p-0 text-sm">
+            <i class="fa-solid fa-floppy-disk text-theme-indigo"></i>
+          </button>
+          <button id="deletePresetButton" title="Delete Preset" aria-label="Delete Preset"
+            class="btn-secondary w-[2rem] p-0 text-sm text-theme-pink border-theme-pink">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="settingsContent" class="collapsible-wrapper">
+        <div class="collapsible-inner">
+
+          <div id="doubleSidedModeUI">
+            <div class="flex flex-col gap-3 mb-4">
+              <!-- Paper Size Card -->
+              <div
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
+                  <i class="fa-solid fa-file text-xl text-theme-indigo"></i>
+                  <h3 class="font-display text-base text-theme-dark">Paper Size</h3>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex flex-wrap gap-2 items-center shrink-0 justify-start">
+                  <!-- Hidden selects for seamless JS compatibility -->
+                  <select id="pageSize" name="pageSize" class="hidden">
+                    <option value="A4" selected>A4</option>
+                    <option value="Letter">Letter</option>
+                    <option value="Custom">Custom</option>
+                  </select>
+                  <select id="pageOrientation" name="pageOrientation" class="hidden">
+                    <option value="portrait" selected>Portrait</option>
+                    <option value="landscape">Landscape</option>
+                  </select>
+
+                  <!-- Segmented Page Size Toggle -->
+                  <div
+                    class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center"
+                    id="pageSizeSegmented">
+                    <button type="button" data-val="A4" title="A4"
+                      class="btn-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">A4</button>
+                    <button type="button" data-val="Letter" title="Letter"
+                      class="btn-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center">Letter</button>
+                    <button type="button" data-val="Custom" title="Custom"
+                      class="btn-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center"><i
+                        class="fa-solid fa-sliders"></i></button>
+                  </div>
+
+                  <!-- Segmented Orientation Toggle -->
+                  <div
+                    class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center"
+                    id="pageOrientationSegmented">
+                    <button type="button" data-val="portrait" title="Portrait" aria-label="Portrait"
+                      class="btn-page-orient font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">
+                      <i class="fa-solid fa-file"></i>
+                    </button>
+                    <button type="button" data-val="landscape" title="Landscape" aria-label="Landscape"
+                      class="btn-page-orient font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center">
+                      <i class="fa-solid fa-file fa-rotate-90"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class=" flex flex-wrap gap-4 items-center shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
+                    <label for="pageWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
+                    <input type="number" id="pageWidth" value="210" step="0.1" disabled class="w-16" />
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <label for="pageHeight" class="text-xs font-bold text-theme-muted text-center">Height</label>
+                    <input type="number" id="pageHeight" value="297" step="0.1" disabled class="w-16" />
+                  </div>
+                </div>
+                </div>
+              </div>
+
+              <!-- Card Size Card -->
+              <div
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
+                  <i class="fa-solid fa-ruler-combined text-xl text-theme-indigo"></i>
+                  <h3 class="font-display text-base text-theme-dark">Card Size</h3>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex gap-2 items-center flex-1 min-w-[200px] max-w-md">
+                  <select id="cardSize" name="cardSize" class="flex-1 min-w-0 text-ellipsis"></select>
+                  <button id="saveCardSizeButton" title="Save Card Size" aria-label="Save Card Size"
+                    class="btn-secondary w-[2rem] p-0 text-sm shrink-0">
+                    <i class="fa-solid fa-floppy-disk text-theme-indigo"></i>
+                  </button>
+                  <button id="deleteCardSizeButton" title="Delete Card Size" aria-label="Delete Card Size"
+                    class="btn-secondary w-[2rem] p-0 text-sm text-theme-pink border-theme-pink shrink-0">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+
+                <div class=" flex flex-wrap gap-4 items-center shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
+                    <label for="imageWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
+                    <input type="number" id="imageWidth" value="63" disabled class="w-12" />
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <label for="imageHeight" class="text-xs font-bold text-theme-muted text-center">Height</label>
+                    <input type="number" id="imageHeight" value="88" disabled class="w-12" />
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <label for="bleed" class="text-xs font-bold text-theme-muted text-center">Bleed</label>
+                    <input type="number" id="bleed" value="0" class="w-12" />
+                  </div>
+                </div>
+                </div>
+              </div>
+
+              <!-- Grid Card -->
+              <div
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
+                  <i class="fa-solid fa-table-cells text-xl text-theme-indigo"></i>
+                  <h3 class="font-display text-base text-theme-dark">Grid Size</h3>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex gap-2 items-center shrink-0">
+                  <input type="checkbox" id="autoGrid" checked class="hidden" />
+                  <div
+                    class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center"
+                    id="autoGridSegmented">
+                    <button type="button" data-val="false" title="Manual" aria-label="Manual Grid"
+                      class="btn-auto-grid font-bold px-3 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center justify-center">
+                      <span class="mr-2">Manual</span>
+                      <i class="fa-solid fa-lock-open"></i>
+                    </button>
+                    <button type="button" data-val="true" title="Auto-calculate" aria-label="Auto-calculate Grid"
+                      class="btn-auto-grid font-bold px-3 h-full rounded-[10px] text-xs transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center justify-center">
+                      <span class="mr-2">Auto</span>
+                      <i class="fa-solid fa-lock"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class=" flex gap-4 items-center shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
+                    <label for="rows" class="text-xs font-bold text-theme-muted text-center">Rows</label>
+                    <input type="number" id="rows" value="3" class="w-12" />
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <label for="columns" class="text-xs font-bold text-theme-muted text-center">Cols</label>
+                    <input type="number" id="columns" value="3" class="w-12" />
+                  </div>
+                </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+              <!-- Crosshairs Card -->
+              <div
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
+                  <i class="fa-solid fa-crosshairs text-xl text-theme-pink"></i>
+                  <h3 class="font-display text-base text-theme-dark">Crosshairs</h3>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex gap-3 items-center shrink-0 flex-nowrap">
+                  <div class="flex flex-col items-center">
+                    <label for="frontCheckbox" class="text-xs font-bold text-theme-muted cursor-pointer text-center">Front</label>
+                    <input type="checkbox" id="frontCheckbox" name="frontCheckbox" checked
+                      class="accent-theme-pink cursor-pointer mt-1" />
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <label for="backCheckbox" class="text-xs font-bold text-theme-muted cursor-pointer text-center">Back</label>
+                    <input type="checkbox" id="backCheckbox" name="backCheckbox"
+                      class="accent-theme-pink cursor-pointer mt-1" />
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <label class="text-xs font-bold text-theme-muted opacity-0 select-none text-center">&nbsp;</label>
+                    <input type="color" id="crosshaircolor" value="#000000" class="mt-1" />
+                  </div>
+                </div>
+
+                <div class=" flex flex-wrap items-center gap-3 shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
+                    <label for="crosswidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
+                    <input type="number" id="crosswidth" value="0.1" step="0.05" class="w-12" />
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <label for="crosssize" class="text-xs font-bold text-theme-muted text-center">Size</label>
+                    <input type="number" id="crosssize" value="3" step="0.5" class="w-12" />
+                  </div>
+                </div>
+                </div>
+              </div>
+
+              <!-- Borders Card -->
+              <div
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
+                  <i class="fa-solid fa-border-top-left text-xl text-theme-pink"></i>
+                  <h3 class="font-display text-base text-theme-dark">Borders</h3>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex flex-wrap items-center gap-3 shrink-0">
+                  <div class="flex flex-col items-center">
+                    <label for="frontBorderCheckbox"
+                      class="text-xs font-bold text-theme-muted cursor-pointer text-center">Front</label>
+                    <input type="checkbox" id="frontBorderCheckbox" class="accent-theme-pink cursor-pointer mt-1" />
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <label for="backBorderCheckbox"
+                      class="text-xs font-bold text-theme-muted cursor-pointer text-center">Back</label>
+                    <input type="checkbox" id="backBorderCheckbox" class="accent-theme-pink cursor-pointer mt-1" />
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <label class="text-xs font-bold text-theme-muted opacity-0 select-none text-center">&nbsp;</label>
+                    <input type="color" id="borderColor" value="#ffffff" class="mt-1" />
+                  </div>
+                </div>
+
+                <div class=" flex flex-wrap items-center gap-3 shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
+                    <label for="cornerRadius"
+                      class="text-xs font-bold text-theme-muted flex justify-between items-center text-center">
+                      <span>Radius</span>
+                      <span id="cornerRadiusVal" class="text-[10px] text-theme-dark font-bold ml-1">(0mm)</span>
+                    </label>
+                    <select id="cornerRadius" class="hidden">
+                      <option value="0" selected>0</option>
+                      <option value="3">3</option>
+                      <option value="5">5</option>
+                      <option value="8">8</option>
+                      <option value="10">10</option>
+                    </select>
+                    <div
+                      class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center"
+                      id="cornerRadiusSegmented">
+                      <button type="button" data-val="0"
+                        class="btn-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">None</button>
+                      <button type="button" data-val="3"
+                        class="btn-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">S</button>
+                      <button type="button" data-val="5"
+                        class="btn-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">M</button>
+                      <button type="button" data-val="8"
+                        class="btn-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">L</button>
+                      <button type="button" data-val="10"
+                        class="btn-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">XL</button>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <label for="borderWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
+                    <input type="number" id="borderWidth" value="3" class="w-12" />
+                  </div>
+                </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="foldableModeUI" style="display: none">
+            <div class="flex flex-col gap-3 mb-3">
+              <!-- Paper Size Card -->
+              <div
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
+                  <i class="fa-solid fa-file text-xl text-theme-indigo"></i>
+                  <h3 class="font-display text-base text-theme-dark">Paper Size</h3>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex flex-wrap gap-2 items-center shrink-0 justify-start">
+                  <!-- Hidden select for seamless JS compatibility -->
+                  <select id="foldable_pageSize" name="foldable_pageSize" class="hidden">
+                    <option value="A4" selected>A4</option>
+                    <option value="Letter">Letter</option>
+                    <option value="Custom">Custom</option>
+                  </select>
+
+                  <!-- Segmented Page Size Toggle -->
+                  <div
+                    class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center shrink-0"
+                    id="foldable_pageSizeSegmented">
+                    <button type="button" data-val="A4" title="A4"
+                      class="btn-fold-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">A4</button>
+                    <button type="button" data-val="Letter" title="Letter"
+                      class="btn-fold-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center">Letter</button>
+                    <button type="button" data-val="Custom" title="Custom"
+                      class="btn-fold-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center"><i
+                        class="fa-solid fa-sliders"></i></button>
+                  </div>
+                </div>
+
+                <div class=" flex flex-wrap gap-4 items-center shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_pageWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
+                    <input type="number" id="foldable_pageWidth" value="210" step="0.1" disabled class="w-16" />
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_pageHeight" class="text-xs font-bold text-theme-muted text-center">Height</label>
+                    <input type="number" id="foldable_pageHeight" value="297" step="0.1" disabled class="w-16" />
+                  </div>
+                </div>
+                </div>
+              </div>
+
+              <!-- Card Size Card -->
+              <div
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
+                  <i class="fa-solid fa-ruler-combined text-xl text-theme-indigo"></i>
+                  <h3 class="font-display text-base text-theme-dark">Card Size</h3>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex gap-2 items-center flex-1 min-w-[200px] max-w-md">
+                  <select id="foldable_cardSize" name="foldable_cardSize" class="flex-1 min-w-0 text-ellipsis"></select>
+                  <button id="foldable_saveCardSizeButton" title="Save Card Size" aria-label="Save Card Size"
+                    class="btn-secondary w-[2rem] p-0 text-sm shrink-0">
+                    <i class="fa-solid fa-floppy-disk text-theme-indigo"></i>
+                  </button>
+                  <button id="foldable_deleteCardSizeButton" title="Delete Card Size" aria-label="Delete Card Size"
+                    class="btn-secondary w-[2rem] p-0 text-sm text-theme-pink border-theme-pink shrink-0">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+
+                <div class=" flex flex-wrap gap-4 items-center shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_cardWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
+                    <input type="number" id="foldable_cardWidth" value="63" disabled class="w-12" />
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_cardHeight" class="text-xs font-bold text-theme-muted text-center">Height</label>
+                    <input type="number" id="foldable_cardHeight" value="88" disabled class="w-12" />
+                  </div>
+                  <!-- Hidden spacing input defaulting to 0 -->
+                  <input type="hidden" id="foldable_cardMargin" value="0" />
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_cutMargin" class="text-xs font-bold text-theme-muted text-center">Bleed</label>
+                    <input type="number" id="foldable_cutMargin" value="0" class="w-12" />
+                  </div>
+                </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Settings Grid for Card Size and Borders -->
+            <div class="flex flex-col gap-3">
+              <!-- Fold Preference Card -->
+              <div
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
+                  <i class="fa-solid fa-map text-xl text-theme-indigo"></i>
+                  <h3 class="font-display text-base text-theme-dark">Fold Preference</h3>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex gap-2 items-center shrink-0">
+                  <!-- Hidden select for seamless JS compatibility -->
+                  <select id="foldable_foldLinePreference" class="hidden">
+                    <option value="auto" selected>Auto</option>
+                    <option value="vertical">Vertical</option>
+                    <option value="horizontal">Horizontal</option>
+                  </select>
+
+                  <!-- Segmented Fold Line Preference Toggle -->
+                  <div
+                    class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center shrink-0"
+                    id="foldable_foldLinePreferenceSegmented">
+                    <button type="button" data-val="auto" title="Auto Fold" aria-label="Auto Fold"
+                      class="btn-fold-pref font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">Auto</button>
+                    <button type="button" data-val="vertical" title="Vertical Fold" aria-label="Vertical Fold"
+                      class="btn-fold-pref font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center"><i
+                        class="fa-solid fa-arrows-up-down"></i></button>
+                    <button type="button" data-val="horizontal" title="Horizontal Fold" aria-label="Horizontal Fold"
+                      class="btn-fold-pref font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center"><i
+                        class="fa-solid fa-arrows-left-right"></i></button>
+                  </div>
+
+                  <!-- Hidden printer margin input defaulting to 5 -->
+                  <input type="hidden" id="foldable_printerMargin" value="5" />
+                </div>
+
+                <div class=" flex items-center gap-3 shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_foldingMargin" class="text-xs font-bold text-theme-muted text-center">Margin</label>
+                    <input type="number" id="foldable_foldingMargin" value="5" class="w-12" />
+                  </div>
+                </div>
+                </div>
+              </div>
+
+              <!-- Borders Card -->
+              <div
+                class="bento-card-stage flex flex-wrap items-center justify-between gap-3 p-3.5 border-3 border-theme-bg rounded-xl w-full">
+                <div class="min-w-[200px] flex items-center gap-2 shrink-0" style="flex-grow: 1; flex-basis: 200px;">
+                  <i class="fa-solid fa-border-top-left text-xl text-theme-pink"></i>
+                  <h3 class="font-display text-base text-theme-dark">Borders</h3>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
+                <div class=" flex flex-wrap items-center gap-3 shrink-0">
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_borderColorFront" class="text-xs font-bold text-theme-muted text-center">Front</label>
+                    <input type="color" id="foldable_borderColorFront" value="#000000" class="mt-1" />
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_borderColorBack" class="text-xs font-bold text-theme-muted text-center">Back</label>
+                    <input type="color" id="foldable_borderColorBack" value="#000000" class="mt-1" />
+                  </div>
+                </div>
+
+                <div class=" flex flex-wrap items-center gap-3 shrink-0 justify-start ml-auto">
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_cornerRadius"
+                      class="text-xs font-bold text-theme-muted flex justify-between items-center text-center">
+                      <span>Radius</span>
+                      <span id="foldable_cornerRadiusVal"
+                        class="text-[10px] text-theme-dark font-bold ml-1">(0mm)</span>
+                    </label>
+                    <select id="foldable_cornerRadius" class="hidden">
+                      <option value="0" selected>0</option>
+                      <option value="3">3</option>
+                      <option value="5">5</option>
+                      <option value="8">8</option>
+                      <option value="10">10</option>
+                    </select>
+                    <div
+                      class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center"
+                      id="foldable_cornerRadiusSegmented">
+                      <button type="button" data-val="0"
+                        class="btn-fold-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">None</button>
+                      <button type="button" data-val="3"
+                        class="btn-fold-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">S</button>
+                      <button type="button" data-val="5"
+                        class="btn-fold-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">M</button>
+                      <button type="button" data-val="8"
+                        class="btn-fold-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">L</button>
+                      <button type="button" data-val="10"
+                        class="btn-fold-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">XL</button>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <label for="foldable_innerBorder" class="text-xs font-bold text-theme-muted text-center">Width</label>
+                    <input type="number" id="foldable_innerBorder" value="0" class="w-12" />
+                  </div>
+                </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <script src="layout-master.js"></script>
-    <script src="layout-ui.js"></script>
-  </body>
+
+    <!-- ===== 4. Live Sheet Preview Bento Box ===== -->
+    <div class="bento-box" id="sheetPreviewSection">
+      <div
+        class="flex items-center justify-between border-b-3 border-theme-dark pb-3 mb-4 gap-3 flex-wrap sm:flex-nowrap">
+        <div class="flex items-center gap-3 shrink-0">
+          <h2 class="text-xl font-display text-theme-dark">4. Sheet Preview</h2>
+          <span id="previewStatus" class="text-xs font-bold text-theme-indigo"></span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <!-- Zoom Toggle Button -->
+          <button type="button" id="togglePreviewZoom"
+            class="btn-secondary flex items-center gap-1.5 text-xs py-1 px-2.5" title="Toggle Zoom Level">
+            <i id="previewZoomIcon" class="fa-solid fa-magnifying-glass-plus text-xs"></i>
+            <span id="previewZoomText" class="font-bold hidden sm:inline">Zoom</span>
+          </button>
+          <!-- Show/Hide Toggle Button (Matches 3. Settings button) -->
+          <button type="button" id="togglePreviewCollapse"
+            class="btn-secondary flex items-center gap-1.5 text-xs py-1 px-2.5" title="Toggle Preview Visibility">
+            <span id="previewCollapseText" class="font-bold hidden sm:inline">Show</span>
+            <i id="previewCollapseIcon" class="fa-solid fa-chevron-up transition-transform duration-200 text-xs"
+              style="transform: rotate(180deg);"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Collapsible Content Wrapper -->
+      <div id="sheetPreviewContentWrapper" class="collapsible-wrapper collapsed">
+        <div class="collapsible-inner">
+          <div id="previewCanvasContainer"
+            class="flex justify-center items-center bg-theme-bg/60 rounded-xl border-2 border-dashed border-theme-dark/30 p-4 transition-all overflow-x-auto custom-scrollbar">
+            <!-- Empty state -->
+            <div id="previewEmptyState" class="text-center text-theme-muted py-6">
+              <i class="fa-solid fa-eye text-3xl mb-2 text-theme-indigo/50 block"></i>
+              <p class="text-sm font-bold">Upload images to see live layout preview</p>
+            </div>
+            <!-- Loading state -->
+            <div id="previewLoadingState" class="text-center text-theme-muted py-6" style="display: none;">
+              <i class="fa-solid fa-spinner fa-spin text-3xl text-theme-indigo mb-2 block"></i>
+              <p class="text-sm font-bold">Rendering preview sheet...</p>
+            </div>
+            <!-- Rendered Canvases (Side-by-side spread for Page 1 & 2) -->
+            <div id="previewCanvasWrapper"
+              class="flex flex-wrap md:flex-nowrap gap-4 justify-center items-center max-w-full" style="display: none;">
+              <canvas id="previewCanvasP1" class="shadow-sm max-w-full h-auto bg-white flex-1 min-w-0"></canvas>
+              <canvas id="previewCanvasP2" class="shadow-sm max-w-full h-auto bg-white flex-1 min-w-0"
+                style="display: none;"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generate Button Area -->
+    <div
+      class="bento-box grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-5 items-stretch bg-theme-bg border-theme-dark mt-8">
+      <!-- Column 1: Generate PDF Button -->
+      <button id="generatePdfButton"
+        class="bg-theme-pink text-white font-display text-xl border-3 border-theme-dark px-6 py-3 rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)] w-full max-w-sm justify-self-center md:justify-self-start flex items-center justify-center tracking-wide h-[52px] md:h-full min-h-[52px]">
+        Generate PDF
+      </button>
+
+      <!-- Column 2: Filename Card & Progress Container (Shared Slot) -->
+      <div class="w-full max-w-sm justify-self-center flex items-stretch justify-center h-full">
+        <!-- Filename Card (wraps internally to 2 rows when tight) -->
+        <div id="fileNameCard"
+          class="bg-white border-3 border-theme-dark rounded-xl py-2 px-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 shadow-[4px_4px_0_var(--color-theme-dark)] w-full h-full">
+          <!-- Item 1: Filename label + dynamic preview text -->
+          <div class="flex items-center gap-1.5 text-xs shrink-0">
+            <span class="font-bold shrink-0 text-theme-dark">Filename:</span>
+            <span id="fileNamePreview" class="font-bold text-theme-indigo truncate max-w-[180px]">cards.pdf</span>
+          </div>
+          <!-- Item 2: Prefix (stacked label over checkbox) > text input -->
+          <div class="flex items-end gap-2 shrink-0">
+            <label for="prefixPageSize"
+              class="flex flex-col items-center justify-center gap-0.5 cursor-pointer text-[10px] font-bold shrink-0 text-theme-dark"
+              title="Prefix page size to filename">
+              <span class="leading-none">Prefix</span>
+              <input type="checkbox" id="prefixPageSize" class="accent-theme-indigo" />
+            </label>
+            <input type="text" id="customFileName" value="" placeholder="grid" class="px-2 text-xs w-28 shrink-0" />
+          </div>
+        </div>
+
+        <!-- Progress Container (Replaces Filename Card when generating) -->
+        <div id="progressContainer"
+          class="bg-white border-3 border-theme-dark rounded-xl p-3 sm:px-4 flex flex-col justify-center shadow-[4px_4px_0_var(--color-theme-dark)] w-full max-w-md h-full"
+          style="display: none;">
+          <span id="progressStatus" class="font-bold text-xs text-theme-indigo block mb-1 text-center"></span>
+          <progress id="progressBar" value="0" max="100"
+            class="w-full h-3 rounded-full overflow-hidden border-2 border-theme-dark [&::-webkit-progress-bar]:bg-white [&::-webkit-progress-value]:bg-theme-teal"></progress>
+        </div>
+      </div>
+
+      <!-- Column 3: Buy Me a Dice Link -->
+      <a href="https://www.buymeacoffee.com/pnpbuddy" title="Support PnPBuddy by buying me a dice"
+        class="w-full max-w-sm justify-self-center md:justify-self-end flex items-center justify-center border-3 border-theme-dark rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] overflow-hidden bg-[#f7e517] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)] h-[52px] md:h-full min-h-[52px] p-1">
+        <img
+          src="https://img.buymeacoffee.com/button-api/?text=Buy me a dice&emoji=🎲&slug=pnpbuddy&button_colour=f7e517&font_colour=000000&font_family=Bree&outline_colour=000000&coffee_colour=FFDD00"
+          alt="Buy me a dice" class="h-full w-full max-h-full max-w-full object-contain object-center" />
+      </a>
+    </div>
+
+  </div> <!-- Close max-w-6xl -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+  <script src="notifications.js"></script>
+  <script src="preview-panel.js?v=2"></script>
+  <script src="layout-master.js"></script>
+  <script src="sheet-preview.js?v=7"></script>
+  <script src="layout-ui.js"></script>
+</body>
+
 </html>
