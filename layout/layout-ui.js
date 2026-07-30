@@ -685,7 +685,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const addPart = (iconClass, iconStyle, text) => {
           let styleAttr = iconStyle ? `style="${iconStyle}"` : "";
-          parts.push(`<span class="inline-flex items-center gap-1.5 whitespace-nowrap"><i class="${iconClass} text-theme-indigo text-[12px]" ${styleAttr}></i> <span class="tracking-tight">${text}</span></span>`);
+          parts.push(`<span class="inline-flex items-center gap-1.5 mr-3.5 whitespace-nowrap"><i class="${iconClass} text-theme-indigo text-[12px]" ${styleAttr}></i> <span class="tracking-tight">${text}</span></span>`);
         };
 
         if (isDoubleSided) {
@@ -696,7 +696,16 @@ document.addEventListener("DOMContentLoaded", () => {
           const displaySize = pageSize === "Custom" ? `${LayoutToolUI.elements.pageWidth?.value || 0}x${LayoutToolUI.elements.pageHeight?.value || 0}` : pageSize;
           addPart(orientIcon, null, displaySize);
 
-          // 2. Grid Icon: NxN (shows calculated result even if Auto)
+          // 2. Card Size icon: NxN (+N)
+          const cardSize = LayoutToolUI.elements.cardSize ? LayoutToolUI.elements.cardSize.value : "Poker";
+          const dims = this.getCardSizeDimensions(cardSize);
+          const w = cardSize === "Custom" ? (LayoutToolUI.elements.imageWidth?.value || 63) : (dims?.width || 63);
+          const h = cardSize === "Custom" ? (LayoutToolUI.elements.imageHeight?.value || 88) : (dims?.height || 88);
+          const bleed = LayoutToolUI.elements.bleed ? parseFloat(LayoutToolUI.elements.bleed.value || "0") : 0;
+          const bleedText = bleed > 0 ? ` (+${bleed})` : "";
+          addPart("fa-solid fa-ruler-combined", null, `${w}x${h}${bleedText}`);
+
+          // 3. Grid Icon: NxN (shows calculated result even if Auto)
           const autoGrid = LayoutToolUI.elements.autoGrid ? LayoutToolUI.elements.autoGrid.checked : true;
           const cols = LayoutToolUI.elements.columns ? LayoutToolUI.elements.columns.value : 3;
           const rows = LayoutToolUI.elements.rows ? LayoutToolUI.elements.rows.value : 3;
@@ -705,15 +714,6 @@ document.addEventListener("DOMContentLoaded", () => {
           } else {
             addPart("fa-solid fa-table-cells", null, `${cols}x${rows}`);
           }
-
-          // 3. Card Size icon: NxN (+N)
-          const cardSize = LayoutToolUI.elements.cardSize ? LayoutToolUI.elements.cardSize.value : "Poker";
-          const dims = this.getCardSizeDimensions(cardSize);
-          const w = cardSize === "Custom" ? (LayoutToolUI.elements.imageWidth?.value || 63) : (dims?.width || 63);
-          const h = cardSize === "Custom" ? (LayoutToolUI.elements.imageHeight?.value || 88) : (dims?.height || 88);
-          const bleed = LayoutToolUI.elements.bleed ? parseFloat(LayoutToolUI.elements.bleed.value || "0") : 0;
-          const bleedText = bleed > 0 ? ` (+${bleed})` : "";
-          addPart("fa-solid fa-ruler-combined", null, `${w}x${h}${bleedText}`);
 
           // 4. Crosshair icon: F/B, width, size
           const crossFront = LayoutToolUI.elements.frontCheckbox?.checked;
@@ -744,11 +744,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const displaySize = pageSize === "Custom" ? `${LayoutToolUI.elements.foldable_pageWidth?.value || 0}x${LayoutToolUI.elements.foldable_pageHeight?.value || 0}` : pageSize;
           addPart("fa-solid fa-file", null, displaySize);
 
-          // 2. Fold Line Pref
-          const foldPref = LayoutToolUI.elements.foldable_foldLinePreference ? LayoutToolUI.elements.foldable_foldLinePreference.value : "auto";
-          addPart("fa-solid fa-map", null, foldPref.charAt(0).toUpperCase() + foldPref.slice(1));
-
-          // 3. Card Size icon: NxN (+N)
+          // 2. Card Size icon: NxN (+N)
           const cardSize = LayoutToolUI.elements.foldable_cardSize ? LayoutToolUI.elements.foldable_cardSize.value : "Poker";
           const dims = this.getCardSizeDimensions(cardSize);
           const w = cardSize === "Custom" ? (LayoutToolUI.elements.foldable_cardWidth?.value || 63.5) : (dims?.width || 63.5);
@@ -756,6 +752,10 @@ document.addEventListener("DOMContentLoaded", () => {
           const bleed = LayoutToolUI.elements.foldable_cutMargin ? parseFloat(LayoutToolUI.elements.foldable_cutMargin.value || "0") : 0;
           const bleedText = bleed > 0 ? ` (+${bleed})` : "";
           addPart("fa-solid fa-ruler-combined", null, `${w}x${h}${bleedText}`);
+
+          // 3. Fold Line Pref
+          const foldPref = LayoutToolUI.elements.foldable_foldLinePreference ? LayoutToolUI.elements.foldable_foldLinePreference.value : "auto";
+          addPart("fa-solid fa-map", null, foldPref.charAt(0).toUpperCase() + foldPref.slice(1));
 
           // 4. Fold marks
           const foldLine = LayoutToolUI.elements.foldable_foldLine?.checked;
@@ -777,7 +777,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        summaryEl.innerHTML = parts.join('<span class="mx-2 opacity-30 select-none">|</span>');
+        summaryEl.innerHTML = parts.join('');
       },
 
       updateGridAutoCalc() {
