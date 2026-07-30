@@ -75,7 +75,12 @@
     input[type="number"], input[type="text"] {
       height: 2rem;
       border: 1.5px solid var(--color-theme-dark);
-      @apply px-2 rounded-lg font-ui text-sm focus:outline-none focus:ring-2 focus:ring-theme-pink;
+      @apply px-2 rounded-lg font-ui text-sm;
+    }
+    input[type="number"]:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--color-theme-pink);
+      box-shadow: 0 0 0 2px rgba(223, 44, 212, 0.2);
     }
   </style>
   <link rel="stylesheet" href="style.css" />
