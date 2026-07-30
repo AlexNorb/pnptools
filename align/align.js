@@ -41,7 +41,7 @@ async function shiftPDFContent() {
   const pdfFile = inputFile.files[0];
 
   if (!pdfFile) {
-    alert("Please choose a PDF file first.");
+    Toast.show("Please choose a PDF file first.", "error");
     return;
   }
 
@@ -57,7 +57,7 @@ async function shiftPDFContent() {
 
   // Basic validation for shift values
   if (isNaN(shiftX) || isNaN(shiftY)) {
-    alert("Please enter valid numbers for the shift values.");
+    Toast.show("Please enter valid numbers for the shift values.", "error");
     return;
   }
 
@@ -94,15 +94,15 @@ async function shiftPDFContent() {
     const modifiedPDFData = await pdfDoc.save();
     const blob = new Blob([modifiedPDFData], { type: "application/pdf" });
     triggerDownload(blob, `${originalName}_shifted.pdf`);
+    Toast.show("PDF shifted successfully!", "success");
   } catch (error) {
     console.error("Failed to process PDF:", error);
-    alert(
-      "An error occurred while processing the PDF. Please check the console for details."
-    );
+    Toast.show("An error occurred while processing the PDF.", "error");
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById('shiftPdfBtn').addEventListener('click', shiftPDFContent);
   const sliderPad = document.getElementById("sliderPad");
   const sliderHandle = document.getElementById("sliderHandle");
   const shiftXInput = document.getElementById("shiftX");

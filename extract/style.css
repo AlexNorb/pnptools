@@ -1,0 +1,80 @@
+/* Custom spinner animation */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #ccc;
+  border-top-color: var(--color-theme-indigo, #4E63C5);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Log styles (Neo-Brutalist) */
+pre#logOutput {
+  background-color: white;
+  border: 3px solid var(--color-theme-dark, #1C111F);
+  border-radius: 0.75rem; /* rounded-xl */
+  padding: 12px;
+  max-height: 250px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  box-shadow: 4px 4px 0 var(--color-theme-dark, #1C111F);
+}
+
+/* Custom scrollbar for log output */
+pre#logOutput::-webkit-scrollbar {
+  width: 10px;
+}
+pre#logOutput::-webkit-scrollbar-track {
+  background: var(--color-theme-bg, #ECF0DD);
+  border-left: 2px solid var(--color-theme-dark, #1C111F);
+  border-top-right-radius: 0.6rem;
+  border-bottom-right-radius: 0.6rem;
+}
+pre#logOutput::-webkit-scrollbar-thumb {
+  background-color: var(--color-theme-dark, #1C111F);
+  border: 2px solid var(--color-theme-bg, #ECF0DD);
+  border-radius: 10px;
+}
+
+.log-warn {
+  color: #a66a00;
+  font-weight: 600;
+}
+.log-error {
+  color: #DF2CD4; /* Theme pink */
+  font-weight: bold;
+}
+.log-filter {
+  color: var(--color-theme-indigo, #4E63C5);
+}
+
+/* Progress bar */
+#pageProgressBar {
+  height: 16px;
+  background-color: white;
+  border: 2px solid var(--color-theme-dark, #1C111F);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 8px;
+  /* Hard shadow for neo-brutalist */
+  box-shadow: 2px 2px 0 var(--color-theme-dark, #1C111F);
+}
+
+#progressBarFill {
+  height: 100%;
+  background-color: var(--color-theme-teal, #3DDDB2);
+  width: 0%;
+  transition: width 0.3s ease-out;
+  border-right: 2px solid var(--color-theme-dark, #1C111F);
+}
