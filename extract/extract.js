@@ -30,7 +30,6 @@ function initApp() {
   const progressBarFill = document.getElementById("progressBarFill");
 
   // DOM Elements for Summary/Collapse/Debug/Config
-  const resultsBar = document.getElementById("resultsBar");
   const toggleThumbsBtn = document.getElementById("toggleThumbsBtn");
   const debugModeToggle = document.getElementById("debugModeToggle");
   const logContainer = document.getElementById("logContainer");
