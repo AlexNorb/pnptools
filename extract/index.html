@@ -217,159 +217,138 @@
     
     <div class="max-w-6xl mx-auto px-4 py-6" id="page-container">
       
-      <!-- Bento Box 1: Combined Workspace (Fluid 50/50% Auto-Wrapping) -->
+      <!-- Bento Box 1: Upload PDF -->
       <div class="bento-box">
-        <div class="flex flex-wrap items-stretch gap-6">
-          <!-- Column 1: Upload PDF -->
-          <div class="flex-1 min-w-[280px] flex flex-col">
-            <h2 class="text-xl font-display text-theme-dark mb-2">1. Upload PDF</h2>
-            <p class="text-xs text-theme-muted font-body mb-3 leading-relaxed">
-              Extract all unique embedded images and graphics directly from your PDF file.
-            </p>
-            <div class="dropzone-neo relative flex-1 flex flex-col items-center justify-center p-4 min-h-[140px]" id="pdfDropzone">
-              <i class="fa-solid fa-file-pdf text-4xl text-theme-pink mb-2"></i>
-              <label for="fileInput" class="text-base font-bold cursor-pointer block text-theme-dark">Drop PDF here or browse</label>
-              <span class="file-count text-xs block text-theme-muted mt-1 font-medium" id="status">No PDF loaded.</span>
-              <input type="file" id="fileInput" accept="application/pdf" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
-            </div>
-          </div>
-
-          <!-- Column 2: Quick Action / Extract Status -->
-          <div class="flex-1 min-w-[320px] flex flex-col justify-between pt-4 sm:pt-0 sm:pl-2">
-            <div>
-              <h2 class="text-xl font-display text-theme-dark mb-2">2. Extract</h2>
-              <p class="text-xs text-theme-muted font-body mb-4 leading-relaxed">
-                Click extract to process the document. Found images will be deduplicated automatically.
-              </p>
-              
-              <!-- Progress Bar -->
-              <div id="pageProgressBar" class="hidden mb-4">
-                <div id="progressBarFill"></div>
-              </div>
-            </div>
-
-            <button id="extractBtn" class="btn-action-pink w-full h-[52px] uppercase flex items-center justify-center gap-2 shrink-0" disabled>
-              <i class="fa-solid fa-bolt text-lg"></i>
-              Extract Images
-            </button>
-          </div>
+        <h2 class="text-xl font-display text-theme-dark mb-2">1. Upload PDF</h2>
+        <p class="text-xs text-theme-muted font-body mb-3 leading-relaxed">
+          Select or drop a PDF file. Image extraction will start automatically upon upload.
+        </p>
+        <div class="dropzone-neo relative flex flex-col items-center justify-center p-6 min-h-[140px]" id="pdfDropzone">
+          <i class="fa-solid fa-file-pdf text-4xl text-theme-pink mb-2"></i>
+          <label for="fileInput" class="text-base font-bold cursor-pointer block text-theme-dark">Drop PDF here or browse</label>
+          <span class="file-count text-xs block text-theme-muted mt-1 font-medium" id="status">No PDF loaded.</span>
+          <input type="file" id="fileInput" accept="application/pdf" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
         </div>
+        
+        <!-- Progress Bar -->
+        <div id="pageProgressBar" class="hidden mt-4">
+          <div id="progressBarFill"></div>
+        </div>
+
+        <!-- Hidden Legacy Trigger for Compatibility -->
+        <button id="extractBtn" class="hidden" disabled></button>
       </div>
 
-      <!-- Bento Box 2: Advanced Configuration (Collapsible Accordion) -->
-      <div class="bento-box p-0 overflow-hidden">
-        <button id="toggleConfigBtn" class="w-full h-12 bg-gray-50 border-b-3 border-theme-dark flex items-center justify-between px-5 font-display text-sm cursor-pointer hover:bg-gray-100 transition-colors uppercase">
-          <span><i class="fa-solid fa-sliders mr-2 text-theme-muted"></i> Advanced Configuration</span>
-          <i class="fa-solid fa-chevron-down text-theme-muted"></i>
-        </button>
+      <!-- Bento Box 2: Settings -->
+      <div class="bento-box">
+        <h2 class="text-xl font-display text-theme-dark mb-4 flex items-center justify-between">
+          <span>2. Settings</span>
+        </h2>
         
-        <div id="configContainer" class="hidden p-5 bg-white">
-          <div class="flex flex-col gap-6">
-            
-            <!-- Row 1: Page Range & Format -->
-            <div class="flex flex-wrap gap-6 items-start">
-              <!-- Page Range -->
-              <div class="flex-1 min-w-[260px]">
-                <label class="block font-bold text-xs text-theme-dark uppercase tracking-wider mb-2">Page Range</label>
-                <div class="flex items-center gap-3 h-8">
-                  <label class="flex items-center gap-2 cursor-pointer text-sm font-medium shrink-0 select-none">
-                    <div class="neo-checkbox">
-                      <input type="checkbox" id="allPagesToggle" checked />
-                      <div class="neo-checkbox-icon"></div>
-                    </div>
-                    All Pages
-                  </label>
-                  <input
-                    type="text"
-                    id="pageRangeInput"
-                    placeholder="e.g., 1, 3, 5-9"
-                    disabled
-                    class="flex-1 min-w-0"
-                  />
-                </div>
-              </div>
-
-              <!-- Output Format -->
-              <div class="flex-1 min-w-[240px]">
-                <label class="block font-bold text-xs text-theme-dark uppercase tracking-wider mb-2">Output Format</label>
-                <div class="flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-8 items-center w-full max-w-[240px]">
-                  <label class="segmented-option">
-                    <input type="radio" id="formatJpeg" name="outputFormat" value="image/jpeg" class="hidden" checked />
-                    <span>JPG</span>
-                  </label>
-                  <label class="segmented-option">
-                    <input type="radio" id="formatPng" name="outputFormat" value="image/png" class="hidden" />
-                    <span>PNG</span>
-                  </label>
-                </div>
+        <div id="configContainer" class="flex flex-col gap-6">
+          <!-- Row 1: Page Range & Format -->
+          <div class="flex flex-wrap gap-6 items-start">
+            <!-- Page Range -->
+            <div class="flex-1 min-w-[260px]">
+              <label class="block font-bold text-xs text-theme-dark uppercase tracking-wider mb-2">Page Range</label>
+              <div class="flex items-center gap-3 h-8">
+                <label class="flex items-center gap-2 cursor-pointer text-sm font-medium shrink-0 select-none">
+                  <div class="neo-checkbox">
+                    <input type="checkbox" id="allPagesToggle" checked />
+                    <div class="neo-checkbox-icon"></div>
+                  </div>
+                  All Pages
+                </label>
+                <input
+                  type="text"
+                  id="pageRangeInput"
+                  placeholder="e.g., 1, 3, 5-9"
+                  disabled
+                  class="flex-1 min-w-0"
+                />
               </div>
             </div>
 
-            <!-- Row 2: Quality & Options -->
-            <div class="flex flex-wrap gap-6 items-start">
+            <!-- Output Format -->
+            <div class="flex-1 min-w-[240px]">
+              <label class="block font-bold text-xs text-theme-dark uppercase tracking-wider mb-2">Output Format</label>
+              <div class="flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-8 items-center w-full max-w-[240px]">
+                <label class="segmented-option">
+                  <input type="radio" id="formatJpeg" name="outputFormat" value="image/jpeg" class="hidden" checked />
+                  <span>JPG</span>
+                </label>
+                <label class="segmented-option">
+                  <input type="radio" id="formatPng" name="outputFormat" value="image/png" class="hidden" />
+                  <span>PNG</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2: Quality & Options -->
+          <div class="flex flex-wrap gap-6 items-start">
+            <!-- Quality Control -->
+            <div class="flex-1 min-w-[240px]">
+              <label class="block font-bold text-xs text-theme-dark uppercase tracking-wider mb-2">JPEG Quality</label>
+              <div class="flex items-center gap-3 h-8">
+                <input
+                  id="quality"
+                  type="range"
+                  min="0.4"
+                  max="1"
+                  step="0.05"
+                  value="1"
+                  class="flex-1 max-w-[160px]"
+                />
+                <span id="qualityVal" class="text-sm font-bold w-10 text-theme-dark">1.00</span>
+              </div>
+            </div>
+
+            <!-- Filters & Toggles -->
+            <div class="flex-[2] min-w-[280px] flex flex-wrap gap-x-6 gap-y-3 pt-6 sm:pt-0">
+              <label class="flex items-center gap-2 cursor-pointer text-sm font-medium select-none">
+                <div class="neo-checkbox">
+                  <input type="checkbox" id="ignoreSmallFiles" checked />
+                  <div class="neo-checkbox-icon"></div>
+                </div>
+                Ignore &lt;5KB
+              </label>
               
-              <!-- Quality Control -->
-              <div class="flex-1 min-w-[240px]">
-                <label class="block font-bold text-xs text-theme-dark uppercase tracking-wider mb-2">JPEG Quality</label>
-                <div class="flex items-center gap-3 h-8">
-                  <input
-                    id="quality"
-                    type="range"
-                    min="0.4"
-                    max="1"
-                    step="0.05"
-                    value="1"
-                    class="flex-1 max-w-[160px]"
-                  />
-                  <span id="qualityVal" class="text-sm font-bold w-10 text-theme-dark">1.00</span>
+              <label class="flex items-center gap-2 cursor-pointer text-sm font-medium select-none">
+                <div class="neo-checkbox">
+                  <input type="checkbox" id="safeModeToggle" />
+                  <div class="neo-checkbox-icon"></div>
                 </div>
-              </div>
-
-              <!-- Filters & Toggles -->
-              <div class="flex-[2] min-w-[280px] flex flex-wrap gap-x-6 gap-y-3 pt-6 sm:pt-0">
-                <label class="flex items-center gap-2 cursor-pointer text-sm font-medium select-none">
-                  <div class="neo-checkbox">
-                    <input type="checkbox" id="ignoreSmallFiles" checked />
-                    <div class="neo-checkbox-icon"></div>
-                  </div>
-                  Ignore &lt;5KB
-                </label>
-                
-                <label class="flex items-center gap-2 cursor-pointer text-sm font-medium select-none">
-                  <div class="neo-checkbox">
-                    <input type="checkbox" id="safeModeToggle" />
-                    <div class="neo-checkbox-icon"></div>
-                  </div>
-                  Slow Mode
-                </label>
-                
-                <label class="flex items-center gap-2 cursor-pointer text-sm font-medium select-none">
-                  <div class="neo-checkbox">
-                    <input type="checkbox" id="debugModeToggle" />
-                    <div class="neo-checkbox-icon"></div>
-                  </div>
-                  Debug Mode
-                </label>
-              </div>
+                Slow Mode
+              </label>
+              
+              <label class="flex items-center gap-2 cursor-pointer text-sm font-medium select-none">
+                <div class="neo-checkbox">
+                  <input type="checkbox" id="debugModeToggle" />
+                  <div class="neo-checkbox-icon"></div>
+                </div>
+                Debug Mode
+              </label>
             </div>
+          </div>
 
-            <!-- Row 3: Utilities -->
-            <div class="flex gap-3 pt-4 border-t-2 border-dashed border-gray-200">
-              <button id="clearBtn" class="btn-secondary" disabled>
-                <i class="fa-solid fa-rotate-right mr-1.5 text-xs"></i> Clear All
-              </button>
-              <button id="clearLogBtn" class="btn-secondary">
-                <i class="fa-solid fa-eraser mr-1.5 text-xs"></i> Clear Log
-              </button>
-            </div>
-
+          <!-- Row 3: Utilities -->
+          <div class="flex gap-3 pt-4 border-t-2 border-dashed border-gray-200">
+            <button id="clearBtn" class="btn-secondary" disabled>
+              <i class="fa-solid fa-rotate-right mr-1.5 text-xs"></i> Clear All
+            </button>
+            <button id="clearLogBtn" class="btn-secondary">
+              <i class="fa-solid fa-eraser mr-1.5 text-xs"></i> Clear Log
+            </button>
+            <!-- Hidden Legacy Accordion Toggle Button for JS compatibility -->
+            <button id="toggleConfigBtn" class="hidden"></button>
           </div>
         </div>
       </div>
 
       <!-- Bento Box 3: Action & Export Bar (3-to-1 Column Responsive Grid) -->
       <div id="resultsBar" class="bento-box grid grid-cols-1 md:grid-cols-[auto_1fr_170px] gap-4 items-stretch bg-theme-bg border-theme-dark mt-6 hidden">
-        <!-- Column 1: Download All Button -->
+        <!-- Column 1: Save ZIP Button -->
         <button id="downloadZip" class="btn-primary text-lg h-[52px] md:h-full min-h-[52px] flex items-center justify-center gap-2 uppercase tracking-wide cursor-pointer shrink-0" disabled>
           <i class="fa-solid fa-file-zipper"></i>
           Save ZIP
@@ -393,19 +372,19 @@
         </a>
       </div>
 
-      <!-- Bento Box 4: Debug Log (Hidden by default) -->
-      <div id="logContainer" class="bento-box hidden">
-        <h2 class="font-display text-sm text-theme-dark mb-3 uppercase flex items-center gap-2"><i class="fa-solid fa-terminal text-theme-muted"></i> Debug Log</h2>
-        <pre id="logOutput"></pre>
-      </div>
-
-      <!-- Bento Box 5: Image Gallery -->
+      <!-- Bento Box 4: Preview (Image Gallery) -->
       <div class="bento-box p-0 overflow-hidden bg-transparent border-0 shadow-none">
         <button id="toggleThumbsBtn" class="btn-secondary w-full h-12 uppercase font-display text-sm" disabled>
           Preview 0 images
         </button>
         <!-- Thumbnail Grid Container -->
         <div id="images" class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-5"></div>
+      </div>
+
+      <!-- Bento Box 5: Debug Log (Hidden by default) -->
+      <div id="logContainer" class="bento-box hidden">
+        <h2 class="font-display text-sm text-theme-dark mb-3 uppercase flex items-center gap-2"><i class="fa-solid fa-terminal text-theme-muted"></i> Debug Log</h2>
+        <pre id="logOutput"></pre>
       </div>
       
     </div>

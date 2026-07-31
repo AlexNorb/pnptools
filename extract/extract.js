@@ -496,9 +496,15 @@ function initApp() {
       extractBtn.disabled = false;
       clearBtn.disabled = false;
 
-      const msg = `[INFO] ${file.name} loaded (${maxPages} pages). Ready for extraction.`;
+      const msg = `[INFO] ${file.name} loaded (${maxPages} pages). Starting extraction...`;
       status.textContent = msg;
       log(msg);
+
+      // Trigger automatic extraction
+      const pagesToProcess = getPagesToProcess(maxPages);
+      if (pagesToProcess.length > 0) {
+        await startExtraction(pdfDocument, pagesToProcess);
+      }
     } catch (err) {
       const errorMsg =
         "[ERROR] Fatal error during PDF loading: " +
