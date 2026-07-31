@@ -382,11 +382,15 @@
 <body class="bg-theme-bg font-ui text-theme-dark antialiased">
   <div class="max-w-6xl mx-auto px-4 py-6">
     <div class="flex items-center justify-between mb-6 relative">
-      <a href="../index.html" class="btn-secondary font-bold gap-1.5 text-xs sm:text-sm py-1 px-3 flex items-center shrink-0" title="Back to Landing Page">
+      <a href="../index.html"
+        class="btn-secondary font-bold gap-1.5 text-xs sm:text-sm py-1 px-3 flex items-center shrink-0"
+        title="Back to Landing Page">
         <i class="fa-solid fa-house"></i>
         <span class="hidden sm:inline">Home</span>
       </a>
-      <h1 class="text-2xl sm:text-3xl md:text-4xl font-display text-theme-dark uppercase text-center flex-1 mx-2 sm:mx-4">Layout tool</h1>
+      <h1
+        class="text-2xl sm:text-3xl md:text-4xl font-display text-theme-dark uppercase text-center flex-1 mx-2 sm:mx-4">
+        Layout tool</h1>
       <div class="w-[38px] sm:w-[85px] shrink-0"></div>
     </div>
 
@@ -394,10 +398,10 @@
     <div class="bento-box">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <!-- Upload Images Section -->
-        <div class="flex-1 shrink flex flex-col gap-2 min-w-[330px]">
+        <div class="flex-1 shrink flex flex-col gap-2 min-w-[280px]">
           <h2 class="text-xl font-display text-theme-dark">1. Upload Images</h2>
           <div class="flex flex-wrap gap-2 sm:gap-4">
-            <div class="dropzone-neo flex-1 shrink p-2 sm:p-3 min-h-[70px] min-w-[160px]" id="frontDropzone">
+            <div class="dropzone-neo flex-1 shrink p-2 sm:p-3 min-h-[70px] min-w-[120px]" id="frontDropzone">
               <div class="flex items-center gap-1.5 sm:gap-3">
                 <i class="fa-regular fa-file-image text-lg sm:text-2xl text-theme-indigo shrink-0"></i>
                 <div class="text-left min-w-0 flex-1">
@@ -409,7 +413,7 @@
               <input type="file" id="frontImages" accept=".png, .jpg, .jpeg" multiple />
             </div>
 
-            <div class="dropzone-neo flex-1 shrink p-2 sm:p-3 min-h-[70px] min-w-[160px]" id="backDropzone">
+            <div class="dropzone-neo flex-1 shrink p-2 sm:p-3 min-h-[70px] min-w-[120px]" id="backDropzone">
               <div class="flex items-center gap-1.5 sm:gap-3">
                 <i class="fa-regular fa-file-image text-lg sm:text-2xl text-theme-teal shrink-0"></i>
                 <div class="text-left min-w-0 flex-1">
@@ -425,20 +429,20 @@
         </div>
 
         <!-- Back Configuration Badges Section -->
-        <div class="mode-badge-container shrink-0 min-w-[44px] sm:min-w-[155px] border-l-2 border-theme-dark/20 pl-3">
-          <div class="flex flex-col gap-1.5">
+        <div class="mode-badge-container w-full sm:w-[160px] sm:min-w-[160px] shrink-0 border-t-2 sm:border-t-0 sm:border-l-2 border-theme-dark/20 pt-2.5 sm:pt-0 pl-0 sm:pl-3">
+          <div class="flex flex-row sm:flex-col gap-1.5">
             <div id="mode1" title="No backs"
-              class="mode-indicator inactive px-2.5 sm:px-3 py-1.5 border-2 rounded-lg flex items-center justify-between text-xs font-bold transition-all min-w-0 cursor-default">
+              class="mode-indicator inactive flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 border-2 rounded-lg flex items-center justify-center sm:justify-between text-xs font-bold transition-all min-w-0 cursor-default">
               <span class="mode-text truncate">No backs</span>
               <i class="fa-solid fa-ban text-sm opacity-60 shrink-0 ml-1"></i>
             </div>
             <div id="mode2" title="Same back"
-              class="mode-indicator inactive px-2.5 sm:px-3 py-1.5 border-2 rounded-lg flex items-center justify-between text-xs font-bold transition-all min-w-0 cursor-default">
+              class="mode-indicator inactive flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 border-2 rounded-lg flex items-center justify-center sm:justify-between text-xs font-bold transition-all min-w-0 cursor-default">
               <span class="mode-text truncate">Same back</span>
               <i class="fa-solid fa-clone text-sm opacity-60 shrink-0 ml-1"></i>
             </div>
             <div id="mode3" title="Unique backs"
-              class="mode-indicator inactive px-2.5 sm:px-3 py-1.5 border-2 rounded-lg flex items-center justify-between text-xs font-bold transition-all min-w-0 cursor-default">
+              class="mode-indicator inactive flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 border-2 rounded-lg flex items-center justify-center sm:justify-between text-xs font-bold transition-all min-w-0 cursor-default">
               <span class="mode-text truncate">Unique backs</span>
               <i class="fa-solid fa-layer-group text-sm opacity-60 shrink-0 ml-1"></i>
             </div>
@@ -554,57 +558,58 @@
                   <h3 class="font-display text-base text-theme-dark">Paper Size</h3>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
-                <div class=" flex flex-wrap gap-2 items-center shrink-0 justify-start">
-                  <!-- Hidden selects for seamless JS compatibility -->
-                  <select id="pageSize" name="pageSize" class="hidden">
-                    <option value="A4" selected>A4</option>
-                    <option value="Letter">Letter</option>
-                    <option value="Custom">Custom</option>
-                  </select>
-                  <select id="pageOrientation" name="pageOrientation" class="hidden">
-                    <option value="portrait" selected>Portrait</option>
-                    <option value="landscape">Landscape</option>
-                  </select>
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full"
+                  style="flex-grow: 9999; flex-basis: max-content;">
+                  <div class=" flex flex-wrap gap-2 items-center shrink-0 justify-start">
+                    <!-- Hidden selects for seamless JS compatibility -->
+                    <select id="pageSize" name="pageSize" class="hidden">
+                      <option value="A4" selected>A4</option>
+                      <option value="Letter">Letter</option>
+                      <option value="Custom">Custom</option>
+                    </select>
+                    <select id="pageOrientation" name="pageOrientation" class="hidden">
+                      <option value="portrait" selected>Portrait</option>
+                      <option value="landscape">Landscape</option>
+                    </select>
 
-                  <!-- Segmented Page Size Toggle -->
-                  <div
-                    class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center"
-                    id="pageSizeSegmented">
-                    <button type="button" data-val="A4" title="A4"
-                      class="btn-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">A4</button>
-                    <button type="button" data-val="Letter" title="Letter"
-                      class="btn-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center">Letter</button>
-                    <button type="button" data-val="Custom" title="Custom"
-                      class="btn-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center"><i
-                        class="fa-solid fa-sliders"></i></button>
+                    <!-- Segmented Page Size Toggle -->
+                    <div
+                      class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center"
+                      id="pageSizeSegmented">
+                      <button type="button" data-val="A4" title="A4"
+                        class="btn-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">A4</button>
+                      <button type="button" data-val="Letter" title="Letter"
+                        class="btn-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center">Letter</button>
+                      <button type="button" data-val="Custom" title="Custom"
+                        class="btn-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center"><i
+                          class="fa-solid fa-sliders"></i></button>
+                    </div>
+
+                    <!-- Segmented Orientation Toggle -->
+                    <div
+                      class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center"
+                      id="pageOrientationSegmented">
+                      <button type="button" data-val="portrait" title="Portrait" aria-label="Portrait"
+                        class="btn-page-orient font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">
+                        <i class="fa-solid fa-file"></i>
+                      </button>
+                      <button type="button" data-val="landscape" title="Landscape" aria-label="Landscape"
+                        class="btn-page-orient font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center">
+                        <i class="fa-solid fa-file fa-rotate-90"></i>
+                      </button>
+                    </div>
                   </div>
 
-                  <!-- Segmented Orientation Toggle -->
-                  <div
-                    class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center"
-                    id="pageOrientationSegmented">
-                    <button type="button" data-val="portrait" title="Portrait" aria-label="Portrait"
-                      class="btn-page-orient font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">
-                      <i class="fa-solid fa-file"></i>
-                    </button>
-                    <button type="button" data-val="landscape" title="Landscape" aria-label="Landscape"
-                      class="btn-page-orient font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center">
-                      <i class="fa-solid fa-file fa-rotate-90"></i>
-                    </button>
+                  <div class=" flex flex-wrap gap-4 items-center shrink-0 justify-start ml-auto">
+                    <div class="flex flex-col items-center">
+                      <label for="pageWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
+                      <input type="number" id="pageWidth" value="210" step="0.1" disabled class="w-16" />
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label for="pageHeight" class="text-xs font-bold text-theme-muted text-center">Height</label>
+                      <input type="number" id="pageHeight" value="297" step="0.1" disabled class="w-16" />
+                    </div>
                   </div>
-                </div>
-
-                <div class=" flex flex-wrap gap-4 items-center shrink-0 justify-start ml-auto">
-                  <div class="flex flex-col items-center">
-                    <label for="pageWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
-                    <input type="number" id="pageWidth" value="210" step="0.1" disabled class="w-16" />
-                  </div>
-                  <div class="flex flex-col items-center">
-                    <label for="pageHeight" class="text-xs font-bold text-theme-muted text-center">Height</label>
-                    <input type="number" id="pageHeight" value="297" step="0.1" disabled class="w-16" />
-                  </div>
-                </div>
                 </div>
               </div>
 
@@ -616,33 +621,34 @@
                   <h3 class="font-display text-base text-theme-dark">Card Size</h3>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
-                <div class=" flex gap-2 items-center flex-1 min-w-[200px] max-w-md">
-                  <select id="cardSize" name="cardSize" class="flex-1 min-w-0 text-ellipsis"></select>
-                  <button id="saveCardSizeButton" title="Save Card Size" aria-label="Save Card Size"
-                    class="btn-secondary w-[2rem] p-0 text-sm shrink-0">
-                    <i class="fa-solid fa-floppy-disk text-theme-indigo"></i>
-                  </button>
-                  <button id="deleteCardSizeButton" title="Delete Card Size" aria-label="Delete Card Size"
-                    class="btn-secondary w-[2rem] p-0 text-sm text-theme-pink border-theme-pink shrink-0">
-                    <i class="fa-solid fa-trash-can"></i>
-                  </button>
-                </div>
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full"
+                  style="flex-grow: 9999; flex-basis: max-content;">
+                  <div class=" flex gap-2 items-center flex-1 min-w-[200px] max-w-md">
+                    <select id="cardSize" name="cardSize" class="flex-1 min-w-0 text-ellipsis"></select>
+                    <button id="saveCardSizeButton" title="Save Card Size" aria-label="Save Card Size"
+                      class="btn-secondary w-[2rem] p-0 text-sm shrink-0">
+                      <i class="fa-solid fa-floppy-disk text-theme-indigo"></i>
+                    </button>
+                    <button id="deleteCardSizeButton" title="Delete Card Size" aria-label="Delete Card Size"
+                      class="btn-secondary w-[2rem] p-0 text-sm text-theme-pink border-theme-pink shrink-0">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </div>
 
-                <div class=" flex flex-wrap gap-4 items-center shrink-0 justify-start ml-auto">
-                  <div class="flex flex-col items-center">
-                    <label for="imageWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
-                    <input type="number" id="imageWidth" value="63" disabled class="w-12" />
+                  <div class=" flex flex-wrap gap-4 items-center shrink-0 justify-start ml-auto">
+                    <div class="flex flex-col items-center">
+                      <label for="imageWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
+                      <input type="number" id="imageWidth" value="63" disabled class="w-12" />
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label for="imageHeight" class="text-xs font-bold text-theme-muted text-center">Height</label>
+                      <input type="number" id="imageHeight" value="88" disabled class="w-12" />
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label for="bleed" class="text-xs font-bold text-theme-muted text-center">Bleed</label>
+                      <input type="number" id="bleed" value="0" class="w-12" />
+                    </div>
                   </div>
-                  <div class="flex flex-col items-center">
-                    <label for="imageHeight" class="text-xs font-bold text-theme-muted text-center">Height</label>
-                    <input type="number" id="imageHeight" value="88" disabled class="w-12" />
-                  </div>
-                  <div class="flex flex-col items-center">
-                    <label for="bleed" class="text-xs font-bold text-theme-muted text-center">Bleed</label>
-                    <input type="number" id="bleed" value="0" class="w-12" />
-                  </div>
-                </div>
                 </div>
               </div>
 
@@ -654,35 +660,36 @@
                   <h3 class="font-display text-base text-theme-dark">Grid Size</h3>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
-                <div class=" flex gap-2 items-center shrink-0">
-                  <input type="checkbox" id="autoGrid" checked class="hidden" />
-                  <div
-                    class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center"
-                    id="autoGridSegmented">
-                    <button type="button" data-val="false" title="Manual" aria-label="Manual Grid"
-                      class="btn-auto-grid font-bold px-3 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center justify-center">
-                      <span class="mr-2">Manual</span>
-                      <i class="fa-solid fa-lock-open"></i>
-                    </button>
-                    <button type="button" data-val="true" title="Auto-calculate" aria-label="Auto-calculate Grid"
-                      class="btn-auto-grid font-bold px-3 h-full rounded-[10px] text-xs transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center justify-center">
-                      <span class="mr-2">Auto</span>
-                      <i class="fa-solid fa-lock"></i>
-                    </button>
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full"
+                  style="flex-grow: 9999; flex-basis: max-content;">
+                  <div class=" flex gap-2 items-center shrink-0">
+                    <input type="checkbox" id="autoGrid" checked class="hidden" />
+                    <div
+                      class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center"
+                      id="autoGridSegmented">
+                      <button type="button" data-val="false" title="Manual" aria-label="Manual Grid"
+                        class="btn-auto-grid font-bold px-3 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center justify-center">
+                        <span class="mr-2">Manual</span>
+                        <i class="fa-solid fa-lock-open"></i>
+                      </button>
+                      <button type="button" data-val="true" title="Auto-calculate" aria-label="Auto-calculate Grid"
+                        class="btn-auto-grid font-bold px-3 h-full rounded-[10px] text-xs transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center justify-center">
+                        <span class="mr-2">Auto</span>
+                        <i class="fa-solid fa-lock"></i>
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                <div class=" flex gap-4 items-center shrink-0 justify-start ml-auto">
-                  <div class="flex flex-col items-center">
-                    <label for="rows" class="text-xs font-bold text-theme-muted text-center">Rows</label>
-                    <input type="number" id="rows" value="3" class="w-12" />
+                  <div class=" flex gap-4 items-center shrink-0 justify-start ml-auto">
+                    <div class="flex flex-col items-center">
+                      <label for="rows" class="text-xs font-bold text-theme-muted text-center">Rows</label>
+                      <input type="number" id="rows" value="3" class="w-12" />
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label for="columns" class="text-xs font-bold text-theme-muted text-center">Cols</label>
+                      <input type="number" id="columns" value="3" class="w-12" />
+                    </div>
                   </div>
-                  <div class="flex flex-col items-center">
-                    <label for="columns" class="text-xs font-bold text-theme-muted text-center">Cols</label>
-                    <input type="number" id="columns" value="3" class="w-12" />
-                  </div>
-                </div>
                 </div>
               </div>
             </div>
@@ -696,34 +703,37 @@
                   <h3 class="font-display text-base text-theme-dark">Crosshairs</h3>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
-                <div class=" flex gap-3 items-center shrink-0 flex-nowrap">
-                  <div class="flex flex-col items-center">
-                    <label for="frontCheckbox" class="text-xs font-bold text-theme-muted cursor-pointer text-center">Front</label>
-                    <input type="checkbox" id="frontCheckbox" name="frontCheckbox" checked
-                      class="accent-theme-pink cursor-pointer mt-1" />
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full"
+                  style="flex-grow: 9999; flex-basis: max-content;">
+                  <div class=" flex gap-3 items-center shrink-0 flex-nowrap">
+                    <div class="flex flex-col items-center">
+                      <label for="frontCheckbox"
+                        class="text-xs font-bold text-theme-muted cursor-pointer text-center">Front</label>
+                      <input type="checkbox" id="frontCheckbox" name="frontCheckbox" checked
+                        class="accent-theme-pink cursor-pointer mt-1" />
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label for="backCheckbox"
+                        class="text-xs font-bold text-theme-muted cursor-pointer text-center">Back</label>
+                      <input type="checkbox" id="backCheckbox" name="backCheckbox"
+                        class="accent-theme-pink cursor-pointer mt-1" />
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label class="text-xs font-bold text-theme-muted opacity-0 select-none text-center">&nbsp;</label>
+                      <input type="color" id="crosshaircolor" value="#000000" class="mt-1" />
+                    </div>
                   </div>
-                  <div class="flex flex-col items-center">
-                    <label for="backCheckbox" class="text-xs font-bold text-theme-muted cursor-pointer text-center">Back</label>
-                    <input type="checkbox" id="backCheckbox" name="backCheckbox"
-                      class="accent-theme-pink cursor-pointer mt-1" />
-                  </div>
-                  <div class="flex flex-col items-center">
-                    <label class="text-xs font-bold text-theme-muted opacity-0 select-none text-center">&nbsp;</label>
-                    <input type="color" id="crosshaircolor" value="#000000" class="mt-1" />
-                  </div>
-                </div>
 
-                <div class=" flex flex-wrap items-center gap-3 shrink-0 justify-start ml-auto">
-                  <div class="flex flex-col items-center">
-                    <label for="crosswidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
-                    <input type="number" id="crosswidth" value="0.1" step="0.05" class="w-12" />
+                  <div class=" flex flex-wrap items-center gap-3 shrink-0 justify-start ml-auto">
+                    <div class="flex flex-col items-center">
+                      <label for="crosswidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
+                      <input type="number" id="crosswidth" value="0.1" step="0.05" class="w-12" />
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label for="crosssize" class="text-xs font-bold text-theme-muted text-center">Size</label>
+                      <input type="number" id="crosssize" value="3" step="0.5" class="w-12" />
+                    </div>
                   </div>
-                  <div class="flex flex-col items-center">
-                    <label for="crosssize" class="text-xs font-bold text-theme-muted text-center">Size</label>
-                    <input type="number" id="crosssize" value="3" step="0.5" class="w-12" />
-                  </div>
-                </div>
                 </div>
               </div>
 
@@ -735,58 +745,59 @@
                   <h3 class="font-display text-base text-theme-dark">Borders</h3>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
-                <div class=" flex flex-wrap items-center gap-3 shrink-0">
-                  <div class="flex flex-col items-center">
-                    <label for="frontBorderCheckbox"
-                      class="text-xs font-bold text-theme-muted cursor-pointer text-center">Front</label>
-                    <input type="checkbox" id="frontBorderCheckbox" class="accent-theme-pink cursor-pointer mt-1" />
-                  </div>
-                  <div class="flex flex-col items-center">
-                    <label for="backBorderCheckbox"
-                      class="text-xs font-bold text-theme-muted cursor-pointer text-center">Back</label>
-                    <input type="checkbox" id="backBorderCheckbox" class="accent-theme-pink cursor-pointer mt-1" />
-                  </div>
-                  <div class="flex flex-col items-center">
-                    <label class="text-xs font-bold text-theme-muted opacity-0 select-none text-center">&nbsp;</label>
-                    <input type="color" id="borderColor" value="#ffffff" class="mt-1" />
-                  </div>
-                </div>
-
-                <div class=" flex flex-wrap items-center gap-3 shrink-0 justify-start ml-auto">
-                  <div class="flex flex-col items-center">
-                    <label for="cornerRadius"
-                      class="text-xs font-bold text-theme-muted flex justify-between items-center text-center">
-                      <span>Radius</span>
-                      <span id="cornerRadiusVal" class="text-[10px] text-theme-dark font-bold ml-1">(0mm)</span>
-                    </label>
-                    <select id="cornerRadius" class="hidden">
-                      <option value="0" selected>0</option>
-                      <option value="3">3</option>
-                      <option value="5">5</option>
-                      <option value="8">8</option>
-                      <option value="10">10</option>
-                    </select>
-                    <div
-                      class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center"
-                      id="cornerRadiusSegmented">
-                      <button type="button" data-val="0"
-                        class="btn-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">None</button>
-                      <button type="button" data-val="3"
-                        class="btn-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">S</button>
-                      <button type="button" data-val="5"
-                        class="btn-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">M</button>
-                      <button type="button" data-val="8"
-                        class="btn-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">L</button>
-                      <button type="button" data-val="10"
-                        class="btn-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">XL</button>
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full"
+                  style="flex-grow: 9999; flex-basis: max-content;">
+                  <div class=" flex flex-wrap items-center gap-3 shrink-0">
+                    <div class="flex flex-col items-center">
+                      <label for="frontBorderCheckbox"
+                        class="text-xs font-bold text-theme-muted cursor-pointer text-center">Front</label>
+                      <input type="checkbox" id="frontBorderCheckbox" class="accent-theme-pink cursor-pointer mt-1" />
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label for="backBorderCheckbox"
+                        class="text-xs font-bold text-theme-muted cursor-pointer text-center">Back</label>
+                      <input type="checkbox" id="backBorderCheckbox" class="accent-theme-pink cursor-pointer mt-1" />
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label class="text-xs font-bold text-theme-muted opacity-0 select-none text-center">&nbsp;</label>
+                      <input type="color" id="borderColor" value="#ffffff" class="mt-1" />
                     </div>
                   </div>
-                  <div class="flex flex-col items-center">
-                    <label for="borderWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
-                    <input type="number" id="borderWidth" value="3" class="w-12" />
+
+                  <div class=" flex flex-wrap items-center gap-3 shrink-0 justify-start ml-auto">
+                    <div class="flex flex-col items-center">
+                      <label for="cornerRadius"
+                        class="text-xs font-bold text-theme-muted flex justify-between items-center text-center">
+                        <span>Radius</span>
+                        <span id="cornerRadiusVal" class="text-[10px] text-theme-dark font-bold ml-1">(0mm)</span>
+                      </label>
+                      <select id="cornerRadius" class="hidden">
+                        <option value="0" selected>0</option>
+                        <option value="3">3</option>
+                        <option value="5">5</option>
+                        <option value="8">8</option>
+                        <option value="10">10</option>
+                      </select>
+                      <div
+                        class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center"
+                        id="cornerRadiusSegmented">
+                        <button type="button" data-val="0"
+                          class="btn-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">None</button>
+                        <button type="button" data-val="3"
+                          class="btn-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">S</button>
+                        <button type="button" data-val="5"
+                          class="btn-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">M</button>
+                        <button type="button" data-val="8"
+                          class="btn-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">L</button>
+                        <button type="button" data-val="10"
+                          class="btn-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">XL</button>
+                      </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label for="borderWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
+                      <input type="number" id="borderWidth" value="3" class="w-12" />
+                    </div>
                   </div>
-                </div>
                 </div>
               </div>
             </div>
@@ -802,39 +813,42 @@
                   <h3 class="font-display text-base text-theme-dark">Paper Size</h3>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
-                <div class=" flex flex-wrap gap-2 items-center shrink-0 justify-start">
-                  <!-- Hidden select for seamless JS compatibility -->
-                  <select id="foldable_pageSize" name="foldable_pageSize" class="hidden">
-                    <option value="A4" selected>A4</option>
-                    <option value="Letter">Letter</option>
-                    <option value="Custom">Custom</option>
-                  </select>
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full"
+                  style="flex-grow: 9999; flex-basis: max-content;">
+                  <div class=" flex flex-wrap gap-2 items-center shrink-0 justify-start">
+                    <!-- Hidden select for seamless JS compatibility -->
+                    <select id="foldable_pageSize" name="foldable_pageSize" class="hidden">
+                      <option value="A4" selected>A4</option>
+                      <option value="Letter">Letter</option>
+                      <option value="Custom">Custom</option>
+                    </select>
 
-                  <!-- Segmented Page Size Toggle -->
-                  <div
-                    class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center shrink-0"
-                    id="foldable_pageSizeSegmented">
-                    <button type="button" data-val="A4" title="A4"
-                      class="btn-fold-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">A4</button>
-                    <button type="button" data-val="Letter" title="Letter"
-                      class="btn-fold-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center">Letter</button>
-                    <button type="button" data-val="Custom" title="Custom"
-                      class="btn-fold-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center"><i
-                        class="fa-solid fa-sliders"></i></button>
+                    <!-- Segmented Page Size Toggle -->
+                    <div
+                      class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center shrink-0"
+                      id="foldable_pageSizeSegmented">
+                      <button type="button" data-val="A4" title="A4"
+                        class="btn-fold-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">A4</button>
+                      <button type="button" data-val="Letter" title="Letter"
+                        class="btn-fold-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center">Letter</button>
+                      <button type="button" data-val="Custom" title="Custom"
+                        class="btn-fold-page-size font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center"><i
+                          class="fa-solid fa-sliders"></i></button>
+                    </div>
                   </div>
-                </div>
 
-                <div class=" flex flex-wrap gap-4 items-center shrink-0 justify-start ml-auto">
-                  <div class="flex flex-col items-center">
-                    <label for="foldable_pageWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
-                    <input type="number" id="foldable_pageWidth" value="210" step="0.1" disabled class="w-16" />
+                  <div class=" flex flex-wrap gap-4 items-center shrink-0 justify-start ml-auto">
+                    <div class="flex flex-col items-center">
+                      <label for="foldable_pageWidth"
+                        class="text-xs font-bold text-theme-muted text-center">Width</label>
+                      <input type="number" id="foldable_pageWidth" value="210" step="0.1" disabled class="w-16" />
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label for="foldable_pageHeight"
+                        class="text-xs font-bold text-theme-muted text-center">Height</label>
+                      <input type="number" id="foldable_pageHeight" value="297" step="0.1" disabled class="w-16" />
+                    </div>
                   </div>
-                  <div class="flex flex-col items-center">
-                    <label for="foldable_pageHeight" class="text-xs font-bold text-theme-muted text-center">Height</label>
-                    <input type="number" id="foldable_pageHeight" value="297" step="0.1" disabled class="w-16" />
-                  </div>
-                </div>
                 </div>
               </div>
 
@@ -846,35 +860,40 @@
                   <h3 class="font-display text-base text-theme-dark">Card Size</h3>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
-                <div class=" flex gap-2 items-center flex-1 min-w-[200px] max-w-md">
-                  <select id="foldable_cardSize" name="foldable_cardSize" class="flex-1 min-w-0 text-ellipsis"></select>
-                  <button id="foldable_saveCardSizeButton" title="Save Card Size" aria-label="Save Card Size"
-                    class="btn-secondary w-[2rem] p-0 text-sm shrink-0">
-                    <i class="fa-solid fa-floppy-disk text-theme-indigo"></i>
-                  </button>
-                  <button id="foldable_deleteCardSizeButton" title="Delete Card Size" aria-label="Delete Card Size"
-                    class="btn-secondary w-[2rem] p-0 text-sm text-theme-pink border-theme-pink shrink-0">
-                    <i class="fa-solid fa-trash-can"></i>
-                  </button>
-                </div>
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full"
+                  style="flex-grow: 9999; flex-basis: max-content;">
+                  <div class=" flex gap-2 items-center flex-1 min-w-[200px] max-w-md">
+                    <select id="foldable_cardSize" name="foldable_cardSize"
+                      class="flex-1 min-w-0 text-ellipsis"></select>
+                    <button id="foldable_saveCardSizeButton" title="Save Card Size" aria-label="Save Card Size"
+                      class="btn-secondary w-[2rem] p-0 text-sm shrink-0">
+                      <i class="fa-solid fa-floppy-disk text-theme-indigo"></i>
+                    </button>
+                    <button id="foldable_deleteCardSizeButton" title="Delete Card Size" aria-label="Delete Card Size"
+                      class="btn-secondary w-[2rem] p-0 text-sm text-theme-pink border-theme-pink shrink-0">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </div>
 
-                <div class=" flex flex-wrap gap-4 items-center shrink-0 justify-start ml-auto">
-                  <div class="flex flex-col items-center">
-                    <label for="foldable_cardWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
-                    <input type="number" id="foldable_cardWidth" value="63" disabled class="w-12" />
+                  <div class=" flex flex-wrap gap-4 items-center shrink-0 justify-start ml-auto">
+                    <div class="flex flex-col items-center">
+                      <label for="foldable_cardWidth"
+                        class="text-xs font-bold text-theme-muted text-center">Width</label>
+                      <input type="number" id="foldable_cardWidth" value="63" disabled class="w-12" />
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label for="foldable_cardHeight"
+                        class="text-xs font-bold text-theme-muted text-center">Height</label>
+                      <input type="number" id="foldable_cardHeight" value="88" disabled class="w-12" />
+                    </div>
+                    <!-- Hidden spacing input defaulting to 0 -->
+                    <input type="hidden" id="foldable_cardMargin" value="0" />
+                    <div class="flex flex-col items-center">
+                      <label for="foldable_cutMargin"
+                        class="text-xs font-bold text-theme-muted text-center">Bleed</label>
+                      <input type="number" id="foldable_cutMargin" value="0" class="w-12" />
+                    </div>
                   </div>
-                  <div class="flex flex-col items-center">
-                    <label for="foldable_cardHeight" class="text-xs font-bold text-theme-muted text-center">Height</label>
-                    <input type="number" id="foldable_cardHeight" value="88" disabled class="w-12" />
-                  </div>
-                  <!-- Hidden spacing input defaulting to 0 -->
-                  <input type="hidden" id="foldable_cardMargin" value="0" />
-                  <div class="flex flex-col items-center">
-                    <label for="foldable_cutMargin" class="text-xs font-bold text-theme-muted text-center">Bleed</label>
-                    <input type="number" id="foldable_cutMargin" value="0" class="w-12" />
-                  </div>
-                </div>
                 </div>
               </div>
             </div>
@@ -889,39 +908,41 @@
                   <h3 class="font-display text-base text-theme-dark">Fold Preference</h3>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
-                <div class=" flex gap-2 items-center shrink-0">
-                  <!-- Hidden select for seamless JS compatibility -->
-                  <select id="foldable_foldLinePreference" class="hidden">
-                    <option value="auto" selected>Auto</option>
-                    <option value="vertical">Vertical</option>
-                    <option value="horizontal">Horizontal</option>
-                  </select>
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full"
+                  style="flex-grow: 9999; flex-basis: max-content;">
+                  <div class=" flex gap-2 items-center shrink-0">
+                    <!-- Hidden select for seamless JS compatibility -->
+                    <select id="foldable_foldLinePreference" class="hidden">
+                      <option value="auto" selected>Auto</option>
+                      <option value="vertical">Vertical</option>
+                      <option value="horizontal">Horizontal</option>
+                    </select>
 
-                  <!-- Segmented Fold Line Preference Toggle -->
-                  <div
-                    class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center shrink-0"
-                    id="foldable_foldLinePreferenceSegmented">
-                    <button type="button" data-val="auto" title="Auto Fold" aria-label="Auto Fold"
-                      class="btn-fold-pref font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">Auto</button>
-                    <button type="button" data-val="vertical" title="Vertical Fold" aria-label="Vertical Fold"
-                      class="btn-fold-pref font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center"><i
-                        class="fa-solid fa-arrows-up-down"></i></button>
-                    <button type="button" data-val="horizontal" title="Horizontal Fold" aria-label="Horizontal Fold"
-                      class="btn-fold-pref font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center"><i
-                        class="fa-solid fa-arrows-left-right"></i></button>
+                    <!-- Segmented Fold Line Preference Toggle -->
+                    <div
+                      class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center shrink-0"
+                      id="foldable_foldLinePreferenceSegmented">
+                      <button type="button" data-val="auto" title="Auto Fold" aria-label="Auto Fold"
+                        class="btn-fold-pref font-bold px-2.5 h-full rounded-[10px] text-sm transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">Auto</button>
+                      <button type="button" data-val="vertical" title="Vertical Fold" aria-label="Vertical Fold"
+                        class="btn-fold-pref font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center"><i
+                          class="fa-solid fa-arrows-up-down"></i></button>
+                      <button type="button" data-val="horizontal" title="Horizontal Fold" aria-label="Horizontal Fold"
+                        class="btn-fold-pref font-bold px-2.5 h-full rounded-[10px] text-sm transition-all text-theme-muted hover:bg-black/5 flex items-center"><i
+                          class="fa-solid fa-arrows-left-right"></i></button>
+                    </div>
+
+                    <!-- Hidden printer margin input defaulting to 5 -->
+                    <input type="hidden" id="foldable_printerMargin" value="5" />
                   </div>
 
-                  <!-- Hidden printer margin input defaulting to 5 -->
-                  <input type="hidden" id="foldable_printerMargin" value="5" />
-                </div>
-
-                <div class=" flex items-center gap-3 shrink-0 justify-start ml-auto">
-                  <div class="flex flex-col items-center">
-                    <label for="foldable_foldingMargin" class="text-xs font-bold text-theme-muted text-center">Margin</label>
-                    <input type="number" id="foldable_foldingMargin" value="5" class="w-12" />
+                  <div class=" flex items-center gap-3 shrink-0 justify-start ml-auto">
+                    <div class="flex flex-col items-center">
+                      <label for="foldable_foldingMargin"
+                        class="text-xs font-bold text-theme-muted text-center">Margin</label>
+                      <input type="number" id="foldable_foldingMargin" value="5" class="w-12" />
+                    </div>
                   </div>
-                </div>
                 </div>
               </div>
 
@@ -933,53 +954,57 @@
                   <h3 class="font-display text-base text-theme-dark">Borders</h3>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-between gap-4 w-full" style="flex-grow: 9999; flex-basis: max-content;">
-                <div class=" flex flex-wrap items-center gap-3 shrink-0">
-                  <div class="flex flex-col items-center">
-                    <label for="foldable_borderColorFront" class="text-xs font-bold text-theme-muted text-center">Front</label>
-                    <input type="color" id="foldable_borderColorFront" value="#000000" class="mt-1" />
-                  </div>
-                  <div class="flex flex-col items-center">
-                    <label for="foldable_borderColorBack" class="text-xs font-bold text-theme-muted text-center">Back</label>
-                    <input type="color" id="foldable_borderColorBack" value="#000000" class="mt-1" />
-                  </div>
-                </div>
-
-                <div class=" flex flex-wrap items-center gap-3 shrink-0 justify-start ml-auto">
-                  <div class="flex flex-col items-center">
-                    <label for="foldable_cornerRadius"
-                      class="text-xs font-bold text-theme-muted flex justify-between items-center text-center">
-                      <span>Radius</span>
-                      <span id="foldable_cornerRadiusVal"
-                        class="text-[10px] text-theme-dark font-bold ml-1">(0mm)</span>
-                    </label>
-                    <select id="foldable_cornerRadius" class="hidden">
-                      <option value="0" selected>0</option>
-                      <option value="3">3</option>
-                      <option value="5">5</option>
-                      <option value="8">8</option>
-                      <option value="10">10</option>
-                    </select>
-                    <div
-                      class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center"
-                      id="foldable_cornerRadiusSegmented">
-                      <button type="button" data-val="0"
-                        class="btn-fold-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">None</button>
-                      <button type="button" data-val="3"
-                        class="btn-fold-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">S</button>
-                      <button type="button" data-val="5"
-                        class="btn-fold-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">M</button>
-                      <button type="button" data-val="8"
-                        class="btn-fold-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">L</button>
-                      <button type="button" data-val="10"
-                        class="btn-fold-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">XL</button>
+                <div class="flex flex-wrap items-center justify-between gap-4 w-full"
+                  style="flex-grow: 9999; flex-basis: max-content;">
+                  <div class=" flex flex-wrap items-center gap-3 shrink-0">
+                    <div class="flex flex-col items-center">
+                      <label for="foldable_borderColorFront"
+                        class="text-xs font-bold text-theme-muted text-center">Front</label>
+                      <input type="color" id="foldable_borderColorFront" value="#000000" class="mt-1" />
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label for="foldable_borderColorBack"
+                        class="text-xs font-bold text-theme-muted text-center">Back</label>
+                      <input type="color" id="foldable_borderColorBack" value="#000000" class="mt-1" />
                     </div>
                   </div>
-                  <div class="flex flex-col items-center">
-                    <label for="foldable_innerBorder" class="text-xs font-bold text-theme-muted text-center">Width</label>
-                    <input type="number" id="foldable_innerBorder" value="0" class="w-12" />
+
+                  <div class=" flex flex-wrap items-center gap-3 shrink-0 justify-start ml-auto">
+                    <div class="flex flex-col items-center">
+                      <label for="foldable_cornerRadius"
+                        class="text-xs font-bold text-theme-muted flex justify-between items-center text-center">
+                        <span>Radius</span>
+                        <span id="foldable_cornerRadiusVal"
+                          class="text-[10px] text-theme-dark font-bold ml-1">(0mm)</span>
+                      </label>
+                      <select id="foldable_cornerRadius" class="hidden">
+                        <option value="0" selected>0</option>
+                        <option value="3">3</option>
+                        <option value="5">5</option>
+                        <option value="8">8</option>
+                        <option value="10">10</option>
+                      </select>
+                      <div
+                        class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2rem] items-center"
+                        id="foldable_cornerRadiusSegmented">
+                        <button type="button" data-val="0"
+                          class="btn-fold-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all bg-theme-yellow border-[1.5px] border-theme-dark flex items-center">None</button>
+                        <button type="button" data-val="3"
+                          class="btn-fold-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">S</button>
+                        <button type="button" data-val="5"
+                          class="btn-fold-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">M</button>
+                        <button type="button" data-val="8"
+                          class="btn-fold-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">L</button>
+                        <button type="button" data-val="10"
+                          class="btn-fold-radius font-bold px-2 h-full rounded-[10px] text-xs transition-all text-theme-muted hover:bg-black/5 flex items-center">XL</button>
+                      </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label for="foldable_innerBorder"
+                        class="text-xs font-bold text-theme-muted text-center">Width</label>
+                      <input type="number" id="foldable_innerBorder" value="0" class="w-12" />
+                    </div>
                   </div>
-                </div>
                 </div>
               </div>
             </div>

@@ -34,7 +34,7 @@
     }
 
     .btn-primary {
-      @apply bg-theme-yellow border-3 border-theme-dark font-ui font-bold px-5 py-2.5 rounded-xl transition-all duration-200;
+      @apply bg-theme-yellow border-3 border-theme-dark font-ui font-bold px-5 py-2.5 rounded-xl transition-all duration-200 cursor-pointer;
       box-shadow: 4px 4px 0 var(--color-theme-dark);
     }
     .btn-primary:hover {
@@ -47,7 +47,7 @@
     }
 
     .btn-secondary {
-      @apply bg-white font-ui font-medium px-3 text-sm rounded-lg transition-all duration-200 inline-flex items-center justify-center;
+      @apply bg-white font-ui font-medium px-3 text-sm rounded-lg transition-all duration-200 inline-flex items-center justify-center cursor-pointer;
       border: 1.5px solid var(--color-theme-dark);
       height: 2rem;
       box-shadow: 2px 2px 0 var(--color-theme-dark);
@@ -62,6 +62,62 @@
       box-shadow: 1px 1px 0 var(--color-theme-dark);
     }
 
+    .btn-indigo {
+      background-color: var(--color-theme-indigo) !important;
+      color: #ffffff !important;
+      border: 1.5px solid var(--color-theme-dark);
+      border-radius: 0.5rem;
+      height: 2.25rem;
+      width: 2.25rem;
+      box-shadow: 2px 2px 0 var(--color-theme-dark);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-indigo:hover {
+      transform: translate(-0.5px, -0.5px);
+      box-shadow: 3px 3px 0 var(--color-theme-dark);
+    }
+    .btn-indigo:active {
+      transform: translate(0, 0);
+      box-shadow: 1px 1px 0 var(--color-theme-dark);
+    }
+
+    .btn-teal {
+      background-color: var(--color-theme-teal) !important;
+      color: var(--color-theme-dark) !important;
+      border: 1.5px solid var(--color-theme-dark);
+      border-radius: 0.5rem;
+      height: 2.25rem;
+      width: 2.25rem;
+      box-shadow: 2px 2px 0 var(--color-theme-dark);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-teal:hover {
+      transform: translate(-0.5px, -0.5px);
+      box-shadow: 3px 3px 0 var(--color-theme-dark);
+    }
+    .btn-teal:active {
+      transform: translate(0, 0);
+      box-shadow: 1px 1px 0 var(--color-theme-dark);
+    }
+
+    .dropzone-neo {
+      @apply border-2 border-dashed border-theme-dark bg-white rounded-lg p-4 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center min-h-[110px];
+      box-shadow: 3px 3px 0 var(--color-theme-dark);
+      position: relative;
+    }
+    .dropzone-neo:hover {
+      @apply -translate-x-0.5 -translate-y-0.5 border-theme-pink;
+      box-shadow: 4px 4px 0 var(--color-theme-pink);
+    }
+
     .segmented-option:has(input:checked) {
       background-color: var(--color-theme-yellow);
       color: var(--color-theme-dark);
@@ -71,11 +127,14 @@
       color: var(--color-theme-muted);
       border: 2px solid transparent;
     }
+    .segmented-option:not(:has(input:checked)):hover {
+      background-color: rgba(0,0,0,0.05);
+    }
 
     input[type="number"], input[type="text"] {
       height: 2rem;
       border: 1.5px solid var(--color-theme-dark);
-      @apply px-2 rounded-lg font-ui text-sm;
+      @apply px-1 rounded-lg font-ui text-sm;
     }
     input[type="number"]:focus, input[type="text"]:focus {
       outline: none;
@@ -89,82 +148,140 @@
 <body class="bg-theme-bg font-ui text-theme-dark antialiased" data-tool-title="Align Tool">
   <div class="max-w-6xl mx-auto px-4 py-6" id="page-container">
     
-    <!-- Bento Box 1: Upload & Controls -->
+    <!-- Bento Box 1: Combined Workspace (Fluid 50/50% Auto-Wrapping) -->
     <div class="bento-box">
-      <p class="font-body text-theme-muted text-lg text-center max-w-2xl mx-auto mb-6">
-        This tool will shift (move) all content of every odd/even page.<br />
-        Set the amount of millimeters you want to shift the content to the right/up.<br />
-        Negative(-) numbers will shift it to the left/down instead.
-      </p>
-
-      <div class="flex flex-col items-center mb-8">
-        <label for="pdfFile" class="btn-primary cursor-pointer flex items-center gap-2">
-          <i class="fa-solid fa-upload"></i>
-          Choose PDF File
-        </label>
-        <input type="file" id="pdfFile" accept="application/pdf" class="sr-only" />
-      </div>
-
-      <div class="flex flex-col md:flex-row justify-center gap-8 md:gap-12 items-center md:items-start">
-        
-        <!-- Left Column: Slider Pad -->
-        <div class="flex-shrink-0 flex flex-col items-center">
-          <div id="sliderPad" class="slider-pad w-[300px] h-[424px] bg-white border-3 border-theme-dark rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)]">
-            <div id="sliderHandle" class="slider-handle w-[40px] h-[57px] bg-theme-indigo border-2 border-theme-dark rounded shadow-[2px_2px_0_var(--color-theme-dark)] transition-transform duration-75"></div>
+      <div class="flex flex-wrap items-stretch gap-6">
+        <!-- Column 1: 1. Upload PDF (Shares 50% width when space allows) -->
+        <div class="flex-1 min-w-[280px] flex flex-col">
+          <h2 class="text-xl font-display text-theme-dark mb-2">1. Upload PDF</h2>
+          <p class="text-xs text-theme-muted font-body mb-3 leading-relaxed">This tool will move all content on chosen pages to adjust for your printer's mis-alignment.</p>
+          <div class="dropzone-neo relative flex-1 flex flex-col items-center justify-center p-4 min-h-[140px]" id="pdfDropzone">
+            <i class="fa-solid fa-file-pdf text-4xl text-theme-pink mb-2"></i>
+            <label for="pdfFile" class="text-base font-bold cursor-pointer block text-theme-dark">Drop PDF here or browse</label>
+            <span class="file-count text-xs block text-theme-muted mt-1 font-medium" id="fileCount">No file selected</span>
+            <input type="file" id="pdfFile" accept="application/pdf" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
           </div>
         </div>
 
-        <!-- Right Column: Shift Inputs & Page Selection -->
-        <div class="flex flex-col gap-6 w-full max-w-xs">
-          
-          <div class="flex flex-col gap-4">
-            <div class="flex items-center justify-between gap-4">
-              <label for="shiftX" class="font-bold whitespace-nowrap">Shift Right (X):</label>
-              <div class="flex items-center gap-2">
-                <input type="number" id="shiftX" value="0" step="0.5" class="w-20 text-center" />
-                <span class="text-theme-muted text-sm font-medium">mm</span>
+        <!-- Column 2: 2. Settings (Requires min 400px so internal elements stay spacious and wrap cleanly) -->
+        <div class="flex-1 min-w-[400px] flex flex-col justify-between pt-4 sm:pt-0 sm:pl-2">
+          <div>
+            <div class="flex items-center gap-3 mb-4">
+              <h2 class="text-xl font-display text-theme-dark">2. Settings</h2>
+              <div class="inline-flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-8 items-center">
+                <label class="segmented-option cursor-pointer font-bold h-full rounded-[10px] text-xs transition-all flex items-center justify-center px-2.5">
+                  <input type="radio" id="unitMm" name="globalUnit" value="mm" checked class="hidden" />
+                  <span>mm</span>
+                </label>
+                <label class="segmented-option cursor-pointer font-bold h-full rounded-[10px] text-xs transition-all flex items-center justify-center px-2.5">
+                  <input type="radio" id="unitIn" name="globalUnit" value="in" class="hidden" />
+                  <span>in</span>
+                </label>
               </div>
             </div>
 
-            <div class="flex items-center justify-between gap-4">
-              <label for="shiftY" class="font-bold whitespace-nowrap">Shift Up (Y):</label>
-              <div class="flex items-center gap-2">
-                <input type="number" id="shiftY" value="0" step="0.5" class="w-20 text-center" />
-                <span class="text-theme-muted text-sm font-medium">mm</span>
+            <!-- Top Row: Number Inputs + Preview Together (Strictly flex-nowrap) -->
+            <div class="flex flex-nowrap items-stretch gap-3 sm:gap-4 mb-4 overflow-hidden">
+              <!-- Steppers & Reset -->
+              <div class="flex flex-col gap-2 shrink-0 justify-between">
+                <!-- Horizontal Shift (Indigo Axis) -->
+                <div class="flex items-center gap-1.5 shrink-0" title="Horizontal Shift (Right / -Left)">
+                  <button type="button" id="btnStepLeft" title="Left" class="btn-indigo shrink-0"><i class="fa-solid fa-arrow-left text-sm"></i></button>
+                  <input type="number" id="shiftX" value="0" step="0.5" class="w-14 px-1 text-center font-bold text-sm shrink-0 border-theme-dark focus:border-theme-pink" />
+                  <button type="button" id="btnStepRight" title="Right" class="btn-indigo shrink-0"><i class="fa-solid fa-arrow-right text-sm"></i></button>
+                </div>
+
+                <!-- Vertical Shift (Teal Axis) -->
+                <div class="flex items-center gap-1.5 shrink-0" title="Vertical Shift (Up / -Down)">
+                  <button type="button" id="btnStepDown" title="Down" class="btn-teal shrink-0"><i class="fa-solid fa-arrow-down text-sm"></i></button>
+                  <input type="number" id="shiftY" value="0" step="0.5" class="w-14 px-1 text-center font-bold text-sm shrink-0 border-theme-dark focus:border-theme-pink" />
+                  <button type="button" id="btnStepUp" title="Up" class="btn-teal shrink-0"><i class="fa-solid fa-arrow-up text-sm"></i></button>
+                </div>
+
+                <!-- Reset Button -->
+                <button type="button" id="btnReset" title="Reset values to 0" class="btn-secondary w-full px-2 py-0.5 text-xs font-bold text-theme-muted hover:bg-theme-yellow hover:text-theme-dark flex items-center justify-center gap-1 shrink-0 h-6.5">
+                  <i class="fa-solid fa-rotate-left text-[10px]"></i> Reset
+                </button>
+              </div>
+
+              <!-- Mini Shift Preview Box + Dynamic Text -->
+              <div class="flex items-stretch gap-2 shrink-0 min-w-0" title="Visual Shift Preview">
+                <div class="relative h-full min-h-[114px] aspect-[210/297] bg-white border-2 border-theme-dark rounded-lg shadow-[2px_2px_0_var(--color-theme-dark)] overflow-hidden flex items-center justify-center shrink-0" id="miniPreviewBox">
+                  <!-- Center crosshair guides -->
+                  <div class="absolute inset-0 flex items-center justify-center opacity-15 pointer-events-none">
+                    <div class="w-full h-[1px] bg-theme-dark"></div>
+                    <div class="h-full w-[1px] bg-theme-dark"></div>
+                  </div>
+                  <!-- Shifted Content Indicator (Aspect Ratio 210:297) -->
+                  <div id="miniPreviewContent" class="w-[62%] aspect-[210/297] bg-theme-indigo/20 border border-theme-indigo rounded flex items-center justify-center transition-transform duration-100 ease-out">
+                    <i class="fa-solid fa-file-lines text-theme-indigo text-xs opacity-70"></i>
+                  </div>
+                </div>
+
+                <!-- Dynamic Text Display (Whitespace-nowrap so text doesn't overflow or clip) -->
+                <div class="flex flex-col justify-center gap-1 shrink-0 font-ui text-[11px] font-bold leading-tight whitespace-nowrap">
+                  <span id="previewXText" class="text-theme-muted">0mm right/left</span>
+                  <span id="previewYText" class="text-theme-muted">0mm up/down</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Segmented Control for Pages -->
-          <div class="flex bg-theme-bg p-1 rounded-xl border-3 border-theme-dark shadow-[inset_2px_2px_0_rgba(0,0,0,0.1)]">
-            <label class="segmented-option flex-1 text-center py-2 rounded-lg font-bold text-sm cursor-pointer transition-all duration-200">
-              <input type="radio" id="odd" name="shiftPages" value="odd" class="sr-only" checked />
-              Odd pages
-            </label>
-            <label class="segmented-option flex-1 text-center py-2 rounded-lg font-bold text-sm cursor-pointer transition-all duration-200">
-              <input type="radio" id="even" name="shiftPages" value="even" class="sr-only" />
-              Even pages
-            </label>
-          </div>
+          <!-- Bottom Section: Target Pages Segmented Control & Selection Input Stacked Below -->
+          <div class="flex flex-col gap-2 w-full pt-1">
+            <label class="font-bold text-xs text-theme-dark uppercase tracking-wider block">Apply to pages:</label>
+            
+            <!-- Segmented Control Toggle -->
+            <div class="flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2.5rem] items-center w-full max-w-xs" id="shiftPagesSegmented">
+              <label class="segmented-option cursor-pointer font-bold flex-1 h-full rounded-[10px] text-xs sm:text-sm transition-all flex items-center justify-center px-3">
+                <input type="radio" id="odd" name="shiftPages" value="odd" class="hidden" checked />
+                <span>Odd</span>
+              </label>
+              <label class="segmented-option cursor-pointer font-bold flex-1 h-full rounded-[10px] text-xs sm:text-sm transition-all flex items-center justify-center px-3">
+                <input type="radio" id="even" name="shiftPages" value="even" class="hidden" />
+                <span>Even</span>
+              </label>
+              <label class="segmented-option cursor-pointer font-bold flex-1 h-full rounded-[10px] text-xs sm:text-sm transition-all flex items-center justify-center px-3">
+                <input type="radio" id="selection" name="shiftPages" value="selection" class="hidden" />
+                <span>Selection</span>
+              </label>
+            </div>
 
+            <!-- Page Selection Text Input (Stacked Directly Below Toggle) -->
+            <div id="selectionInputWrapper" class="w-full max-w-xs">
+              <input type="text" id="pageSelectionInput" placeholder="e.g. 1-3,5,8" disabled class="w-full text-xs font-bold text-theme-dark border-1.5 border-theme-dark rounded-lg h-8 px-3 focus:outline-none focus:border-theme-pink disabled:bg-[#E2E8F0] disabled:text-theme-muted disabled:border-theme-dark/30 disabled:opacity-70 disabled:cursor-not-allowed" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Bento Box 2: Action Bar -->
-    <div class="bento-box">
-      <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-stretch">
-        <button id="shiftPdfBtn" class="bg-theme-pink text-white font-display text-xl border-3 border-theme-dark px-6 py-3 rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)] active:translate-x-0 active:translate-y-0 active:shadow-[2px_2px_0_var(--color-theme-dark)] transition-all duration-200 uppercase flex items-center justify-center gap-2">
-          <i class="fa-solid fa-arrows-up-down-left-right"></i>
-          Shift PDF
-        </button>
+    <!-- Bento Box 2: Action & Export (3-to-1 Column Responsive Grid at md: 768px) -->
+    <div class="bento-box grid grid-cols-1 md:grid-cols-[auto_1fr_170px] gap-4 items-stretch bg-theme-bg border-theme-dark mt-8">
+      <!-- Column 1: Shift PDF Button (100% width on 1-column mobile layout <768px) -->
+      <button id="shiftPdfBtn"
+        class="bg-theme-pink text-white font-display text-xl border-3 border-theme-dark px-6 py-3 rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)] w-full flex items-center justify-center tracking-wide h-[52px] md:h-full min-h-[52px] uppercase gap-2 cursor-pointer shrink-0">
+        <i class="fa-solid fa-arrows-up-down-left-right"></i>
+        Shift PDF
+      </button>
 
-        <a href="https://www.buymeacoffee.com/pnpbuddy" title="Support PnPBuddy"
-          class="flex items-center justify-center border-3 border-theme-dark rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] overflow-hidden bg-[#f7e517] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)] p-1 h-[52px]">
-          <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a dice&emoji=🎲&slug=pnpbuddy&button_colour=f7e517&font_colour=000000&font_family=Bree&outline_colour=000000&coffee_colour=FFDD00"
-            alt="Buy me a dice" class="h-full w-full max-h-full max-w-full object-contain object-center" />
-        </a>
+      <!-- Column 2: Filename Card (Gets ALL priority space >=768px) -->
+      <div class="w-full justify-self-stretch flex items-stretch justify-center h-full min-w-0">
+        <div id="fileNameCard"
+          class="bg-white border-3 border-theme-dark rounded-xl py-2 px-4 flex items-center gap-3 shadow-[4px_4px_0_var(--color-theme-dark)] w-full h-full min-h-[52px]">
+          <i class="fa-solid fa-file-pdf text-theme-pink text-lg shrink-0"></i>
+          <span class="font-bold text-xs text-theme-dark shrink-0">Filename:</span>
+          <input type="text" id="outputFileName" value="shifted.pdf" class="px-2 text-xs font-bold text-theme-dark border-1.5 border-theme-dark rounded-md h-8 focus:outline-none focus:border-theme-pink flex-1 min-w-0 w-full" />
+        </div>
       </div>
+
+      <!-- Column 3: Buy Me a Dice Link (Strictly capped at 170px on desktop/tablet >=768px) -->
+      <a href="https://www.buymeacoffee.com/pnpbuddy" title="Support PnPBuddy by buying me a dice"
+        class="w-full md:w-[170px] flex items-center justify-center border-3 border-theme-dark rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] overflow-hidden bg-[#f7e517] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)] h-[52px] md:h-full min-h-[52px] p-1 shrink-0">
+        <img
+          src="https://img.buymeacoffee.com/button-api/?text=Buy me a dice&emoji=🎲&slug=pnpbuddy&button_colour=f7e517&font_colour=000000&font_family=Bree&outline_colour=000000&coffee_colour=FFDD00"
+          alt="Buy me a dice" class="h-full w-full max-h-full max-w-full object-contain object-center" />
+      </a>
     </div>
 
   </div>

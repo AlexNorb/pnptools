@@ -1,34 +1,11 @@
-.slider-pad {
-  position: relative;
-  cursor: crosshair;
+/* Custom styles for Align Tool */
+
+/* Hide native number input spinners for clean neo-brutalist styling */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
-.slider-pad::before,
-.slider-pad::after {
-  content: "";
-  position: absolute;
-  background-color: var(--color-theme-muted);
-}
-.slider-pad::before {
-  left: 50%;
-  top: 0;
-  width: 1px;
-  height: 100%;
-  transform: translateX(-50%);
-}
-.slider-pad::after {
-  top: 50%;
-  left: 0;
-  height: 1px;
-  width: 100%;
-  transform: translateY(-50%);
-}
-.slider-handle {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  cursor: grab;
-}
-.slider-handle:active {
-  cursor: grabbing;
+input[type="number"] {
+  -moz-appearance: textfield;
 }
