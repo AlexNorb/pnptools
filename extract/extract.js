@@ -616,11 +616,22 @@ function initApp() {
       resultsSummaryText.textContent = `${finalCount} images (~${totalSizeMB} MB)`;
     }
 
-    // Update the Thumbnail Toggle button state
+    // Update the Thumbnail Toggle button state & auto-expand preview
     if (finalCount > 0) {
       toggleThumbsBtn.disabled = false;
+      areThumbsVisible = true;
+      if (!areThumbsRendered) {
+        renderThumbnails();
+        areThumbsRendered = true;
+      }
+      if (imagesContentWrapper) {
+        imagesContentWrapper.classList.remove("collapsed");
+      }
       if (previewCollapseText) {
-        previewCollapseText.textContent = areThumbsVisible ? "Hide" : "Show";
+        previewCollapseText.textContent = "Hide";
+      }
+      if (previewCollapseIcon) {
+        previewCollapseIcon.style.transform = "rotate(0deg)";
       }
     } else {
       toggleThumbsBtn.disabled = true;
