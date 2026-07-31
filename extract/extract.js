@@ -17,7 +17,9 @@ function initApp() {
   const pageRangeInput = document.getElementById("pageRangeInput");
   const status = document.getElementById("status");
   const imagesWrap = document.getElementById("images");
+  const resultsBar = document.getElementById("resultsBar");
   const downloadZipBtn = document.getElementById("downloadZip");
+  const resultsSummaryText = document.getElementById("resultsSummaryText");
   const clearBtn = document.getElementById("clearBtn");
   const qualityRange = document.getElementById("quality");
   const qualityVal = document.getElementById("qualityVal");
@@ -380,8 +382,11 @@ function initApp() {
       status.textContent = doneMsg;
       log(doneMsg);
 
-      // Update the button with final size
-      downloadZipBtn.textContent = `Save all ${count} images (~${actualZipSizeMB} MB)`;
+      // Update button & summary text
+      downloadZipBtn.innerHTML = `<i class="fa-solid fa-file-zipper"></i> Save ZIP`;
+      if (resultsSummaryText) {
+        resultsSummaryText.textContent = `${count} images (~${actualZipSizeMB} MB)`;
+      }
     } catch (err) {
       const errorMsg =
         "[ERROR] Error creating ZIP: " + ((err && err.message) || err);
@@ -440,7 +445,10 @@ function initApp() {
     toggleThumbsBtn.disabled = true;
 
     downloadZipBtn.disabled = true;
-    downloadZipBtn.textContent = `Save all 0 images (~0.0 MB)`;
+    downloadZipBtn.innerHTML = `<i class="fa-solid fa-file-zipper"></i> Save ZIP`;
+    if (resultsSummaryText) {
+      resultsSummaryText.textContent = `0 images found`;
+    }
 
     // --- Document State Clear (Only if fullReset is true) ---
     if (fullReset) {
@@ -598,7 +606,10 @@ function initApp() {
     );
 
     // Update the Results Bar Button with estimated size (since all are checked by default)
-    downloadZipBtn.textContent = `Save all ${finalCount} images (~${totalSizeMB} MB)`;
+    downloadZipBtn.innerHTML = `<i class="fa-solid fa-file-zipper"></i> Save ZIP`;
+    if (resultsSummaryText) {
+      resultsSummaryText.textContent = `${finalCount} images (~${totalSizeMB} MB)`;
+    }
 
     // Update the Thumbnail Toggle button
     if (finalCount > 0) {
@@ -1043,7 +1054,10 @@ function initApp() {
         ).length;
 
         const totalSizeMB = formatSizeToMB(totalBytes);
-        downloadZipBtn.textContent = `Save all ${finalCount} images (~${totalSizeMB} MB)`;
+        downloadZipBtn.innerHTML = `<i class="fa-solid fa-file-zipper"></i> Save ZIP`;
+        if (resultsSummaryText) {
+          resultsSummaryText.textContent = `${finalCount} images (~${totalSizeMB} MB)`;
+        }
         downloadZipBtn.disabled = finalCount === 0;
       });
 

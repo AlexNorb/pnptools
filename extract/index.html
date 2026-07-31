@@ -2,8 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>PDF → Extract Unique Images</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Extract Images - PNP Buddy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="expires" content="Tue, 01 Jan 1990 12:00:00 GMT" />
+    
+    <link rel="icon" href="favicon.png" type="image/png" />
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Bungee&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -14,7 +20,7 @@
     <!-- Tailwind v4 -->
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     
-    <!-- Theme Configuration -->
+    <!-- Theme Configuration & Component Styles -->
     <style type="text/tailwindcss">
       @theme {
         --font-display: "Bungee", cursive, sans-serif;
@@ -41,17 +47,22 @@
         @apply bg-theme-yellow border-3 border-theme-dark font-ui font-bold px-5 py-2.5 rounded-xl transition-all duration-200 cursor-pointer;
         box-shadow: 4px 4px 0 var(--color-theme-dark);
       }
-      .btn-primary:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-      .btn-primary:not(:disabled):hover {
+      .btn-primary:hover:not(:disabled) {
         @apply -translate-x-1 -translate-y-1;
         box-shadow: 6px 6px 0 var(--color-theme-dark);
       }
-      .btn-primary:not(:disabled):active {
+      .btn-primary:active:not(:disabled) {
         @apply translate-x-0 translate-y-0;
         box-shadow: 2px 2px 0 var(--color-theme-dark);
+      }
+      .btn-primary:disabled {
+        background-color: #E2E8F0 !important;
+        color: var(--color-theme-muted) !important;
+        border-color: rgba(28, 17, 31, 0.3) !important;
+        opacity: 0.7;
+        cursor: not-allowed;
+        box-shadow: none !important;
+        transform: none !important;
       }
 
       /* Extract Button (Pink) */
@@ -59,17 +70,22 @@
         @apply bg-theme-pink text-white font-display text-lg border-3 border-theme-dark rounded-xl px-5 py-2.5 transition-all duration-200 cursor-pointer;
         box-shadow: 4px 4px 0 var(--color-theme-dark);
       }
-      .btn-action-pink:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-      .btn-action-pink:not(:disabled):hover {
+      .btn-action-pink:hover:not(:disabled) {
         @apply -translate-x-1 -translate-y-1;
         box-shadow: 6px 6px 0 var(--color-theme-dark);
       }
-      .btn-action-pink:not(:disabled):active {
+      .btn-action-pink:active:not(:disabled) {
         @apply translate-x-0 translate-y-0;
         box-shadow: 2px 2px 0 var(--color-theme-dark);
+      }
+      .btn-action-pink:disabled {
+        background-color: #E2E8F0 !important;
+        color: var(--color-theme-muted) !important;
+        border-color: rgba(28, 17, 31, 0.3) !important;
+        opacity: 0.7;
+        cursor: not-allowed;
+        box-shadow: none !important;
+        transform: none !important;
       }
       
       /* Secondary Button */
@@ -80,33 +96,53 @@
         box-shadow: 2px 2px 0 var(--color-theme-dark);
         box-sizing: border-box;
       }
-      .btn-secondary:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-      .btn-secondary:not(:disabled):hover {
+      .btn-secondary:hover:not(:disabled) {
         @apply -translate-x-0.5 -translate-y-0.5;
         box-shadow: 3px 3px 0 var(--color-theme-dark);
       }
-      .btn-secondary:not(:disabled):active {
+      .btn-secondary:active:not(:disabled) {
         @apply translate-x-0 translate-y-0;
         box-shadow: 1px 1px 0 var(--color-theme-dark);
       }
-      
-      /* Text Input */
-      .text-input {
-        @apply px-3 py-1 bg-white text-theme-dark font-ui text-sm rounded-lg transition-all duration-200;
-        border: 1.5px solid var(--color-theme-dark);
-        height: 2rem;
-        box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05);
+      .btn-secondary:disabled {
+        background-color: #E2E8F0 !important;
+        color: var(--color-theme-muted) !important;
+        border-color: rgba(28, 17, 31, 0.3) !important;
+        opacity: 0.7;
+        cursor: not-allowed;
+        box-shadow: none !important;
+        transform: none !important;
       }
-      .text-input:not(:disabled):focus {
+
+      /* Neo Dropzone */
+      .dropzone-neo {
+        @apply border-2 border-dashed border-theme-dark bg-white rounded-lg p-4 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center min-h-[110px];
+        box-shadow: 3px 3px 0 var(--color-theme-dark);
+        position: relative;
+      }
+      .dropzone-neo:hover {
+        @apply -translate-x-0.5 -translate-y-0.5 border-theme-pink;
+        box-shadow: 4px 4px 0 var(--color-theme-pink);
+      }
+      
+      /* Standardized Inputs & Disabled State */
+      input[type="text"], input[type="number"], select {
+        height: 2rem;
+        border: 1.5px solid var(--color-theme-dark);
+        @apply px-3 rounded-lg font-ui text-sm bg-white text-theme-dark transition-all duration-200;
+      }
+      input[type="text"]:focus, input[type="number"]:focus, select:focus {
+        outline: none;
         border-color: var(--color-theme-pink);
         box-shadow: 0 0 0 2px rgba(223, 44, 212, 0.2);
       }
-      .text-input:disabled {
-        opacity: 0.5;
-        background-color: #f3f4f6;
+      input:disabled, select:disabled {
+        background-color: #E2E8F0 !important;
+        color: var(--color-theme-muted) !important;
+        border-color: rgba(28, 17, 31, 0.3) !important;
+        opacity: 0.7;
+        cursor: not-allowed;
+        box-shadow: none !important;
       }
       
       /* Range Input Styling */
@@ -118,16 +154,14 @@
         box-shadow: 1px 1px 0 var(--color-theme-dark);
       }
 
-      /* Segmented Control */
+      /* Segmented Control Options */
       .segmented-option {
-        @apply flex-1 text-center font-ui font-semibold text-sm rounded-md transition-all duration-200 cursor-pointer flex items-center justify-center;
-        height: 2rem;
+        @apply flex-1 text-center font-ui font-bold text-xs sm:text-sm rounded-[10px] transition-all duration-200 cursor-pointer flex items-center justify-center h-full;
       }
       .segmented-option:has(input:checked) {
         background-color: var(--color-theme-yellow);
         color: var(--color-theme-dark);
         border: 1.5px solid var(--color-theme-dark);
-        box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1);
       }
       .segmented-option:not(:has(input:checked)) {
         color: var(--color-theme-muted);
@@ -183,47 +217,62 @@
     
     <div class="max-w-6xl mx-auto px-4 py-6" id="page-container">
       
-      <!-- Status & Progress Section -->
-      <div class="mb-4">
-        <div class="font-ui font-medium text-theme-muted mb-2 flex items-center min-h-[24px]" id="status">
-          No PDF loaded.
-        </div>
-        <!-- Progress Bar -->
-        <div id="pageProgressBar" class="hidden">
-          <div id="progressBarFill"></div>
+      <!-- Bento Box 1: Combined Workspace (Fluid 50/50% Auto-Wrapping) -->
+      <div class="bento-box">
+        <div class="flex flex-wrap items-stretch gap-6">
+          <!-- Column 1: Upload PDF -->
+          <div class="flex-1 min-w-[280px] flex flex-col">
+            <h2 class="text-xl font-display text-theme-dark mb-2">1. Upload PDF</h2>
+            <p class="text-xs text-theme-muted font-body mb-3 leading-relaxed">
+              Extract all unique embedded images and graphics directly from your PDF file.
+            </p>
+            <div class="dropzone-neo relative flex-1 flex flex-col items-center justify-center p-4 min-h-[140px]" id="pdfDropzone">
+              <i class="fa-solid fa-file-pdf text-4xl text-theme-pink mb-2"></i>
+              <label for="fileInput" class="text-base font-bold cursor-pointer block text-theme-dark">Drop PDF here or browse</label>
+              <span class="file-count text-xs block text-theme-muted mt-1 font-medium" id="status">No PDF loaded.</span>
+              <input type="file" id="fileInput" accept="application/pdf" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+            </div>
+          </div>
+
+          <!-- Column 2: Quick Action / Extract Status -->
+          <div class="flex-1 min-w-[320px] flex flex-col justify-between pt-4 sm:pt-0 sm:pl-2">
+            <div>
+              <h2 class="text-xl font-display text-theme-dark mb-2">2. Extract</h2>
+              <p class="text-xs text-theme-muted font-body mb-4 leading-relaxed">
+                Click extract to process the document. Found images will be deduplicated automatically.
+              </p>
+              
+              <!-- Progress Bar -->
+              <div id="pageProgressBar" class="hidden mb-4">
+                <div id="progressBarFill"></div>
+              </div>
+            </div>
+
+            <button id="extractBtn" class="btn-action-pink w-full h-[52px] uppercase flex items-center justify-center gap-2 shrink-0" disabled>
+              <i class="fa-solid fa-bolt text-lg"></i>
+              Extract Images
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Bento Box 1: Upload & Extract -->
-      <div class="bento-box flex flex-col md:flex-row gap-4 items-center">
-        <!-- Styled Dropzone/Upload Button -->
-        <label for="fileInput" class="w-full md:flex-1 h-14 bg-white border-3 border-dashed border-theme-dark rounded-xl flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 transition-colors font-display text-lg text-theme-dark relative overflow-hidden">
-          <i class="fa-solid fa-file-pdf text-theme-pink"></i> SELECT PDF
-          <input id="fileInput" type="file" accept="application/pdf" class="hidden" />
-        </label>
-        
-        <!-- Extract Button -->
-        <button id="extractBtn" class="btn-action-pink w-full md:w-auto h-14 uppercase" disabled>
-          Extract Images
-        </button>
-      </div>
-
-      <!-- Bento Box 2: Advanced Configuration -->
+      <!-- Bento Box 2: Advanced Configuration (Collapsible Accordion) -->
       <div class="bento-box p-0 overflow-hidden">
         <button id="toggleConfigBtn" class="w-full h-12 bg-gray-50 border-b-3 border-theme-dark flex items-center justify-between px-5 font-display text-sm cursor-pointer hover:bg-gray-100 transition-colors uppercase">
-          Advanced Configuration <i class="fa-solid fa-chevron-down text-theme-muted"></i>
+          <span><i class="fa-solid fa-sliders mr-2 text-theme-muted"></i> Advanced Configuration</span>
+          <i class="fa-solid fa-chevron-down text-theme-muted"></i>
         </button>
         
         <div id="configContainer" class="hidden p-5 bg-white">
           <div class="flex flex-col gap-6">
             
             <!-- Row 1: Page Range & Format -->
-            <div class="flex flex-col md:flex-row gap-6">
+            <div class="flex flex-wrap gap-6 items-start">
               <!-- Page Range -->
-              <div class="flex-1">
-                <label class="block font-display text-xs text-theme-muted mb-2 uppercase">Page Range</label>
-                <div class="flex items-center gap-4 h-8">
-                  <label class="flex items-center gap-2 cursor-pointer text-sm font-medium">
+              <div class="flex-1 min-w-[260px]">
+                <label class="block font-bold text-xs text-theme-dark uppercase tracking-wider mb-2">Page Range</label>
+                <div class="flex items-center gap-3 h-8">
+                  <label class="flex items-center gap-2 cursor-pointer text-sm font-medium shrink-0 select-none">
                     <div class="neo-checkbox">
                       <input type="checkbox" id="allPagesToggle" checked />
                       <div class="neo-checkbox-icon"></div>
@@ -235,33 +284,33 @@
                     id="pageRangeInput"
                     placeholder="e.g., 1, 3, 5-9"
                     disabled
-                    class="text-input flex-1 max-w-[200px]"
+                    class="flex-1 min-w-0"
                   />
                 </div>
               </div>
 
               <!-- Output Format -->
-              <div class="flex-1">
-                <label class="block font-display text-xs text-theme-muted mb-2 uppercase">Output Format</label>
-                <div class="flex bg-gray-100 rounded-lg p-0.5 border-[1.5px] border-theme-dark shadow-[inset_1px_1px_3px_rgba(0,0,0,0.1)] h-9 w-full max-w-[250px]">
+              <div class="flex-1 min-w-[240px]">
+                <label class="block font-bold text-xs text-theme-dark uppercase tracking-wider mb-2">Output Format</label>
+                <div class="flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-8 items-center w-full max-w-[240px]">
                   <label class="segmented-option">
                     <input type="radio" id="formatJpeg" name="outputFormat" value="image/jpeg" class="hidden" checked />
-                    JPG
+                    <span>JPG</span>
                   </label>
                   <label class="segmented-option">
                     <input type="radio" id="formatPng" name="outputFormat" value="image/png" class="hidden" />
-                    PNG
+                    <span>PNG</span>
                   </label>
                 </div>
               </div>
             </div>
 
-            <!-- Row 2: Filters, Modes & Quality -->
-            <div class="flex flex-col md:flex-row gap-6 items-start">
+            <!-- Row 2: Quality & Options -->
+            <div class="flex flex-wrap gap-6 items-start">
               
               <!-- Quality Control -->
-              <div class="flex-1">
-                <label class="block font-display text-xs text-theme-muted mb-2 uppercase">JPEG Quality</label>
+              <div class="flex-1 min-w-[240px]">
+                <label class="block font-bold text-xs text-theme-dark uppercase tracking-wider mb-2">JPEG Quality</label>
                 <div class="flex items-center gap-3 h-8">
                   <input
                     id="quality"
@@ -270,15 +319,15 @@
                     max="1"
                     step="0.05"
                     value="1"
-                    class="w-32"
+                    class="flex-1 max-w-[160px]"
                   />
-                  <span id="qualityVal" class="text-sm font-bold w-10">1.00</span>
+                  <span id="qualityVal" class="text-sm font-bold w-10 text-theme-dark">1.00</span>
                 </div>
               </div>
 
-              <!-- Toggles -->
-              <div class="flex-[2] flex flex-wrap gap-x-6 gap-y-3">
-                <label class="flex items-center gap-2 cursor-pointer text-sm font-medium">
+              <!-- Filters & Toggles -->
+              <div class="flex-[2] min-w-[280px] flex flex-wrap gap-x-6 gap-y-3 pt-6 sm:pt-0">
+                <label class="flex items-center gap-2 cursor-pointer text-sm font-medium select-none">
                   <div class="neo-checkbox">
                     <input type="checkbox" id="ignoreSmallFiles" checked />
                     <div class="neo-checkbox-icon"></div>
@@ -286,7 +335,7 @@
                   Ignore &lt;5KB
                 </label>
                 
-                <label class="flex items-center gap-2 cursor-pointer text-sm font-medium">
+                <label class="flex items-center gap-2 cursor-pointer text-sm font-medium select-none">
                   <div class="neo-checkbox">
                     <input type="checkbox" id="safeModeToggle" />
                     <div class="neo-checkbox-icon"></div>
@@ -294,7 +343,7 @@
                   Slow Mode
                 </label>
                 
-                <label class="flex items-center gap-2 cursor-pointer text-sm font-medium">
+                <label class="flex items-center gap-2 cursor-pointer text-sm font-medium select-none">
                   <div class="neo-checkbox">
                     <input type="checkbox" id="debugModeToggle" />
                     <div class="neo-checkbox-icon"></div>
@@ -318,11 +367,30 @@
         </div>
       </div>
 
-      <!-- Bento Box 3: Results & Download (Hidden by default) -->
-      <div id="resultsBar" class="bento-box bg-theme-teal/10 hidden">
-        <button id="downloadZip" class="btn-primary w-full text-lg h-14 flex items-center justify-center gap-3" disabled>
-          <i class="fa-solid fa-file-zipper"></i> Save all 0 images (~0.0 MB)
+      <!-- Bento Box 3: Action & Export Bar (3-to-1 Column Responsive Grid) -->
+      <div id="resultsBar" class="bento-box grid grid-cols-1 md:grid-cols-[auto_1fr_170px] gap-4 items-stretch bg-theme-bg border-theme-dark mt-6 hidden">
+        <!-- Column 1: Download All Button -->
+        <button id="downloadZip" class="btn-primary text-lg h-[52px] md:h-full min-h-[52px] flex items-center justify-center gap-2 uppercase tracking-wide cursor-pointer shrink-0" disabled>
+          <i class="fa-solid fa-file-zipper"></i>
+          Save ZIP
         </button>
+
+        <!-- Column 2: Status / Details Card -->
+        <div class="w-full justify-self-stretch flex items-stretch justify-center h-full min-w-0">
+          <div class="bg-white border-3 border-theme-dark rounded-xl py-2 px-4 flex items-center gap-3 shadow-[4px_4px_0_var(--color-theme-dark)] w-full h-full min-h-[52px]">
+            <i class="fa-solid fa-images text-theme-pink text-lg shrink-0"></i>
+            <span class="font-bold text-xs text-theme-dark shrink-0">Summary:</span>
+            <span id="resultsSummaryText" class="font-bold text-xs text-theme-indigo truncate min-w-0 flex-1">0 images found</span>
+          </div>
+        </div>
+
+        <!-- Column 3: Buy Me a Dice Link -->
+        <a href="https://www.buymeacoffee.com/pnpbuddy" title="Support PnPBuddy by buying me a dice"
+          class="w-full md:w-[170px] flex items-center justify-center border-3 border-theme-dark rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] overflow-hidden bg-[#f7e517] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)] h-[52px] md:h-full min-h-[52px] p-1 shrink-0">
+          <img
+            src="https://img.buymeacoffee.com/button-api/?text=Buy me a dice&emoji=🎲&slug=pnpbuddy&button_colour=f7e517&font_colour=000000&font_family=Bree&outline_colour=000000&coffee_colour=FFDD00"
+            alt="Buy me a dice" class="h-full w-full max-h-full max-w-full object-contain object-center" />
+        </a>
       </div>
 
       <!-- Bento Box 4: Debug Log (Hidden by default) -->
@@ -340,21 +408,6 @@
         <div id="images" class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-5"></div>
       </div>
       
-      <!-- Footer -->
-      <footer class="mt-8 pt-6 border-t-3 border-theme-dark flex flex-col md:flex-row items-center justify-between gap-4">
-        <p class="font-body text-theme-muted text-sm max-w-lg text-center md:text-left">
-          Runs entirely in your browser. Deduplication is based on the SHA-256 hash
-          of the final content. Uses PDF.js and JSZip.
-        </p>
-        
-        <!-- Buy Me a Coffee -->
-        <a href="https://www.buymeacoffee.com/pnpbuddy" title="Support PnPBuddy"
-          class="flex items-center justify-center border-3 border-theme-dark rounded-xl shadow-[4px_4px_0_var(--color-theme-dark)] overflow-hidden bg-[#f7e517] transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--color-theme-dark)] p-1 h-[52px]">
-          <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a dice&emoji=🎲&slug=pnpbuddy&button_colour=f7e517&font_colour=000000&font_family=Bree&outline_colour=000000&coffee_colour=FFDD00"
-            alt="Buy me a dice" class="h-full w-full max-h-full max-w-full object-contain object-center" />
-        </a>
-      </footer>
-
     </div>
 
     <!-- Scripts -->
@@ -366,3 +419,4 @@
     <script src="extract.js"></script>
   </body>
 </html>
+
