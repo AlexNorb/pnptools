@@ -201,14 +201,14 @@ function initApp() {
   // Toggle Advanced Configuration Visibility
   toggleConfigBtn.addEventListener("click", () => {
     const isHidden = configContainer.classList.contains("hidden");
+    const chevron = document.getElementById("configChevron");
     if (isHidden) {
       configContainer.classList.remove("hidden");
+      if (chevron) chevron.classList.replace("fa-chevron-down", "fa-chevron-up");
     } else {
       configContainer.classList.add("hidden");
+      if (chevron) chevron.classList.replace("fa-chevron-up", "fa-chevron-down");
     }
-    toggleConfigBtn.textContent = isHidden
-      ? "Hide Advanced Configuration"
-      : "Show Advanced Configuration";
   });
 
   // Initial log based on default mode
@@ -302,10 +302,10 @@ function initApp() {
         areThumbsRendered = true;
       }
       imagesWrap.classList.remove("hidden");
-      toggleThumbsBtn.textContent = "Hide images";
+      toggleThumbsBtn.textContent = "Hide Preview";
     } else {
       imagesWrap.classList.add("hidden");
-      toggleThumbsBtn.textContent = `Preview ${currentCount} images`;
+      toggleThumbsBtn.textContent = `Show Preview (${currentCount} images)`;
     }
 
     // Ensure styling is 'button' (blue) when enabled
@@ -439,7 +439,7 @@ function initApp() {
     areThumbsRendered = false; // Reset render state
 
     // Reset text and class for thumbnail button
-    toggleThumbsBtn.textContent = "Preview 0 images";
+    toggleThumbsBtn.textContent = "Show Preview (0 images)";
     toggleThumbsBtn.className = "btn-secondary w-full";
     toggleThumbsBtn.disabled = true;
 
@@ -619,15 +619,15 @@ function initApp() {
     // Update the Thumbnail Toggle button
     if (finalCount > 0) {
       if (areThumbsVisible) {
-        toggleThumbsBtn.textContent = "Hide images";
+        toggleThumbsBtn.textContent = "Hide Preview";
       } else {
-        toggleThumbsBtn.textContent = `Preview ${finalCount} images`;
+        toggleThumbsBtn.textContent = `Show Preview (${finalCount} images)`;
       }
       toggleThumbsBtn.disabled = false;
       // Set to blue color
       toggleThumbsBtn.className = "btn-secondary w-full";
     } else {
-      toggleThumbsBtn.textContent = "Preview 0 images";
+      toggleThumbsBtn.textContent = "Show Preview (0 images)";
       toggleThumbsBtn.disabled = true;
       // Set back to small/grey color
       toggleThumbsBtn.className = "btn-secondary w-full";
