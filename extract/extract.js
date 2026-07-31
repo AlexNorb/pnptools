@@ -198,16 +198,19 @@ function initApp() {
     );
   });
 
-  // Toggle Advanced Configuration Visibility
+  // Toggle Settings Collapse (matching /layout)
+  const configCollapseText = document.getElementById("configCollapseText");
+  const configCollapseIcon = document.getElementById("configCollapseIcon");
   toggleConfigBtn.addEventListener("click", () => {
-    const isHidden = configContainer.classList.contains("hidden");
-    const chevron = document.getElementById("configChevron");
-    if (isHidden) {
-      configContainer.classList.remove("hidden");
-      if (chevron) chevron.classList.replace("fa-chevron-down", "fa-chevron-up");
+    const isCollapsed = configContainer.classList.contains("collapsed");
+    if (isCollapsed) {
+      configContainer.classList.remove("collapsed");
+      if (configCollapseText) configCollapseText.textContent = "Hide";
+      if (configCollapseIcon) configCollapseIcon.style.transform = "rotate(0deg)";
     } else {
-      configContainer.classList.add("hidden");
-      if (chevron) chevron.classList.replace("fa-chevron-up", "fa-chevron-down");
+      configContainer.classList.add("collapsed");
+      if (configCollapseText) configCollapseText.textContent = "Show";
+      if (configCollapseIcon) configCollapseIcon.style.transform = "rotate(180deg)";
     }
   });
 
@@ -288,31 +291,28 @@ function initApp() {
     }
   });
 
-  // Thumbnail Toggle: Lazy rendering is implemented here
+  // Thumbnail/Preview Toggle (matching /layout accordion smooth grid collapse)
+  const imagesContentWrapper = document.getElementById("imagesContentWrapper");
+  const previewCollapseText = document.getElementById("previewCollapseText");
+  const previewCollapseIcon = document.getElementById("previewCollapseIcon");
+
   toggleThumbsBtn.addEventListener("click", () => {
     if (toggleThumbsBtn.disabled) return;
 
     areThumbsVisible = !areThumbsVisible;
-    const currentCount = imageStore.size;
 
     if (areThumbsVisible) {
-      // ONLY render if they haven't been rendered yet
       if (!areThumbsRendered) {
         renderThumbnails();
         areThumbsRendered = true;
       }
-      imagesWrap.classList.remove("hidden");
-      toggleThumbsBtn.textContent = "Hide Preview";
+      imagesContentWrapper.classList.remove("collapsed");
+      if (previewCollapseText) previewCollapseText.textContent = "Hide";
+      if (previewCollapseIcon) previewCollapseIcon.style.transform = "rotate(0deg)";
     } else {
-      imagesWrap.classList.add("hidden");
-      toggleThumbsBtn.textContent = `Show Preview (${currentCount} images)`;
-    }
-
-    // Ensure styling is 'button' (blue) when enabled
-    if (currentCount > 0) {
-      toggleThumbsBtn.className = "btn-secondary w-full"; // Will be updated to match our CSS
-    } else {
-      toggleThumbsBtn.className = "btn-secondary w-full";
+      imagesContentWrapper.classList.add("collapsed");
+      if (previewCollapseText) previewCollapseText.textContent = "Show";
+      if (previewCollapseIcon) previewCollapseIcon.style.transform = "rotate(180deg)";
     }
   });
 
@@ -616,21 +616,15 @@ function initApp() {
       resultsSummaryText.textContent = `${finalCount} images (~${totalSizeMB} MB)`;
     }
 
-    // Update the Thumbnail Toggle button
+    // Update the Thumbnail Toggle button state
     if (finalCount > 0) {
-      if (areThumbsVisible) {
-        toggleThumbsBtn.textContent = "Hide Preview";
-      } else {
-        toggleThumbsBtn.textContent = `Show Preview (${finalCount} images)`;
-      }
       toggleThumbsBtn.disabled = false;
-      // Set to blue color
-      toggleThumbsBtn.className = "btn-secondary w-full";
+      if (previewCollapseText) {
+        previewCollapseText.textContent = areThumbsVisible ? "Hide" : "Show";
+      }
     } else {
-      toggleThumbsBtn.textContent = "Show Preview (0 images)";
       toggleThumbsBtn.disabled = true;
-      // Set back to small/grey color
-      toggleThumbsBtn.className = "btn-secondary w-full";
+      if (previewCollapseText) previewCollapseText.textContent = "Show";
     }
   }
 

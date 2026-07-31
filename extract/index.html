@@ -41,6 +41,22 @@
         @apply bg-white border-3 border-theme-dark rounded-xl p-4 md:p-5 mb-5;
         box-shadow: 4px 4px 0 var(--color-theme-dark);
       }
+
+      /* Smooth Accordion Animation (Matching /layout) */
+      .collapsible-wrapper {
+        display: grid;
+        grid-template-rows: 1fr;
+        transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+        opacity: 1;
+      }
+      .collapsible-wrapper.collapsed {
+        grid-template-rows: 0fr;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .collapsible-inner {
+        overflow: hidden;
+      }
       
       /* Primary Button */
       .btn-primary {
@@ -239,124 +255,145 @@
         <button id="extractBtn" class="hidden" disabled></button>
       </div>
 
-      <!-- Bento Box 2: Settings (Collapsible Accordion) -->
-      <div class="bento-box p-0 overflow-hidden">
-        <button id="toggleConfigBtn" class="w-full h-12 bg-gray-50 flex items-center justify-between px-5 font-display text-sm cursor-pointer hover:bg-gray-100 transition-colors uppercase">
-          <span><i class="fa-solid fa-sliders mr-2 text-theme-muted"></i> 2. Settings</span>
-          <i class="fa-solid fa-chevron-down text-theme-muted" id="configChevron"></i>
-        </button>
+      <!-- Bento Box 2: Settings (Collapsible Accordion matching /layout) -->
+      <div class="bento-box">
+        <div class="flex items-center justify-between pb-3 mb-4 border-b-3 border-theme-dark gap-3 flex-wrap sm:flex-nowrap">
+          <div class="flex items-center gap-3 shrink-0">
+            <h2 class="text-xl font-display text-theme-dark">2. Settings</h2>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button type="button" id="toggleConfigBtn"
+              class="btn-secondary flex items-center gap-1.5 text-xs py-1 px-2.5" title="Toggle Settings Visibility">
+              <span id="configCollapseText" class="font-bold hidden sm:inline">Hide</span>
+              <i id="configCollapseIcon" class="fa-solid fa-chevron-up transition-transform duration-200 text-xs"></i>
+            </button>
+          </div>
+        </div>
         
-        <div id="configContainer" class="hidden p-5 bg-white border-t-3 border-theme-dark">
-          <div class="flex flex-col gap-6">
-            <!-- Row 1: Page Range & Format -->
-            <div class="flex flex-wrap gap-6 items-start">
-              <!-- Page Range -->
-              <div class="flex-1 min-w-[260px]">
-                <label class="block font-bold text-xs text-theme-dark uppercase tracking-wider mb-2">Page Range</label>
-                <div class="flex items-center gap-3 h-8">
-                  <label class="flex items-center gap-2 cursor-pointer text-sm font-medium shrink-0 select-none">
+        <div id="configContainer" class="collapsible-wrapper">
+          <div class="collapsible-inner">
+            <div class="flex flex-col gap-6 pt-1">
+              <!-- Row 1: Page Range & Format -->
+              <div class="flex flex-wrap gap-6 items-start">
+                <!-- Page Range -->
+                <div class="flex-1 min-w-[260px]">
+                  <label class="block font-bold text-xs text-theme-dark uppercase tracking-wider mb-2">Page Range</label>
+                  <div class="flex items-center gap-3 h-8">
+                    <label class="flex items-center gap-2 cursor-pointer text-sm font-medium shrink-0 select-none">
+                      <div class="neo-checkbox">
+                        <input type="checkbox" id="allPagesToggle" checked />
+                        <div class="neo-checkbox-icon"></div>
+                      </div>
+                      All Pages
+                    </label>
+                    <input
+                      type="text"
+                      id="pageRangeInput"
+                      placeholder="e.g., 1, 3, 5-9"
+                      disabled
+                      class="flex-1 min-w-0"
+                    />
+                  </div>
+                </div>
+
+                <!-- Output Format -->
+                <div class="flex-1 min-w-[240px]">
+                  <label class="block font-bold text-xs text-theme-dark uppercase tracking-wider mb-2">Output Format</label>
+                  <div class="flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-8 items-center w-full max-w-[240px]">
+                    <label class="segmented-option">
+                      <input type="radio" id="formatJpeg" name="outputFormat" value="image/jpeg" class="hidden" checked />
+                      <span>JPG</span>
+                    </label>
+                    <label class="segmented-option">
+                      <input type="radio" id="formatPng" name="outputFormat" value="image/png" class="hidden" />
+                      <span>PNG</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Row 2: Quality & Options -->
+              <div class="flex flex-wrap gap-6 items-start">
+                <!-- Quality Control -->
+                <div class="flex-1 min-w-[240px]">
+                  <label class="block font-bold text-xs text-theme-dark uppercase tracking-wider mb-2">JPEG Quality</label>
+                  <div class="flex items-center gap-3 h-8">
+                    <input
+                      id="quality"
+                      type="range"
+                      min="0.4"
+                      max="1"
+                      step="0.05"
+                      value="1"
+                      class="flex-1 max-w-[160px]"
+                    />
+                    <span id="qualityVal" class="text-sm font-bold w-10 text-theme-dark">1.00</span>
+                  </div>
+                </div>
+
+                <!-- Filters & Toggles -->
+                <div class="flex-[2] min-w-[280px] flex flex-wrap gap-x-6 gap-y-3 pt-6 sm:pt-0">
+                  <label class="flex items-center gap-2 cursor-pointer text-sm font-medium select-none">
                     <div class="neo-checkbox">
-                      <input type="checkbox" id="allPagesToggle" checked />
+                      <input type="checkbox" id="ignoreSmallFiles" checked />
                       <div class="neo-checkbox-icon"></div>
                     </div>
-                    All Pages
+                    Ignore &lt;5KB
                   </label>
-                  <input
-                    type="text"
-                    id="pageRangeInput"
-                    placeholder="e.g., 1, 3, 5-9"
-                    disabled
-                    class="flex-1 min-w-0"
-                  />
-                </div>
-              </div>
-
-              <!-- Output Format -->
-              <div class="flex-1 min-w-[240px]">
-                <label class="block font-bold text-xs text-theme-dark uppercase tracking-wider mb-2">Output Format</label>
-                <div class="flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-8 items-center w-full max-w-[240px]">
-                  <label class="segmented-option">
-                    <input type="radio" id="formatJpeg" name="outputFormat" value="image/jpeg" class="hidden" checked />
-                    <span>JPG</span>
+                  
+                  <label class="flex items-center gap-2 cursor-pointer text-sm font-medium select-none">
+                    <div class="neo-checkbox">
+                      <input type="checkbox" id="safeModeToggle" />
+                      <div class="neo-checkbox-icon"></div>
+                    </div>
+                    Slow Mode
                   </label>
-                  <label class="segmented-option">
-                    <input type="radio" id="formatPng" name="outputFormat" value="image/png" class="hidden" />
-                    <span>PNG</span>
+                  
+                  <label class="flex items-center gap-2 cursor-pointer text-sm font-medium select-none">
+                    <div class="neo-checkbox">
+                      <input type="checkbox" id="debugModeToggle" />
+                      <div class="neo-checkbox-icon"></div>
+                    </div>
+                    Debug Mode
                   </label>
                 </div>
               </div>
-            </div>
 
-            <!-- Row 2: Quality & Options -->
-            <div class="flex flex-wrap gap-6 items-start">
-              <!-- Quality Control -->
-              <div class="flex-1 min-w-[240px]">
-                <label class="block font-bold text-xs text-theme-dark uppercase tracking-wider mb-2">JPEG Quality</label>
-                <div class="flex items-center gap-3 h-8">
-                  <input
-                    id="quality"
-                    type="range"
-                    min="0.4"
-                    max="1"
-                    step="0.05"
-                    value="1"
-                    class="flex-1 max-w-[160px]"
-                  />
-                  <span id="qualityVal" class="text-sm font-bold w-10 text-theme-dark">1.00</span>
-                </div>
+              <!-- Row 3: Utilities -->
+              <div class="flex gap-3 pt-4 border-t-2 border-dashed border-gray-200">
+                <button id="clearBtn" class="btn-secondary" disabled>
+                  <i class="fa-solid fa-rotate-right mr-1.5 text-xs"></i> Clear All
+                </button>
+                <button id="clearLogBtn" class="btn-secondary">
+                  <i class="fa-solid fa-eraser mr-1.5 text-xs"></i> Clear Log
+                </button>
               </div>
-
-              <!-- Filters & Toggles -->
-              <div class="flex-[2] min-w-[280px] flex flex-wrap gap-x-6 gap-y-3 pt-6 sm:pt-0">
-                <label class="flex items-center gap-2 cursor-pointer text-sm font-medium select-none">
-                  <div class="neo-checkbox">
-                    <input type="checkbox" id="ignoreSmallFiles" checked />
-                    <div class="neo-checkbox-icon"></div>
-                  </div>
-                  Ignore &lt;5KB
-                </label>
-                
-                <label class="flex items-center gap-2 cursor-pointer text-sm font-medium select-none">
-                  <div class="neo-checkbox">
-                    <input type="checkbox" id="safeModeToggle" />
-                    <div class="neo-checkbox-icon"></div>
-                  </div>
-                  Slow Mode
-                </label>
-                
-                <label class="flex items-center gap-2 cursor-pointer text-sm font-medium select-none">
-                  <div class="neo-checkbox">
-                    <input type="checkbox" id="debugModeToggle" />
-                    <div class="neo-checkbox-icon"></div>
-                  </div>
-                  Debug Mode
-                </label>
-              </div>
-            </div>
-
-            <!-- Row 3: Utilities -->
-            <div class="flex gap-3 pt-4 border-t-2 border-dashed border-gray-200">
-              <button id="clearBtn" class="btn-secondary" disabled>
-                <i class="fa-solid fa-rotate-right mr-1.5 text-xs"></i> Clear All
-              </button>
-              <button id="clearLogBtn" class="btn-secondary">
-                <i class="fa-solid fa-eraser mr-1.5 text-xs"></i> Clear Log
-              </button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Bento Box 3: 3. Preview (Image Gallery) -->
+      <!-- Bento Box 3: Preview (Image Gallery matching /layout preview header) -->
       <div class="bento-box">
-        <h2 class="text-xl font-display text-theme-dark mb-3 flex items-center justify-between">
-          <span>3. Preview</span>
-        </h2>
-        <button id="toggleThumbsBtn" class="btn-secondary w-full h-10 uppercase font-display text-xs sm:text-sm" disabled>
-          Show Preview (0 images)
-        </button>
-        <!-- Thumbnail Grid Container -->
-        <div id="images" class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4"></div>
+        <div class="flex items-center justify-between pb-3 mb-4 border-b-3 border-theme-dark gap-3 flex-wrap sm:flex-nowrap">
+          <div class="flex items-center gap-3 shrink-0">
+            <h2 class="text-xl font-display text-theme-dark">3. Preview</h2>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button type="button" id="toggleThumbsBtn"
+              class="btn-secondary flex items-center gap-1.5 text-xs py-1 px-2.5" title="Toggle Preview Visibility" disabled>
+              <span id="previewCollapseText" class="font-bold hidden sm:inline">Show</span>
+              <i id="previewCollapseIcon" class="fa-solid fa-chevron-up transition-transform duration-200 text-xs" style="transform: rotate(180deg);"></i>
+            </button>
+          </div>
+        </div>
+
+        <div id="imagesContentWrapper" class="collapsible-wrapper collapsed">
+          <div class="collapsible-inner">
+            <!-- Thumbnail Grid Container -->
+            <div id="images" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 pt-1"></div>
+          </div>
+        </div>
       </div>
 
       <!-- Bento Box 4: Action & Export Bar (3-to-1 Column Responsive Grid) -->
