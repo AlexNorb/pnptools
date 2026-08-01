@@ -14,34 +14,27 @@ function initApp() {
   const fileInput = document.getElementById("fileInput");
   const extractBtn = document.getElementById("extractBtn");
   const allPagesToggle = document.getElementById("allPagesToggle");
+  const selectionPagesToggle = document.getElementById("selectionPagesToggle");
   const pageRangeInput = document.getElementById("pageRangeInput");
   const status = document.getElementById("status");
   const imagesWrap = document.getElementById("images");
   const resultsBar = document.getElementById("resultsBar");
   const downloadZipBtn = document.getElementById("downloadZip");
   const resultsSummaryText = document.getElementById("resultsSummaryText");
-  const clearBtn = document.getElementById("clearBtn");
-  const qualityRange = document.getElementById("quality");
-  const qualityVal = document.getElementById("qualityVal");
-  const safeModeToggle = document.getElementById("safeModeToggle");
-  const logOutput = document.getElementById("logOutput");
-  const clearLogBtn = document.getElementById("clearLogBtn");
+
+
   const pageProgressBar = document.getElementById("pageProgressBar");
   const progressBarFill = document.getElementById("progressBarFill");
 
   // DOM Elements for Summary/Collapse/Debug/Config
   const toggleThumbsBtn = document.getElementById("toggleThumbsBtn");
-  const debugModeToggle = document.getElementById("debugModeToggle");
-  const logContainer = document.getElementById("logContainer");
-  const toggleConfigBtn = document.getElementById("toggleConfigBtn");
-  const configContainer = document.getElementById("configContainer");
+
+
 
   const formatJpeg = document.getElementById("formatJpeg");
   const formatPng = document.getElementById("formatPng");
-  const ignoreSmallFiles = document.getElementById("ignoreSmallFiles");
 
-  const SAFE_TIMEOUT = 1500; // Used for actual delay
-  const FAST_TIMEOUT = 200; // Used for actual delay
+  const FAST_TIMEOUT = 200;
   const MIN_FILE_SIZE_BYTES = 5 * 1024; // 5 KB
 
   let pdfDocument = null;
@@ -93,27 +86,14 @@ function initApp() {
   }
 
   function log(message, type = "info") {
-    if (
-      !debugModeToggle.checked &&
-      type !== "error" &&
-      type !== "warn" &&
-      type !== "config" &&
-      type !== "dedupe" &&
-      type !== "filter"
-    ) {
-      return;
+    const prefix = "[Extract]";
+    if (type === "error") {
+      console.error(prefix, message);
+    } else if (type === "warn") {
+      console.warn(prefix, message);
+    } else {
+      console.log(prefix, message);
     }
-    const entry = document.createElement("div");
-    entry.textContent = message;
-    if (type === "warn") {
-      entry.className = "log-warn";
-    } else if (type === "error") {
-      entry.className = "log-error";
-    } else if (type === "filter") {
-      entry.className = "log-filter";
-    }
-    logOutput.prepend(entry);
-    logOutput.scrollTop = 0;
   }
 
   /**
@@ -175,49 +155,11 @@ function initApp() {
 
   // --- Event Listeners ---
 
-  qualityRange.addEventListener("input", () => {
-    qualityVal.textContent = Number(qualityRange.value).toFixed(2);
-  });
 
-  // Toggle quality slider enablement based on format
-  const updateQualitySlider = () => {
-    const isJpeg = formatJpeg.checked;
-    qualityRange.disabled = !isJpeg;
-    qualityVal.style.opacity = isJpeg ? "1" : "0.5";
-  };
-  formatJpeg.addEventListener("change", updateQualitySlider);
-  formatPng.addEventListener("change", updateQualitySlider);
 
-  // Toggle Debug Log Visibility
-  debugModeToggle.addEventListener("change", () => {
-    const isDebug = debugModeToggle.checked;
-    logContainer.classList.toggle("hidden", !isDebug);
-    log(
-      `[CONFIG] Debug mode is now ${isDebug ? "ON" : "OFF"}.`,
-      "config"
-    );
-  });
 
-  // Toggle Settings Collapse (matching /layout)
-  const configCollapseText = document.getElementById("configCollapseText");
-  const configCollapseIcon = document.getElementById("configCollapseIcon");
-  toggleConfigBtn.addEventListener("click", () => {
-    const isCollapsed = configContainer.classList.contains("collapsed");
-    if (isCollapsed) {
-      configContainer.classList.remove("collapsed");
-      if (configCollapseText) configCollapseText.textContent = "Hide";
-      if (configCollapseIcon) configCollapseIcon.style.transform = "rotate(0deg)";
-    } else {
-      configContainer.classList.add("collapsed");
-      if (configCollapseText) configCollapseText.textContent = "Show";
-      if (configCollapseIcon) configCollapseIcon.style.transform = "rotate(180deg)";
-    }
-  });
 
-  // Initial log based on default mode
-  if (!safeModeToggle.checked) {
-    log(`[CONFIG] Fast Mode active.`, "config");
-  }
+  log(`[CONFIG] Fast Mode active.`, "config");
 
   // 1. PDF File Selection
   fileInput.addEventListener("change", async (ev) => {
@@ -236,15 +178,20 @@ function initApp() {
   });
 
   // 2. Page Range Toggle Control
-  allPagesToggle.addEventListener("change", () => {
-    const isChecked = allPagesToggle.checked;
-    pageRangeInput.disabled = isChecked;
+  const handlePageModeChange = () => {
+    const isAll = allPagesToggle.checked;
+    pageRangeInput.disabled = isAll;
     extractBtn.disabled = !pdfDocument || inProgress;
 
-    if (isChecked && maxPages > 0) {
+    if (isAll && maxPages > 0) {
       pageRangeInput.value = `1-${maxPages}`;
+    } else if (!isAll) {
+      pageRangeInput.focus();
     }
-  });
+  };
+
+  allPagesToggle.addEventListener("change", handlePageModeChange);
+  selectionPagesToggle.addEventListener("change", handlePageModeChange);
 
   // 3. Extraction Trigger
   extractBtn.addEventListener("click", async () => {
@@ -267,29 +214,9 @@ function initApp() {
     await startExtraction(pdfDocument, pagesToProcess);
   });
 
-  // --- Utility Event Listeners ---
-  clearBtn.addEventListener("click", () => {
-    clearAll(true);
-  });
 
-  clearLogBtn.addEventListener("click", () => {
-    logOutput.innerHTML = "";
-    log("[INFO] Log cleared.", "config");
-    if (!safeModeToggle.checked) {
-      log(`[CONFIG] Fast Mode active.`, "config");
-    } else {
-      log(`[CONFIG] Slow Mode active.`, "config");
-    }
-  });
 
-  // Mode Toggle Logic
-  safeModeToggle.addEventListener("change", () => {
-    if (safeModeToggle.checked) {
-      log(`[CONFIG] Slow Mode activated.`, "config");
-    } else {
-      log(`[CONFIG] Fast Mode activated.`, "config");
-    }
-  });
+
 
   // Thumbnail/Preview Toggle (matching /layout accordion smooth grid collapse)
   const imagesContentWrapper = document.getElementById("imagesContentWrapper");
@@ -431,16 +358,17 @@ function initApp() {
 
     // Reset UI elements
     imagesWrap.innerHTML = "";
-    imagesWrap.classList.add("hidden");
-    resultsBar.classList.add("hidden");
+    if (imagesContentWrapper) {
+      imagesContentWrapper.classList.add("collapsed");
+    }
     pageProgressBar.classList.add("hidden");
 
     areThumbsVisible = false;
     areThumbsRendered = false; // Reset render state
 
     // Reset text and class for thumbnail button
-    toggleThumbsBtn.textContent = "Show Preview (0 images)";
-    toggleThumbsBtn.className = "btn-secondary w-full";
+    if (previewCollapseText) previewCollapseText.textContent = "Show";
+    if (previewCollapseIcon) previewCollapseIcon.style.transform = "rotate(180deg)";
     toggleThumbsBtn.disabled = true;
 
     downloadZipBtn.disabled = true;
@@ -456,7 +384,7 @@ function initApp() {
       currentDocName = "";
 
       status.textContent = "Cleared. Select a PDF to begin.";
-      clearBtn.disabled = true;
+
       extractBtn.disabled = true;
       pageRangeInput.value = "";
       pageRangeInput.disabled = true;
@@ -464,8 +392,7 @@ function initApp() {
     }
 
     if (fullReset) {
-      logOutput.innerHTML = "";
-      log("[INFO] Log cleared.", "config");
+      log("[INFO] State cleared.", "config");
     }
   }
 
@@ -494,17 +421,11 @@ function initApp() {
       pageRangeInput.value = `1-${maxPages}`;
       pageRangeInput.disabled = allPagesToggle.checked;
       extractBtn.disabled = false;
-      clearBtn.disabled = false;
 
-      const msg = `[INFO] ${file.name} loaded (${maxPages} pages). Starting extraction...`;
+
+      const msg = `${file.name} (${maxPages} pages) ready.`;
       status.textContent = msg;
-      log(msg);
-
-      // Trigger automatic extraction
-      const pagesToProcess = getPagesToProcess(maxPages);
-      if (pagesToProcess.length > 0) {
-        await startExtraction(pdfDocument, pagesToProcess);
-      }
+      log(`[INFO] ${file.name} loaded (${maxPages} pages). Ready for extraction.`);
     } catch (err) {
       const errorMsg =
         "[ERROR] Fatal error during PDF loading: " +
@@ -513,7 +434,8 @@ function initApp() {
       log(errorMsg, "error");
       pdfDocument = null;
       currentDocName = "";
-      clearBtn.disabled = false;
+
+
     } finally {
       isLoading = false;
     }
@@ -587,7 +509,8 @@ function initApp() {
     } finally {
       inProgress = false;
       extractBtn.disabled = !pdfDocument;
-      clearBtn.disabled = false;
+
+
     }
   }
 
@@ -616,47 +539,37 @@ function initApp() {
       resultsSummaryText.textContent = `${finalCount} images (~${totalSizeMB} MB)`;
     }
 
-    // Update the Thumbnail Toggle button state & auto-expand preview
+    // Update the Thumbnail Toggle button state (keep preview collapsed by default)
     if (finalCount > 0) {
       toggleThumbsBtn.disabled = false;
-      areThumbsVisible = true;
-      if (!areThumbsRendered) {
-        renderThumbnails();
-        areThumbsRendered = true;
-      }
+      areThumbsVisible = false;
       if (imagesContentWrapper) {
-        imagesContentWrapper.classList.remove("collapsed");
+        imagesContentWrapper.classList.add("collapsed");
       }
       if (previewCollapseText) {
-        previewCollapseText.textContent = "Hide";
+        previewCollapseText.textContent = "Show";
       }
       if (previewCollapseIcon) {
-        previewCollapseIcon.style.transform = "rotate(0deg)";
+        previewCollapseIcon.style.transform = "rotate(180deg)";
       }
     } else {
       toggleThumbsBtn.disabled = true;
       if (previewCollapseText) previewCollapseText.textContent = "Show";
+      if (previewCollapseIcon) previewCollapseIcon.style.transform = "rotate(180deg)";
     }
   }
 
   /**
    * Wraps the callback-based page.objs.get in a Promise.
+   * Skips phantom objects (soft masks, stencils) that never resolve.
    */
   function objGetPromise(page, objId) {
-    return new Promise((resolve, reject) => {
-      const timeoutDuration = safeModeToggle.checked
-        ? SAFE_TIMEOUT
-        : FAST_TIMEOUT;
-
+    return new Promise((resolve) => {
       try {
         const timeout = setTimeout(() => {
-          // Updated log message to remove time details
-          log(
-            `[WARN] Timeout getting object "${objId}". Skipping reference.`,
-            "warn"
-          );
+          log(`[SKIP] Auxiliary object "${objId}" (likely mask/pattern).`);
           resolve(null);
-        }, timeoutDuration);
+        }, FAST_TIMEOUT);
 
         page.objs.get(objId, (obj) => {
           clearTimeout(timeout);
@@ -822,7 +735,7 @@ function initApp() {
       // --- END TIER 1 DEDUPLICATION ---
 
       // --- CONVERSION TO OUTPUT BLOB & SIZE CHECK ---
-      const quality = Number(qualityRange.value);
+      const quality = 1;
 
       if (imgObj.src && typeof imgObj.src === "string") {
         const imgEl =
@@ -892,7 +805,7 @@ function initApp() {
       }
 
       // --- FILE SIZE FILTER CHECK ---
-      if (ignoreSmallFiles.checked && blob.size < MIN_FILE_SIZE_BYTES) {
+      if (blob.size < MIN_FILE_SIZE_BYTES) {
         log(
           `[FILTER] Skipped image (size: ${(blob.size / 1024).toFixed(
             1
@@ -1124,8 +1037,8 @@ function initApp() {
     return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
   }
 
-  clearBtn.disabled = true;
-  updateQualitySlider(); // Initial state for quality slider
+
+
 }
 
 window.addEventListener("load", function () {
