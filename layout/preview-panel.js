@@ -116,7 +116,18 @@
       const items = await this._normalizeFilesInput(files);
       for (const item of items) {
         this.state.fronts.push(item);
-        this.state.copies.push(1);
+        
+        let copies = 1;
+        if (item.name) {
+          const match = item.name.match(/_x(\d+)(?:\.[^.]+)?$/i);
+          if (match && match[1]) {
+            const parsed = parseInt(match[1], 10);
+            if (!isNaN(parsed) && parsed > 0) {
+              copies = parsed;
+            }
+          }
+        }
+        this.state.copies.push(copies);
       }
       this._notify();
       return items;
