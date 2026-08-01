@@ -132,7 +132,7 @@
 
       /* Neo Dropzone */
       .dropzone-neo {
-        @apply border-2 border-dashed border-theme-dark bg-white rounded-lg p-4 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center min-h-[110px];
+        @apply border-2 border-dashed border-theme-dark bg-white rounded-lg p-4 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center min-h-[140px];
         box-shadow: 3px 3px 0 var(--color-theme-dark);
         position: relative;
       }
@@ -238,18 +238,12 @@
         <div class="flex flex-wrap items-stretch gap-6">
           <!-- Column 1: Upload PDF -->
           <div class="flex-1 min-w-[280px] flex flex-col">
-            <div class="flex items-center justify-between mb-4 gap-2">
-              <h2 class="text-xl font-display text-theme-dark">1. Upload PDF</h2>
-              <button type="button" id="clearPdfBtn" class="btn-secondary flex items-center gap-1.5 text-xs py-1 px-2.5" title="Clear loaded PDFs" disabled>
-                <i class="fa-solid fa-trash-can text-xs text-theme-pink"></i>
-                <span class="font-bold hidden sm:inline">Clear</span>
-              </button>
-            </div>
+            <h2 class="text-xl font-display text-theme-dark mb-4">1. Upload PDF</h2>
             <div class="dropzone-neo relative flex flex-col items-center justify-center p-6 flex-1 min-h-[140px]" id="pdfDropzone">
               <i class="fa-solid fa-file-pdf text-4xl text-theme-pink mb-2"></i>
-              <label for="fileInput" class="text-base font-bold cursor-pointer block text-theme-dark text-center">Drop PDF(s) here or browse</label>
-              <span class="file-count text-xs block text-theme-muted mt-1 font-medium text-center truncate max-w-full px-2" id="status">No PDF loaded.</span>
-              <input type="file" id="fileInput" accept="application/pdf" multiple class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+              <label for="fileInput" class="text-base font-bold cursor-pointer block text-theme-dark">Drop PDF here or browse</label>
+              <span class="file-count text-xs block text-theme-muted mt-1 font-medium" id="status">No PDF loaded.</span>
+              <input type="file" id="fileInput" accept="application/pdf" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
             </div>
 
             <!-- Extract Button -->
@@ -263,41 +257,19 @@
           <div class="flex-1 min-w-[280px] flex flex-col pt-4 sm:pt-0">
             <h2 class="text-xl font-display text-theme-dark mb-4">2. Settings</h2>
 
-            <!-- Extraction Format -->
+            <!-- Output Format -->
             <div class="flex flex-col gap-2 mb-4">
-              <label class="font-bold text-xs text-theme-dark uppercase tracking-wider block">Extraction Format:</label>
-              <div class="flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2.5rem] items-center w-full max-w-sm">
-                <label class="segmented-option cursor-pointer font-bold flex-1 h-full rounded-[10px] text-xs transition-all flex items-center justify-center px-2">
-                  <input type="radio" id="formatOriginal" name="extractionMode" value="original" class="hidden" checked />
-                  <span>Original (recommended)</span>
+              <label class="font-bold text-xs text-theme-dark uppercase tracking-wider block">Output format:</label>
+              <div class="flex p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2.5rem] items-center w-full max-w-xs">
+                <label class="segmented-option cursor-pointer font-bold flex-1 h-full rounded-[10px] text-xs sm:text-sm transition-all flex items-center justify-center px-3">
+                  <input type="radio" id="formatJpeg" name="outputFormat" value="image/jpeg" class="hidden" checked />
+                  <span>JPG</span>
                 </label>
-                <label class="segmented-option cursor-pointer font-bold flex-1 h-full rounded-[10px] text-xs transition-all flex items-center justify-center px-2">
-                  <input type="radio" id="formatJpeg" name="extractionMode" value="jpeg" class="hidden" />
-                  <span>JPEG Conversion</span>
+                <label class="segmented-option cursor-pointer font-bold flex-1 h-full rounded-[10px] text-xs sm:text-sm transition-all flex items-center justify-center px-3">
+                  <input type="radio" id="formatPng" name="outputFormat" value="image/png" class="hidden" />
+                  <span>PNG</span>
                 </label>
               </div>
-            </div>
-
-            <!-- JPEG Quality (Visible only if JPEG conversion is selected) -->
-            <div id="jpegQualityWrapper" class="hidden flex flex-col gap-1.5 mb-4">
-              <label for="jpegQualitySelect" class="font-bold text-xs text-theme-dark uppercase tracking-wider block">JPEG Quality:</label>
-              <select id="jpegQualitySelect" class="w-full max-w-xs text-xs font-bold text-theme-dark border-1.5 border-theme-dark rounded-lg h-8 px-3">
-                <option value="1">100% (Maximum)</option>
-                <option value="0.90" selected>90% (Recommended)</option>
-                <option value="0.80">80% (High)</option>
-                <option value="0.70">70% (Medium)</option>
-              </select>
-            </div>
-
-            <!-- Naming Options -->
-            <div class="flex items-center gap-2 mb-4">
-              <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-theme-dark">
-                <div class="neo-checkbox">
-                  <input type="checkbox" id="addUsageSuffix" checked />
-                  <div class="neo-checkbox-icon"></div>
-                </div>
-                <span>Add usage count suffix (e.g. img_001_x4.jpg)</span>
-              </label>
             </div>
 
             <!-- Page Selection -->
@@ -331,9 +303,8 @@
       <!-- Bento Box 3: Preview (Image Gallery matching /layout preview header) -->
       <div class="bento-box">
         <div class="flex items-center justify-between pb-3 mb-4 border-b-3 border-theme-dark gap-3 flex-wrap sm:flex-nowrap">
-          <div class="flex items-center gap-3 shrink-0 flex-wrap sm:flex-nowrap">
+          <div class="flex items-center gap-3 shrink-0">
             <h2 class="text-xl font-display text-theme-dark">3. Preview</h2>
-            <span id="previewSummaryText" class="font-bold text-xs text-theme-indigo"></span>
           </div>
           <div class="flex items-center gap-2 shrink-0">
             <button type="button" id="toggleThumbsBtn"
@@ -390,4 +361,3 @@
     <script src="extract.js"></script>
   </body>
 </html>
-

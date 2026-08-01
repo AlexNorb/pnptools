@@ -1,5 +1,5 @@
 function initApp() {
-  // --- PDF.js Worker Setup ---
+  // --- PDF.js Worker Setup for Main Thread Preview ---
   if (typeof pdfjsLib === "undefined" || !pdfjsLib.GlobalWorkerOptions) {
     const msg = "Error: Failed to load PDF library. Please refresh the page.";
     document.getElementById("status").textContent = msg;
@@ -12,6 +12,7 @@ function initApp() {
 
   // --- Global Application State & DOM References ---
   const fileInput = document.getElementById("fileInput");
+  const clearPdfBtn = document.getElementById("clearPdfBtn");
   const extractBtn = document.getElementById("extractBtn");
   const allPagesToggle = document.getElementById("allPagesToggle");
   const selectionPagesToggle = document.getElementById("selectionPagesToggle");
@@ -21,68 +22,57 @@ function initApp() {
   const resultsBar = document.getElementById("resultsBar");
   const downloadZipBtn = document.getElementById("downloadZip");
   const resultsSummaryText = document.getElementById("resultsSummaryText");
-
+  const previewSummaryText = document.getElementById("previewSummaryText");
 
   const pageProgressBar = document.getElementById("pageProgressBar");
   const progressBarFill = document.getElementById("progressBarFill");
 
-  // DOM Elements for Summary/Collapse/Debug/Config
+  // DOM Elements for Options & Preview
   const toggleThumbsBtn = document.getElementById("toggleThumbsBtn");
-
-
-
+  const formatOriginal = document.getElementById("formatOriginal");
   const formatJpeg = document.getElementById("formatJpeg");
-  const formatPng = document.getElementById("formatPng");
+  const jpegQualityWrapper = document.getElementById("jpegQualityWrapper");
+  const jpegQualitySelect = document.getElementById("jpegQualitySelect");
+  const addUsageSuffix = document.getElementById("addUsageSuffix");
 
-  const FAST_TIMEOUT = 200;
-  const MIN_FILE_SIZE_BYTES = 5 * 1024; // 5 KB
-
-  let pdfDocument = null;
-  let maxPages = 0;
+  // Loaded PDFs state: Array<{ name: string, safeName: string, arrayBuffer: ArrayBuffer, pdfDocument: object, maxPages: number }>
+  let loadedPdfs = [];
+  let totalMaxPages = 0;
   let currentDocName = "";
   let isLoading = false;
   let inProgress = false;
   let areThumbsVisible = false;
   let areThumbsRendered = false;
 
-  // imageStore structure: Map<CONTENT_HASH, { baseName: string, blob: Blob, name: string, tempUrl: string, width: number, height: number }>
+  // imageStore structure: Map<hash, { name: string, blob: Blob, tempUrl: string, width: number, height: number, referenceCount: number, pages: number[] }>
   let imageStore = new Map();
-  let reuseCanvas = document.createElement("canvas");
-  let reuseCtx = reuseCanvas.getContext("2d");
 
-  let processedObjIds = new Set();
-  let failedObjIds = new Set();
-  let processedContentHashes = new Set();
-
-  let aCounter = 0;
-  let bCounter = 0;
-
-  // --- Helper Functions: Format and Log ---
+  // --- Format and Logging Helper Functions ---
 
   function formatSize(bytes) {
-    if (bytes === 0) return "0 Bytes";
+    if (!bytes || bytes === 0) return "0 Bytes";
     const k = 1024;
     const dm = 1;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return (
-      parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i]
-    );
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
   }
 
-  /**
-   * Converts raw bytes to a formatted string in MB (e.g., 5.4).
-   */
   function formatSizeToMB(bytes) {
-    if (bytes === 0) return "0.0";
-    // Use 1 decimal point for MB unless the value is tiny
+    if (!bytes || bytes === 0) return "0.0";
     const mb = bytes / (1024 * 1024);
     return mb.toFixed(mb < 1 ? 2 : 1);
   }
 
-  function getSelectedFormat() {
-    if (formatPng.checked) return { mime: "image/png", ext: ".png" };
-    return { mime: "image/jpeg", ext: ".jpg" };
+  function getMimeTypeFromExt(ext) {
+    const cleanExt = (ext || "").toLowerCase();
+    if (cleanExt === "jpg" || cleanExt === "jpeg") return "image/jpeg";
+    if (cleanExt === "png") return "image/png";
+    if (cleanExt === "jp2" || cleanExt === "jpx") return "image/jp2";
+    if (cleanExt === "webp") return "image/webp";
+    if (cleanExt === "bmp") return "image/bmp";
+    if (cleanExt === "tif" || cleanExt === "tiff") return "image/tiff";
+    return "application/octet-stream";
   }
 
   function log(message, type = "info") {
@@ -96,16 +86,9 @@ function initApp() {
     }
   }
 
-  /**
-   * Updates the progress bar width based on current vs total operations.
-   */
-  function updatePageProgressBar(currentOps, totalOps) {
-    if (totalOps > 0) {
-      const percentage = Math.min(100, (currentOps / totalOps) * 100);
-      progressBarFill.style.width = `${percentage}%`;
-    } else {
-      progressBarFill.style.width = "100%"; // Assume quick processing if zero ops
-    }
+  function updateProgressBar(percentage) {
+    const clamped = Math.min(100, Math.max(0, percentage));
+    progressBarFill.style.width = `${clamped}%`;
   }
 
   // --- CORE LOGIC: Page Range Parsing ---
@@ -119,9 +102,7 @@ function initApp() {
       if (!trimmedPart) continue;
 
       if (trimmedPart.includes("-")) {
-        const [startStr, endStr] = trimmedPart
-          .split("-")
-          .map((s) => s.trim());
+        const [startStr, endStr] = trimmedPart.split("-").map((s) => s.trim());
         const start = parseInt(startStr);
         let end = parseInt(endStr);
 
@@ -144,7 +125,7 @@ function initApp() {
   }
 
   function getPagesToProcess(max) {
-    if (!pdfDocument || max <= 0) return [];
+    if (loadedPdfs.length === 0 || max <= 0) return [];
 
     if (allPagesToggle.checked) {
       return Array.from({ length: max }, (_, i) => i + 1);
@@ -153,38 +134,48 @@ function initApp() {
     }
   }
 
-  // --- Event Listeners ---
+  // --- UI Event Listeners ---
 
-
-
-
-
-  log(`[CONFIG] Fast Mode active.`, "config");
-
-  // 1. PDF File Selection
-  fileInput.addEventListener("change", async (ev) => {
-    const file = ev.target.files && ev.target.files[0];
-    if (!file || isLoading) {
-      return;
+  // Format Selection Toggle
+  const handleFormatChange = () => {
+    if (formatJpeg && formatJpeg.checked) {
+      jpegQualityWrapper?.classList.remove("hidden");
+    } else {
+      jpegQualityWrapper?.classList.add("hidden");
     }
+  };
 
-    // Perform a full reset before loading a new PDF
+  if (formatOriginal) formatOriginal.addEventListener("change", handleFormatChange);
+  if (formatJpeg) formatJpeg.addEventListener("change", handleFormatChange);
+
+  // 1. PDF File Selection (Supports multiple PDFs)
+  fileInput.addEventListener("change", async (ev) => {
+    const files = ev.target.files;
+    if (!files || files.length === 0 || isLoading) return;
+
     clearAll(true);
-
     extractBtn.disabled = true;
+    if (clearPdfBtn) clearPdfBtn.disabled = true;
 
-    await loadPdf(file);
+    await loadPdfs(Array.from(files));
     fileInput.value = null;
   });
+
+  // Clear / Reset PDFs Button
+  if (clearPdfBtn) {
+    clearPdfBtn.addEventListener("click", () => {
+      clearAll(true);
+    });
+  }
 
   // 2. Page Range Toggle Control
   const handlePageModeChange = () => {
     const isAll = allPagesToggle.checked;
     pageRangeInput.disabled = isAll;
-    extractBtn.disabled = !pdfDocument || inProgress;
+    extractBtn.disabled = loadedPdfs.length === 0 || inProgress;
 
-    if (isAll && maxPages > 0) {
-      pageRangeInput.value = `1-${maxPages}`;
+    if (isAll && totalMaxPages > 0) {
+      pageRangeInput.value = `1-${totalMaxPages}`;
     } else if (!isAll) {
       pageRangeInput.focus();
     }
@@ -195,30 +186,21 @@ function initApp() {
 
   // 3. Extraction Trigger
   extractBtn.addEventListener("click", async () => {
-    if (inProgress || !pdfDocument) return;
+    if (inProgress || loadedPdfs.length === 0) return;
 
-    extractBtn.disabled = true;
-
-    const pagesToProcess = getPagesToProcess(maxPages);
+    const pagesToProcess = getPagesToProcess(totalMaxPages);
 
     if (pagesToProcess.length === 0) {
-      log(
-        "[ERROR] Invalid or empty page range specified. Please check input.",
-        "error"
-      );
+      log("[ERROR] Invalid or empty page range specified.", "error");
       status.textContent = "Extraction failed: Invalid page range.";
-      extractBtn.disabled = !pdfDocument;
+      extractBtn.disabled = loadedPdfs.length === 0;
       return;
     }
 
-    await startExtraction(pdfDocument, pagesToProcess);
+    await startWasmExtraction(pagesToProcess);
   });
 
-
-
-
-
-  // Thumbnail/Preview Toggle (matching /layout accordion smooth grid collapse)
+  // Thumbnail/Preview Toggle Accordion
   const imagesContentWrapper = document.getElementById("imagesContentWrapper");
   const previewCollapseText = document.getElementById("previewCollapseText");
   const previewCollapseIcon = document.getElementById("previewCollapseIcon");
@@ -243,17 +225,15 @@ function initApp() {
     }
   });
 
+  // Save ZIP Button Handler
   downloadZipBtn.addEventListener("click", async () => {
     if (imageStore.size === 0) return;
     downloadZipBtn.disabled = true;
 
-    // 1. Determine which images are included based on checkbox state
     const includedImages = [];
     let totalIncludedBytes = 0;
 
     for (const [hash, rec] of imageStore.entries()) {
-      // If thumbnails were rendered, check the checkbox state.
-      // If thumbnails were NOT rendered, we assume all are included by default.
       let isIncluded = true;
       const checkbox = document.getElementById(`include-${hash}`);
 
@@ -281,7 +261,7 @@ function initApp() {
     status.innerHTML = `<span class="spinner"></span>${msg}`;
     log(msg);
     pageProgressBar.classList.remove("hidden");
-    progressBarFill.style.width = "100%"; // Indeterminate progress for ZIP creation
+    updateProgressBar(100);
 
     try {
       const zip = new JSZip();
@@ -301,31 +281,23 @@ function initApp() {
       saveAs(zipBlob, `${currentDocName}.zip`);
 
       const actualZipSizeMB = formatSizeToMB(zipBlob.size);
-
-      const doneMsg = `[INFO] ZIP ready. ${count} selected image(s) saved. (Final size: ${formatSize(
-        zipBlob.size
-      )})`;
+      const doneMsg = `[INFO] ZIP ready. ${count} selected image(s) saved. (Final size: ${formatSize(zipBlob.size)})`;
       status.textContent = doneMsg;
       log(doneMsg);
 
-      // Update button & summary text
       downloadZipBtn.innerHTML = `<i class="fa-solid fa-file-zipper"></i> Save ZIP`;
       if (resultsSummaryText) {
         resultsSummaryText.textContent = `${count} images (~${actualZipSizeMB} MB)`;
       }
     } catch (err) {
-      const errorMsg =
-        "[ERROR] Error creating ZIP: " + ((err && err.message) || err);
+      const errorMsg = "[ERROR] Error creating ZIP: " + ((err && err.message) || err);
       status.textContent = errorMsg;
       log(errorMsg, "error");
     } finally {
-      // Recalculate size/count of currently CHECKED items to re-enable button accurately
-      const finalCount = Array.from(imageStore.entries()).filter(
-        ([hash]) => {
-          const checkbox = document.getElementById(`include-${hash}`);
-          return !checkbox || checkbox.checked; // If no checkbox (not rendered), include it
-        }
-      ).length;
+      const finalCount = Array.from(imageStore.entries()).filter(([hash]) => {
+        const checkbox = document.getElementById(`include-${hash}`);
+        return !checkbox || checkbox.checked;
+      }).length;
 
       downloadZipBtn.disabled = !(finalCount > 0);
       pageProgressBar.classList.add("hidden");
@@ -333,30 +305,16 @@ function initApp() {
   });
 
   /**
-   * Clears all stored data and resets the UI state.
-   * @param {boolean} fullReset If true, wipes document state (pdf, currentDocName). If false, only wipes results (images, counters).
+   * Resets all stored data and UI state.
    */
   function clearAll(fullReset = false) {
-    log(
-      `[INFO] Clearing ${
-        fullReset ? "all app state" : "previous results"
-      }...`
-    );
+    log(`[INFO] Clearing ${fullReset ? "all app state" : "previous results"}...`);
 
-    // Revoke all temporary URLs if they were created
     imageStore.forEach((rec) => {
       if (rec.tempUrl) URL.revokeObjectURL(rec.tempUrl);
     });
     imageStore.clear();
 
-    processedObjIds.clear();
-    failedObjIds.clear();
-    processedContentHashes.clear();
-
-    aCounter = 0;
-    bCounter = 0;
-
-    // Reset UI elements
     imagesWrap.innerHTML = "";
     if (imagesContentWrapper) {
       imagesContentWrapper.classList.add("collapsed");
@@ -364,9 +322,8 @@ function initApp() {
     pageProgressBar.classList.add("hidden");
 
     areThumbsVisible = false;
-    areThumbsRendered = false; // Reset render state
+    areThumbsRendered = false;
 
-    // Reset text and class for thumbnail button
     if (previewCollapseText) previewCollapseText.textContent = "Show";
     if (previewCollapseIcon) previewCollapseIcon.style.transform = "rotate(180deg)";
     toggleThumbsBtn.disabled = true;
@@ -376,533 +333,299 @@ function initApp() {
     if (resultsSummaryText) {
       resultsSummaryText.textContent = `0 images found`;
     }
+    if (previewSummaryText) {
+      previewSummaryText.textContent = "";
+    }
 
-    // --- Document State Clear (Only if fullReset is true) ---
     if (fullReset) {
-      pdfDocument = null;
-      maxPages = 0;
+      loadedPdfs = [];
+      totalMaxPages = 0;
       currentDocName = "";
 
-      status.textContent = "Cleared. Select a PDF to begin.";
+      status.textContent = "No PDF loaded.";
 
+      if (clearPdfBtn) clearPdfBtn.disabled = true;
       extractBtn.disabled = true;
       pageRangeInput.value = "";
       pageRangeInput.disabled = true;
       allPagesToggle.checked = true;
     }
-
-    if (fullReset) {
-      log("[INFO] State cleared.", "config");
-    }
   }
 
   /**
-   * Step 1: Loads the PDF.
+   * Loads multiple PDF files.
    */
-  async function loadPdf(file) {
+  async function loadPdfs(files) {
     if (isLoading) return;
     isLoading = true;
 
-    const rawDocName = file.name.replace(/\.pdf$/i, "");
-    // Ensure currentDocName is URL-safe and used consistently as the prefix.
-    const safeDocName = rawDocName.replace(/[^\w\d-_\.]/g, "_");
-
     try {
-      const arrayBuffer = await file.arrayBuffer();
-      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      loadedPdfs = [];
+      totalMaxPages = 0;
 
-      status.innerHTML = `<span class="spinner"></span>[PROGRESS] Loading ${file.name}...`;
-      log(`[INFO] Starting load for ${file.name}...`);
+      status.innerHTML = `<span class="spinner"></span>[PROGRESS] Reading ${files.length} PDF file(s)...`;
+      log(`[INFO] Loading ${files.length} PDF file(s)...`);
 
-      pdfDocument = await loadingTask.promise;
-      maxPages = pdfDocument.numPages;
-      currentDocName = safeDocName; // Store the cleaned name globally
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const rawDocName = file.name.replace(/\.pdf$/i, "");
+        const safeDocName = rawDocName.replace(/[^\w\d-_\.]/g, "_");
 
-      pageRangeInput.value = `1-${maxPages}`;
+        const buffer = await file.arrayBuffer();
+        const loadingTask = pdfjsLib.getDocument({ data: buffer.slice(0) });
+        const doc = await loadingTask.promise;
+
+        loadedPdfs.push({
+          name: file.name,
+          safeName: safeDocName,
+          arrayBuffer: buffer,
+          pdfDocument: doc,
+          maxPages: doc.numPages
+        });
+
+        totalMaxPages += doc.numPages;
+      }
+
+      if (loadedPdfs.length === 1) {
+        currentDocName = loadedPdfs[0].safeName;
+      } else {
+        currentDocName = "extracted_images";
+      }
+
+      pageRangeInput.value = `1-${totalMaxPages}`;
       pageRangeInput.disabled = allPagesToggle.checked;
       extractBtn.disabled = false;
+      if (clearPdfBtn) clearPdfBtn.disabled = false;
 
+      const fileNames = loadedPdfs.map(p => p.name).join(", ");
+      const msg = loadedPdfs.length === 1
+        ? `${loadedPdfs[0].name} (${loadedPdfs[0].maxPages} pages) ready.`
+        : `${loadedPdfs.length} PDFs loaded (${totalMaxPages} total pages) ready.`;
 
-      const msg = `${file.name} (${maxPages} pages) ready.`;
       status.textContent = msg;
-      log(`[INFO] ${file.name} loaded (${maxPages} pages). Ready for extraction.`);
+      status.title = fileNames;
+      log(`[INFO] ${loadedPdfs.length} PDF(s) loaded (${totalMaxPages} pages). Ready for extraction.`);
     } catch (err) {
-      const errorMsg =
-        "[ERROR] Fatal error during PDF loading: " +
-        ((err && err.message) || err);
+      const errorMsg = "[ERROR] Fatal error during PDF loading: " + ((err && err.message) || err);
       status.textContent = errorMsg;
       log(errorMsg, "error");
-      pdfDocument = null;
+      loadedPdfs = [];
+      totalMaxPages = 0;
       currentDocName = "";
-
-
+      if (clearPdfBtn) clearPdfBtn.disabled = true;
     } finally {
       isLoading = false;
     }
   }
 
-  /**
-   * Step 2: Starts the extraction loop.
-   */
-  async function startExtraction(pdf, pagesToProcess) {
-    if (inProgress) return;
-    inProgress = true;
+  let extractionWorker = null;
 
-    // --- FIX: Only reset RESULTS, keep document state (currentDocName) intact ---
-    clearAll(false);
-
-    const safeDocName = currentDocName;
-    const totalPages = pagesToProcess.length;
-
-    log(
-      `[INFO] Starting image extraction across ${totalPages} selected page(s).`
-    );
-    log(
-      `[CONFIG] Output format set to: ${getSelectedFormat()
-        .ext.toUpperCase()
-        .substring(1)}`,
-      "config"
-    );
-
-    try {
-      for (let i = 0; i < totalPages; i++) {
-        const p = pagesToProcess[i];
-        try {
-          const pageMsg = `[PROGRESS] Scanning page ${
-            i + 1
-          }/${totalPages} (Page ${p} of PDF)...`;
-          status.innerHTML = `<span class="spinner"></span>${pageMsg}`;
-          pageProgressBar.classList.remove("hidden");
-
-          const page = await pdf.getPage(p);
-          await processPageImages(page, safeDocName, p);
-        } catch (pageErr) {
-          log(
-            `[ERROR] Failed to process PDF page ${p}: ${pageErr.message}. Continuing...`,
-            "error"
-          );
-        }
-      }
-
-      // 2. Hide Progress Bar
-      pageProgressBar.classList.add("hidden");
-
-      // --- FINALIZATION STEP ---
-      finalizeNamingAndUI();
-
-      const finalCount = imageStore.size;
-
-      // Recalculate the count based on the initial default state (all included) for the final message
-      const initialIncludedCount = finalCount;
-      let doneMsg =
-        initialIncludedCount > 0
-          ? `[INFO] Extraction complete. ${initialIncludedCount} unique image(s) ready for download.`
-          : `[INFO] Extraction complete. No unique images found in the selected range or after filtering.`;
-      status.textContent = doneMsg;
-      log(doneMsg);
-
-      resultsBar.classList.remove("hidden");
-      downloadZipBtn.disabled = initialIncludedCount === 0;
-    } catch (err) {
-      log(`[ERROR] Extraction process failed: ${err.message}`, "error");
-      pageProgressBar.classList.add("hidden");
-    } finally {
-      inProgress = false;
-      extractBtn.disabled = !pdfDocument;
-
-
+  function getWorker() {
+    if (!extractionWorker) {
+      extractionWorker = new Worker("./worker.js", { type: "module" });
     }
+    return extractionWorker;
   }
 
-  /**
-   * Finalizes the naming of all images, calculates size, and updates the UI.
-   */
-  function finalizeNamingAndUI() {
-    const { ext } = getSelectedFormat();
-    const finalCount = imageStore.size;
-    let totalBytes = 0;
+  function runWorkerExtraction(pdfBuffer, pagesToProcess, options, onProgress) {
+    return new Promise((resolve, reject) => {
+      const worker = getWorker();
 
-    imageStore.forEach((rec, hash) => {
-      rec.name = `${rec.baseName}${ext}`;
-      totalBytes += rec.blob.size;
-    });
-
-    const totalSizeFormatted = formatSize(totalBytes);
-    const totalSizeMB = formatSizeToMB(totalBytes);
-    log(
-      `[INFO] Finished naming ${finalCount} unique images with ${ext} extension. Estimated total size: ${totalSizeFormatted}`
-    );
-
-    // Update the Results Bar Button with estimated size (since all are checked by default)
-    downloadZipBtn.innerHTML = `<i class="fa-solid fa-file-zipper"></i> Save ZIP`;
-    if (resultsSummaryText) {
-      resultsSummaryText.textContent = `${finalCount} images (~${totalSizeMB} MB)`;
-    }
-
-    // Update the Thumbnail Toggle button state (keep preview collapsed by default)
-    if (finalCount > 0) {
-      toggleThumbsBtn.disabled = false;
-      areThumbsVisible = false;
-      if (imagesContentWrapper) {
-        imagesContentWrapper.classList.add("collapsed");
-      }
-      if (previewCollapseText) {
-        previewCollapseText.textContent = "Show";
-      }
-      if (previewCollapseIcon) {
-        previewCollapseIcon.style.transform = "rotate(180deg)";
-      }
-    } else {
-      toggleThumbsBtn.disabled = true;
-      if (previewCollapseText) previewCollapseText.textContent = "Show";
-      if (previewCollapseIcon) previewCollapseIcon.style.transform = "rotate(180deg)";
-    }
-  }
-
-  /**
-   * Wraps the callback-based page.objs.get in a Promise.
-   * Skips phantom objects (soft masks, stencils) that never resolve.
-   */
-  function objGetPromise(page, objId) {
-    return new Promise((resolve) => {
-      try {
-        const timeout = setTimeout(() => {
-          log(`[SKIP] Auxiliary object "${objId}" (likely mask/pattern).`);
-          resolve(null);
-        }, FAST_TIMEOUT);
-
-        page.objs.get(objId, (obj) => {
-          clearTimeout(timeout);
-          resolve(obj);
-        });
-      } catch (e) {
-        log(
-          `[WARN] Failed to retrieve object ${objId}: ${e.message}`,
-          "warn"
-        );
-        resolve(null);
-      }
-    });
-  }
-
-  /**
-   * Processes a single page to find and handle image objects.
-   */
-  async function processPageImages(page, docName, pageNumber) {
-    try {
-      const ops = await page.getOperatorList();
-      const fns = ops.fnArray;
-      const args = ops.argsArray;
-      const OPS = pdfjsLib.OPS || {};
-      const interesting = new Set(
-        Object.keys({
-          [OPS.paintJpegXObject]: 1,
-          [OPS.paintImageXObject]: 1,
-          [OPS.paintInlineImageXObject]: 1,
-          [OPS.paintImageXObjectRepeat]: 1,
-          [OPS.paintInlineImageXObjectGroup]: 1,
-        }).map(Number)
-      );
-
-      // 1. Calculate Total Image Operations for this page
-      let totalImageOps = fns.filter((fn) => interesting.has(fn)).length;
-      let processedImageOps = 0;
-      updatePageProgressBar(0, totalImageOps); // Initialize bar
-
-      for (let i = 0; i < fns.length; i++) {
-        if (!interesting.has(fns[i])) continue;
-
-        const arg = args[i];
-        let imgObj = null;
-        let currentObjId = null;
-
-        try {
-          if (
-            Array.isArray(arg) &&
-            arg.length > 0 &&
-            typeof arg[0] === "string"
-          ) {
-            currentObjId = arg[0];
-
-            if (
-              processedObjIds.has(currentObjId) ||
-              failedObjIds.has(currentObjId)
-            ) {
-              // Image already processed/failed, update progress but skip processing
-            } else {
-              imgObj = await objGetPromise(page, currentObjId);
-
-              if (!imgObj) {
-                failedObjIds.add(currentObjId);
-              } else {
-                processedObjIds.add(currentObjId);
-                await handleImageObject(
-                  imgObj,
-                  docName,
-                  pageNumber,
-                  currentObjId
-                );
-              }
-            }
-          } else if (arg && typeof arg === "object" && arg.data) {
-            imgObj = arg;
-            await handleImageObject(imgObj, docName, pageNumber, null);
+      worker.onmessage = (e) => {
+        const { type, text, current, total, images, error } = e.data;
+        if (type === "progress") {
+          if (onProgress) onProgress(text, current, total);
+        } else if (type === "complete") {
+          resolve(images);
+        } else if (type === "error") {
+          if (extractionWorker) {
+            extractionWorker.terminate();
+            extractionWorker = null;
           }
-
-          // 2. Update Progress Bar after image operation
-          processedImageOps++;
-          updatePageProgressBar(processedImageOps, totalImageOps);
-          // Yield control slightly to ensure UI update
-          await new Promise((resolve) => setTimeout(resolve, 1));
-        } catch (err) {
-          log(
-            `[ERROR] Image process error (Page ${pageNumber}, ID: ${
-              currentObjId || "inline"
-            }): ${err.message}. Continuing...`,
-            "error"
-          );
-          if (currentObjId) {
-            failedObjIds.add(currentObjId);
-          }
-
-          // Still increment the counter if an error occurs mid-processing to show progress
-          processedImageOps++;
-          updatePageProgressBar(processedImageOps, totalImageOps);
-          await new Promise((resolve) => setTimeout(resolve, 1));
+          reject(new Error(error));
         }
-      }
-
-      await page.cleanup();
-      updatePageProgressBar(totalImageOps, totalImageOps); // Ensure 100% on exit
-    } catch (err) {
-      log(
-        `[ERROR] Cleanup error on page ${pageNumber}: ${err.message}`,
-        "error"
-      );
-      throw err;
-    }
-  }
-
-  /**
-   * Converts image object, checks uniqueness, filters by size, and stores.
-   * Returns true if stored, false if filtered/skipped.
-   */
-  async function handleImageObject(imgObj, docName, pageNumber, objId) {
-    try {
-      let blob = null;
-      let ab = null;
-      let width = 0; // Added for resolution
-      let height = 0; // Added for resolution
-
-      const resetCanvas = (w, h) => {
-        reuseCanvas.width = w;
-        reuseCanvas.height = h;
-        reuseCtx.setTransform(1, 0, 0, 1, 0, 0);
-        reuseCtx.clearRect(0, 0, w, h);
       };
 
-      let abRaw = null;
-      let hashRaw = null;
-
-      // --- TIER 1 DEDUPLICATION: Hashing RAW Pixel Data ---
-      if (
-        (imgObj.data && (imgObj.width || imgObj.height)) ||
-        imgObj instanceof ImageData
-      ) {
-        const dataView =
-          imgObj.data instanceof Uint8ClampedArray
-            ? imgObj.data
-            : imgObj.data instanceof Uint8Array
-            ? imgObj.data
-            : new Uint8Array(imgObj.data.buffer || imgObj.data);
-
-        if (dataView.buffer) {
-          abRaw = dataView.buffer.slice(
-            dataView.byteOffset,
-            dataView.byteOffset + dataView.byteLength
-          );
-          hashRaw = await hashArrayBuffer(abRaw);
-
-          if (processedContentHashes.has(hashRaw)) {
-            log(
-              `[DEDUPE] Raw content hash matched. Skipping image on page ${pageNumber}.`,
-              "dedupe"
-            );
-            return false;
-          }
+      worker.onerror = (err) => {
+        if (extractionWorker) {
+          extractionWorker.terminate();
+          extractionWorker = null;
         }
-      }
-      // --- END TIER 1 DEDUPLICATION ---
+        reject(new Error(err.message || "Web Worker error"));
+      };
 
-      // --- CONVERSION TO OUTPUT BLOB & SIZE CHECK ---
-      const quality = 1;
-
-      if (imgObj.src && typeof imgObj.src === "string") {
-        const imgEl =
-          imgObj instanceof HTMLImageElement
-            ? imgObj
-            : await createImageFromBlob(
-                await (await fetch(imgObj.src)).blob()
-              );
-        width = imgEl.naturalWidth || imgEl.width;
-        height = imgEl.naturalHeight || imgEl.height;
-        resetCanvas(width, height);
-        blob = await canvasToOutputBlob(reuseCanvas, quality);
-        ab = await blob.arrayBuffer();
-      } else if (imgObj instanceof HTMLCanvasElement) {
-        width = imgObj.width;
-        height = imgObj.height;
-        blob = await canvasToOutputBlob(imgObj, quality);
-        ab = await blob.arrayBuffer();
-      } else if (
-        (imgObj.data && (imgObj.width || imgObj.height)) ||
-        imgObj instanceof ImageData
-      ) {
-        width = imgObj.width || imgObj.data.width || 1;
-        height = imgObj.height || imgObj.data.height || 1;
-        if (width <= 1 || height <= 1) {
-          return false;
-        }
-
-        resetCanvas(width, height);
-
-        try {
-          const imageData =
-            imgObj instanceof ImageData
-              ? imgObj
-              : new ImageData(
-                  new Uint8ClampedArray(
-                    imgObj.data.buffer || imgObj.data
-                  ),
-                  width,
-                  height
-                );
-          reuseCtx.putImageData(imageData, 0, 0);
-        } catch (e) {
-          return false;
-        }
-
-        blob = await canvasToOutputBlob(reuseCanvas, quality);
-        ab = await blob.arrayBuffer();
-      } else if (
-        imgObj.bitmap &&
-        imgObj.bitmap.width &&
-        imgObj.bitmap.height
-      ) {
-        const bmp = imgObj.bitmap;
-        width = bmp.width;
-        height = bmp.height;
-        resetCanvas(width, height);
-        reuseCtx.drawImage(bmp, 0, 0);
-        blob = await canvasToOutputBlob(reuseCanvas, quality);
-        ab = await blob.arrayBuffer();
-      } else {
-        return false;
-      }
-
-      if (!ab || !blob) {
-        return false;
-      }
-
-      // --- FILE SIZE FILTER CHECK ---
-      if (blob.size < MIN_FILE_SIZE_BYTES) {
-        log(
-          `[FILTER] Skipped image (size: ${(blob.size / 1024).toFixed(
-            1
-          )} KB, Dim: ${width}x${height}px) on page ${pageNumber}.`,
-          "filter"
-        );
-        return false;
-      }
-
-      const hashContent = await hashArrayBuffer(ab);
-
-      // --- FINAL DUPLICATION CHECK (Content Hash) ---
-      if (imageStore.has(hashContent)) {
-        log(
-          `[DEDUPE] Processed content hash matched. Skipping image on page ${pageNumber}.`,
-          "dedupe"
-        );
-        return false;
-      }
-
-      // --- NEW UNIQUE IMAGE FOUND ---
-
-      let prefix;
-      let counter;
-
-      if (pageNumber % 2 !== 0) {
-        aCounter++;
-        prefix = "A";
-        counter = aCounter;
-      } else {
-        bCounter++;
-        prefix = "B";
-        counter = bCounter;
-      }
-
-      const baseName = `${docName}-${prefix}${counter}`;
-
-      // Store Hashes
-      if (hashRaw) {
-        processedContentHashes.add(hashRaw);
-      }
-      processedContentHashes.add(hashContent);
-
-      // Store with dimensions
-      imageStore.set(hashContent, {
-        baseName: baseName,
-        blob: blob,
-        name: "",
-        tempUrl: null,
-        width: width, // Storing width
-        height: height, // Storing height
-      });
-
-      log(
-        `[NEW] Found image ${baseName} (${(blob.size / 1024).toFixed(
-          1
-        )} KB, Dim: ${width}x${height}px).`
+      const bufferCopy = pdfBuffer.slice(0);
+      worker.postMessage(
+        {
+          pdfBuffer: bufferCopy,
+          pagesToProcess: pagesToProcess,
+          options: options
+        },
+        [bufferCopy]
       );
-
-      return true;
-    } catch (err) {
-      log(`[ERROR] Image storage failure: ${err.message}`, "error");
-      return false;
-    }
-  }
-
-  // --- Generic Canvas to Blob Conversion (supports JPG and PNG) ---
-  function canvasToOutputBlob(canvas, quality) {
-    const format = getSelectedFormat();
-    return new Promise((resolve, reject) => {
-      try {
-        canvas.toBlob(
-          (b) => {
-            if (b) resolve(b);
-            else reject(new Error("canvas.toBlob returned null"));
-          },
-          format.mime,
-          format.mime === "image/jpeg" ? quality : undefined
-        );
-      } catch (e) {
-        reject(e);
-      }
     });
   }
 
-  // --- Thumbnail Rendering Logic (Moved out of extraction loop) ---
+  /**
+   * Step 2: Runs PyMuPDF WASM extraction across all loaded PDFs.
+   */
+  async function startWasmExtraction(pagesToProcess) {
+    if (inProgress || loadedPdfs.length === 0) return;
+    inProgress = true;
+    extractBtn.disabled = true;
+    if (clearPdfBtn) clearPdfBtn.disabled = true;
 
+    clearAll(false);
+
+    const formatMode = formatJpeg && formatJpeg.checked ? "jpeg" : "original";
+    const jpegQuality = parseFloat(jpegQualitySelect ? jpegQualitySelect.value : "0.90") || 0.90;
+    const shouldAddUsageSuffix = addUsageSuffix ? addUsageSuffix.checked : true;
+
+    log(`[INFO] Starting WASM extraction across ${loadedPdfs.length} PDF(s).`);
+    log(`[CONFIG] Mode: ${formatMode.toUpperCase()}` + (formatMode === "jpeg" ? ` (Quality: ${jpegQuality})` : ""), "config");
+
+    pageProgressBar.classList.remove("hidden");
+    updateProgressBar(5);
+    status.innerHTML = `<span class="spinner"></span>[PROGRESS] Preparing extraction task...`;
+
+    try {
+      const allExtractedImages = [];
+      const totalPdfs = loadedPdfs.length;
+
+      for (let pIdx = 0; pIdx < totalPdfs; pIdx++) {
+        const pdfItem = loadedPdfs[pIdx];
+        const pdfLabel = totalPdfs > 1 ? `[PDF ${pIdx + 1}/${totalPdfs}: ${pdfItem.name}] ` : "";
+
+        const pdfImages = await runWorkerExtraction(
+          pdfItem.arrayBuffer,
+          pagesToProcess,
+          { formatMode, jpegQuality },
+          (text, current, total) => {
+            status.innerHTML = `<span class="spinner"></span>${pdfLabel}${text}`;
+            const overallProgress = Math.floor(((pIdx + ((current || 0) / 100)) / totalPdfs) * 100);
+            updateProgressBar(overallProgress);
+          }
+        );
+
+        if (pdfImages && pdfImages.length > 0) {
+          allExtractedImages.push(...pdfImages);
+        }
+      }
+
+      handleExtractionComplete(allExtractedImages, shouldAddUsageSuffix);
+    } catch (err) {
+      handleExtractionError(err.message || String(err));
+    } finally {
+      if (clearPdfBtn) clearPdfBtn.disabled = false;
+    }
+  }
+
+  /**
+   * Handles successfully extracted image payloads from Web Worker.
+   */
+  function handleExtractionComplete(extractedImages, shouldAddUsageSuffix) {
+    pageProgressBar.classList.add("hidden");
+    inProgress = false;
+    extractBtn.disabled = loadedPdfs.length === 0;
+
+    if (!extractedImages || extractedImages.length === 0) {
+      const msg = "[INFO] Extraction complete. No embedded images found in selected pages.";
+      status.textContent = msg;
+      log(msg);
+      resultsBar.classList.remove("hidden");
+      downloadZipBtn.disabled = true;
+      return;
+    }
+
+    log(`[INFO] Processing ${extractedImages.length} extracted image object(s)...`);
+
+    let totalBytes = 0;
+
+    extractedImages.forEach((rec, index) => {
+      const hashKey = rec.hash || `img_${index}`;
+
+      if (imageStore.has(hashKey)) {
+        // Multi-PDF deduplication: accumulate reference counts and pages
+        const existing = imageStore.get(hashKey);
+        existing.referenceCount += (rec.referenceCount || 1);
+        if (rec.pages) {
+          rec.pages.forEach(p => {
+            if (!existing.pages.includes(p)) existing.pages.push(p);
+          });
+        }
+      } else {
+        const sequenceNum = String(imageStore.size + 1).padStart(3, "0");
+        const refSuffix = shouldAddUsageSuffix ? `_x${rec.referenceCount || 1}` : "";
+        const fileName = `img_${sequenceNum}${refSuffix}.${rec.extension}`;
+
+        const mimeType = getMimeTypeFromExt(rec.extension);
+        const blob = new Blob([rec.bytes], { type: mimeType });
+
+        totalBytes += blob.size;
+
+        imageStore.set(hashKey, {
+          name: fileName,
+          blob: blob,
+          tempUrl: null,
+          width: rec.width || 0,
+          height: rec.height || 0,
+          referenceCount: rec.referenceCount || 1,
+          pages: rec.pages || []
+        });
+      }
+    });
+
+    const totalCount = imageStore.size;
+    const totalSizeMB = formatSizeToMB(totalBytes);
+    const totalSizeFormatted = formatSize(totalBytes);
+
+    let totalCopies = 0;
+    imageStore.forEach((rec) => {
+      totalCopies += (rec.referenceCount || 1);
+    });
+
+    if (previewSummaryText) {
+      previewSummaryText.textContent = `${totalCount} unique images found, total ${totalCopies} amount of copies`;
+    }
+
+    const doneMsg = `[INFO] Extraction complete. ${totalCount} unique image(s) extracted (${totalSizeFormatted}).`;
+    status.textContent = doneMsg;
+    log(doneMsg);
+
+    resultsBar.classList.remove("hidden");
+    downloadZipBtn.disabled = totalCount === 0;
+    if (resultsSummaryText) {
+      resultsSummaryText.textContent = `${totalCount} images (~${totalSizeMB} MB)`;
+    }
+
+    if (totalCount > 0) {
+      toggleThumbsBtn.disabled = false;
+    }
+  }
+
+  /**
+   * Handles errors from worker extraction.
+   */
+  function handleExtractionError(errorMsg) {
+    pageProgressBar.classList.add("hidden");
+    inProgress = false;
+    extractBtn.disabled = loadedPdfs.length === 0;
+
+    const formattedErr = `[ERROR] Image extraction failed: ${errorMsg}`;
+    status.textContent = formattedErr;
+    log(formattedErr, "error");
+  }
+
+  /**
+   * Lazy-renders thumbnail previews when user expands Section 3 (Preview).
+   */
   function renderThumbnails() {
     if (areThumbsRendered) return;
 
-    imagesWrap.innerHTML = ""; // Clear in case of previous failed render
-
+    imagesWrap.innerHTML = "";
     log(`[INFO] Generating ${imageStore.size} thumbnail previews...`);
 
-    // Iterate over the stored images and create DOM elements
     for (const [hash, rec] of imageStore) {
-      // Create temporary URL and store it (This is the slow/expensive part we defer)
       rec.tempUrl = URL.createObjectURL(rec.blob);
 
       const div = document.createElement("div");
@@ -910,71 +633,83 @@ function initApp() {
 
       const imgWrap = document.createElement("div");
       imgWrap.className = "w-full h-32 bg-gray-100 rounded border border-gray-200 overflow-hidden flex items-center justify-center";
-      
+
       const img = document.createElement("img");
       img.src = rec.tempUrl;
       img.alt = rec.name;
       img.className = "max-w-full max-h-full object-contain";
-      
+
       imgWrap.appendChild(img);
 
       const meta = document.createElement("div");
       meta.className = "meta text-xs flex flex-col gap-1.5";
 
-      // Filename and Resolution Row
+      // Row 1: Filename & Dimensions
       const row = document.createElement("div");
       row.className = "row flex justify-between items-start gap-2 w-full break-all";
 
       const nameEl = document.createElement("div");
-      nameEl.className = "filename font-medium text-theme-dark flex-1";
+      nameEl.className = "filename font-medium text-theme-dark flex-1 truncate";
       nameEl.id = `name-${hash}`;
       nameEl.textContent = rec.name;
       nameEl.title = rec.name;
 
       const resolutionEl = document.createElement("div");
       resolutionEl.className = "resolution font-bold text-theme-indigo whitespace-nowrap";
-      resolutionEl.textContent = `${rec.width}x${rec.height}px`;
+      resolutionEl.textContent = rec.width && rec.height ? `${rec.width}x${rec.height}px` : formatSize(rec.blob.size);
 
       row.appendChild(nameEl);
       row.appendChild(resolutionEl);
 
-      // Inclusion Control and Save Button Row
+      // Row 2: Page usage & reference count badge
+      const usageRow = document.createElement("div");
+      usageRow.className = "flex justify-between items-center text-[11px] text-theme-muted";
+
+      const usageBadge = document.createElement("span");
+      usageBadge.className = "bg-theme-yellow/60 border border-theme-dark rounded px-1.5 py-0.5 font-bold text-theme-dark";
+      usageBadge.textContent = `Used ${rec.referenceCount}x`;
+
+      const pagesInfo = document.createElement("span");
+      pagesInfo.className = "truncate ml-1 font-mono text-[10px]";
+      pagesInfo.textContent = rec.pages && rec.pages.length > 0 ? `Pg ${rec.pages.join(",")}` : "";
+      pagesInfo.title = rec.pages && rec.pages.length > 0 ? `Appears on page(s): ${rec.pages.join(", ")}` : "";
+
+      usageRow.appendChild(usageBadge);
+      usageRow.appendChild(pagesInfo);
+
+      // Row 3: Controls (Include checkbox & Save button)
       const controls = document.createElement("div");
       controls.className = "controls flex items-center justify-between gap-2 mt-1";
 
-      // Inclusion Checkbox (NEW)
       const checkboxId = `include-${hash}`;
       const includeLabel = document.createElement("label");
       includeLabel.className = "flex items-center gap-1.5 cursor-pointer text-theme-muted hover:text-theme-dark font-medium";
 
       const includeCheckboxWrap = document.createElement("div");
       includeCheckboxWrap.className = "relative flex items-center justify-center w-4 h-4 border-2 border-theme-dark rounded-sm bg-white has-[:checked]:bg-theme-yellow overflow-hidden transition-colors";
-      
+
       const includeCheckbox = document.createElement("input");
       includeCheckbox.type = "checkbox";
       includeCheckbox.id = checkboxId;
-      includeCheckbox.checked = true; // Default checked
+      includeCheckbox.checked = true;
       includeCheckbox.className = "absolute opacity-0 w-full h-full cursor-pointer m-0 z-10 peer";
 
       const checkIcon = document.createElement("div");
       checkIcon.className = "w-2.5 h-2.5 bg-theme-dark opacity-0 peer-checked:opacity-100 transition-opacity";
       checkIcon.style.clipPath = "polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%)";
 
-      // Add listener to update total size/count when a box is unchecked
       includeCheckbox.addEventListener("change", () => {
         const totalBytes = Array.from(imageStore.entries())
-          .filter(([hash]) => {
-            const cb = document.getElementById(`include-${hash}`);
+          .filter(([h]) => {
+            const cb = document.getElementById(`include-${h}`);
             return cb && cb.checked;
           })
-          .reduce((sum, [, rec]) => sum + rec.blob.size, 0);
+          .reduce((sum, [, r]) => sum + r.blob.size, 0);
 
-        const finalCount = Array.from(imageStore.entries()).filter(
-          ([hash]) => {
-            const cb = document.getElementById(`include-${hash}`);
-            return cb && cb.checked;
-          }
-        ).length;
+        const finalCount = Array.from(imageStore.entries()).filter(([h]) => {
+          const cb = document.getElementById(`include-${h}`);
+          return cb && cb.checked;
+        }).length;
 
         const totalSizeMB = formatSizeToMB(totalBytes);
         downloadZipBtn.innerHTML = `<i class="fa-solid fa-file-zipper"></i> Save ZIP`;
@@ -1000,45 +735,17 @@ function initApp() {
       controls.appendChild(dl);
 
       meta.appendChild(row);
+      meta.appendChild(usageRow);
       meta.appendChild(controls);
 
       div.appendChild(imgWrap);
       div.appendChild(meta);
-      imagesWrap.prepend(div);
+      imagesWrap.appendChild(div);
     }
 
     areThumbsRendered = true;
-    log(
-      `[INFO] Thumbnail rendering complete. Individual inclusion controls enabled.`
-    );
+    log(`[INFO] Thumbnail rendering complete.`);
   }
-
-  // --- Helper Functions ---
-
-  function createImageFromBlob(blob) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const url = URL.createObjectURL(blob);
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        resolve(img);
-      };
-      img.onerror = (err) => {
-        URL.revokeObjectURL(url);
-        reject(err);
-      };
-      img.src = url;
-    });
-  }
-
-  async function hashArrayBuffer(arrayBuffer) {
-    const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-  }
-
-
-
 }
 
 window.addEventListener("load", function () {
