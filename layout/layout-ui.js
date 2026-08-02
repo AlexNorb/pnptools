@@ -263,6 +263,17 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         }
       );
+      if (this.elements.customFileName) {
+        this.elements.customFileName.addEventListener("input", (e) => {
+          if (e.target.value.trim()) {
+            e.target.dataset.userCustomized = "true";
+          } else {
+            delete e.target.dataset.userCustomized;
+            this.ui.updateFileNamePreview();
+          }
+        });
+      }
+
       this.config.crosshairColor = window.LayoutToolPDF.utils.updateColor(
         this.elements.crosshaircolor
       );
@@ -641,39 +652,34 @@ document.addEventListener("DOMContentLoaded", () => {
       },
 
       updateFileNamePreview() {
-        const previewEl = LayoutToolUI.elements.fileNamePreview || document.getElementById("fileNamePreview");
-        if (!previewEl) return;
+        const customInput = LayoutToolUI.elements.customFileName || document.getElementById("customFileName");
+        if (!customInput) return;
 
         const isFoldable = LayoutToolUI.elements.foldableRadio?.checked;
-        const fallbackName = isFoldable ? "fold" : "grid";
-
-        let baseName = (LayoutToolUI.elements.customFileName?.value || "").trim();
-        if (baseName.endsWith(".pdf")) baseName = baseName.slice(0, -4);
-        if (!baseName) baseName = fallbackName;
+        const pSize = isFoldable
+          ? LayoutToolUI.elements.foldable_pageSize?.value
+          : LayoutToolUI.elements.pageSize?.value;
 
         let prefix = "";
-        if (LayoutToolUI.elements.prefixPageSize?.checked) {
-          const isFoldable = LayoutToolUI.elements.foldableRadio?.checked;
-          const pSize = isFoldable
-            ? LayoutToolUI.elements.foldable_pageSize?.value
-            : LayoutToolUI.elements.pageSize?.value;
-
-          if (pSize === "Custom") {
-            const widthVal = isFoldable
-              ? LayoutToolUI.elements.foldable_pageWidth?.value
-              : LayoutToolUI.elements.pageWidth?.value;
-            const heightVal = isFoldable
-              ? LayoutToolUI.elements.foldable_pageHeight?.value
-              : LayoutToolUI.elements.pageHeight?.value;
-            const w = Math.round(parseFloat(widthVal) || 0);
-            const h = Math.round(parseFloat(heightVal) || 0);
-            prefix = `${w}x${h}_`;
-          } else {
-            prefix = `${pSize}_`;
-          }
+        if (pSize === "Custom") {
+          const widthVal = isFoldable
+            ? LayoutToolUI.elements.foldable_pageWidth?.value
+            : LayoutToolUI.elements.pageWidth?.value;
+          const heightVal = isFoldable
+            ? LayoutToolUI.elements.foldable_pageHeight?.value
+            : LayoutToolUI.elements.pageHeight?.value;
+          const w = Math.round(parseFloat(widthVal) || 0);
+          const h = Math.round(parseFloat(heightVal) || 0);
+          prefix = `${w}x${h}_`;
+        } else {
+          prefix = `${pSize || "A4"}_`;
         }
 
-        previewEl.textContent = `${prefix}${baseName}.pdf`;
+        const fallbackName = isFoldable ? "fold" : "grid";
+
+        if (!customInput.dataset.userCustomized || !customInput.value.trim()) {
+          customInput.value = `${prefix}${fallbackName}.pdf`;
+        }
       },
 
       updateSettingsSummary() {

@@ -154,17 +154,17 @@
         <!-- Column 1: 1. Upload PDF (Shares 50% width when space allows) -->
         <div class="flex-1 min-w-[280px] flex flex-col">
           <h2 class="text-xl font-display text-theme-dark mb-2">1. Upload PDF</h2>
-          <p class="text-xs text-theme-muted font-body mb-3 leading-relaxed">This tool will move all content on chosen pages to adjust for your printer's mis-alignment.</p>
+          <p class="text-xs text-theme-muted font-body mb-3 leading-relaxed">This tool will move all content on chosen pages to adjust for your printer's misalignment.</p>
           <div class="dropzone-neo relative flex-1 flex flex-col items-center justify-center p-4 min-h-[140px]" id="pdfDropzone">
             <i class="fa-solid fa-file-pdf text-4xl text-theme-pink mb-2"></i>
-            <label for="pdfFile" class="text-base font-bold cursor-pointer block text-theme-dark">Drop PDF here or browse</label>
-            <span class="file-count text-xs block text-theme-muted mt-1 font-medium" id="fileCount">No file selected</span>
-            <input type="file" id="pdfFile" accept="application/pdf" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+            <label for="pdfFile" class="text-base font-bold cursor-pointer block text-theme-dark text-center">Drop PDF(s) here or browse</label>
+            <span class="file-count text-xs block text-theme-muted mt-1 font-medium text-center truncate max-w-full px-2" id="fileCount">No file selected</span>
+            <input type="file" id="pdfFile" accept="application/pdf" multiple class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
           </div>
         </div>
 
         <!-- Column 2: 2. Settings (Requires min 400px so internal elements stay spacious and wrap cleanly) -->
-        <div class="flex-1 min-w-[400px] flex flex-col justify-between pt-4 sm:pt-0 sm:pl-2">
+        <div class="flex-1 min-w-[400px] flex flex-col justify-between pt-4 sm:pt-0 sm:pl-6 md:pl-8">
           <div>
             <div class="flex items-center gap-3 mb-4">
               <h2 class="text-xl font-display text-theme-dark">2. Settings</h2>
@@ -181,7 +181,7 @@
             </div>
 
             <!-- Top Row: Number Inputs + Preview Together (Strictly flex-nowrap) -->
-            <div class="flex flex-nowrap items-stretch gap-3 sm:gap-4 mb-4 overflow-hidden">
+            <div class="flex flex-nowrap items-stretch gap-3 sm:gap-4 mb-6 sm:mb-7">
               <!-- Steppers & Reset -->
               <div class="flex flex-col gap-2 shrink-0 justify-between">
                 <!-- Horizontal Shift (Indigo Axis) -->
@@ -200,7 +200,7 @@
 
                 <!-- Reset Button -->
                 <button type="button" id="btnReset" title="Reset values to 0" class="btn-secondary w-full px-2 py-0.5 text-xs font-bold text-theme-muted hover:bg-theme-yellow hover:text-theme-dark flex items-center justify-center gap-1 shrink-0 h-6.5">
-                  <i class="fa-solid fa-rotate-left text-[10px]"></i> Reset
+                  <i class="fa-solid fa-rotate-left text-[10px] text-theme-pink"></i> Reset
                 </button>
               </div>
 
@@ -269,7 +269,6 @@
       <div class="w-full justify-self-stretch flex items-stretch justify-center h-full min-w-0">
         <div id="fileNameCard"
           class="bg-white border-3 border-theme-dark rounded-xl py-2 px-4 flex items-center gap-3 shadow-[4px_4px_0_var(--color-theme-dark)] w-full h-full min-h-[52px]">
-          <i class="fa-solid fa-file-pdf text-theme-pink text-lg shrink-0"></i>
           <span class="font-bold text-xs text-theme-dark shrink-0">Filename:</span>
           <input type="text" id="outputFileName" value="shifted.pdf" class="px-2 text-xs font-bold text-theme-dark border-1.5 border-theme-dark rounded-md h-8 focus:outline-none focus:border-theme-pink flex-1 min-w-0 w-full" />
         </div>
@@ -287,6 +286,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="../shared/notifications.js"></script>
   <script src="../shared/header.js"></script>
   <script src="align.js"></script>

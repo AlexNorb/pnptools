@@ -431,10 +431,10 @@ function initApp() {
     return new Promise((resolve, reject) => {
       const worker = getWorker();
 
-      worker.onmessage = (e) => {
+      worker.onmessage = async (e) => {
         const { type, text, current, total, images, error } = e.data;
         if (type === "progress") {
-          if (onProgress) onProgress(text, current, total);
+          if (onProgress) await onProgress(text, current, total);
         } else if (type === "complete") {
           resolve(images);
         } else if (type === "error") {
@@ -486,7 +486,11 @@ function initApp() {
 
     pageProgressBar.classList.remove("hidden");
     updateProgressBar(5);
-    status.innerHTML = `<span class="spinner"></span>[PROGRESS] Preparing extraction task...`;
+    status.innerHTML = `<span class="spinner"></span>Sharpening blade...`;
+
+    const bladeStartTime = Date.now();
+    const MAX_BLADE_TIME_MS = 600;
+    let hasBladeDelayElapsed = false;
 
     try {
       const allExtractedImages = [];
@@ -500,8 +504,18 @@ function initApp() {
           pdfItem.arrayBuffer,
           pagesToProcess,
           { formatMode, jpegQuality },
-          (text, current, total) => {
-            status.innerHTML = `<span class="spinner"></span>${pdfLabel}${text}`;
+          async (text, current, total) => {
+            const cleanText = (text || "").replace(/^\[PROGRESS\]\s*/, "");
+
+            if (!hasBladeDelayElapsed && cleanText !== "Sharpening blade...") {
+              const elapsed = Date.now() - bladeStartTime;
+              if (elapsed < MAX_BLADE_TIME_MS) {
+                await new Promise((r) => setTimeout(r, MAX_BLADE_TIME_MS - elapsed));
+              }
+              hasBladeDelayElapsed = true;
+            }
+
+            status.innerHTML = `<span class="spinner"></span>${pdfLabel}${cleanText}`;
             const overallProgress = Math.floor(((pIdx + ((current || 0) / 100)) / totalPdfs) * 100);
             updateProgressBar(overallProgress);
           }
@@ -585,7 +599,7 @@ function initApp() {
     });
 
     if (previewSummaryText) {
-      previewSummaryText.textContent = `${totalCount} unique images found, total ${totalCopies} amount of copies`;
+      previewSummaryText.textContent = `${totalCount} unique image${totalCount === 1 ? "" : "s"} used ${totalCopies} time${totalCopies === 1 ? "" : "s"} in total`;
     }
 
     const doneMsg = `[INFO] Extraction complete. ${totalCount} unique image(s) extracted (${totalSizeFormatted}).`;
@@ -685,18 +699,11 @@ function initApp() {
       const includeLabel = document.createElement("label");
       includeLabel.className = "flex items-center gap-1.5 cursor-pointer text-theme-muted hover:text-theme-dark font-medium";
 
-      const includeCheckboxWrap = document.createElement("div");
-      includeCheckboxWrap.className = "relative flex items-center justify-center w-4 h-4 border-2 border-theme-dark rounded-sm bg-white has-[:checked]:bg-theme-yellow overflow-hidden transition-colors";
-
       const includeCheckbox = document.createElement("input");
       includeCheckbox.type = "checkbox";
       includeCheckbox.id = checkboxId;
       includeCheckbox.checked = true;
-      includeCheckbox.className = "absolute opacity-0 w-full h-full cursor-pointer m-0 z-10 peer";
-
-      const checkIcon = document.createElement("div");
-      checkIcon.className = "w-2.5 h-2.5 bg-theme-dark opacity-0 peer-checked:opacity-100 transition-opacity";
-      checkIcon.style.clipPath = "polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%)";
+      includeCheckbox.className = "accent-theme-indigo cursor-pointer";
 
       includeCheckbox.addEventListener("change", () => {
         const totalBytes = Array.from(imageStore.entries())
@@ -719,15 +726,12 @@ function initApp() {
         downloadZipBtn.disabled = finalCount === 0;
       });
 
-      includeCheckboxWrap.appendChild(includeCheckbox);
-      includeCheckboxWrap.appendChild(checkIcon);
-
-      includeLabel.appendChild(includeCheckboxWrap);
+      includeLabel.appendChild(includeCheckbox);
       includeLabel.appendChild(document.createTextNode("Include"));
 
       const dl = document.createElement("a");
       dl.href = rec.tempUrl;
-      dl.className = "btn-secondary text-[11px] px-2 h-6 min-h-0 py-0";
+      dl.className = "btn-pink text-[11px] px-2 h-6 min-h-0 py-0";
       dl.textContent = "Save";
       dl.download = rec.name;
 

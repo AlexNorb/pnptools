@@ -91,10 +91,10 @@ async function shiftPDFContent() {
   const MM_TO_PT = 72 / 25.4;
 
   const inputFile = document.getElementById("pdfFile");
-  const pdfFile = inputFile.files[0];
+  const files = Array.from(inputFile?.files || []);
 
-  if (!pdfFile) {
-    Toast.show("Please choose a PDF file first.", "error");
+  if (!files || files.length === 0) {
+    Toast.show("Please choose at least one PDF file first.", "error");
     return;
   }
 
@@ -119,63 +119,133 @@ async function shiftPDFContent() {
     return;
   }
 
-  const originalName = pdfFile.name.replace(/\.pdf$/i, "");
-  let outputFileName = document.getElementById("outputFileName").value.trim();
-  if (!outputFileName) {
-    outputFileName = `${originalName}_shifted.pdf`;
-  } else if (!/\.pdf$/i.test(outputFileName)) {
-    outputFileName += ".pdf";
-  }
+  const customOutputName = document.getElementById("outputFileName").value.trim();
 
   try {
-    const pdfBytes = await readFileAsArrayBuffer(pdfFile);
-    const data = new Uint8Array(pdfBytes);
-    const pdfDoc = await PDFLib.PDFDocument.load(data);
-    const pages = pdfDoc.getPages();
+    if (files.length === 1) {
+      const pdfFile = files[0];
+      const originalName = pdfFile.name.replace(/\.pdf$/i, "");
+      let outputFileName = customOutputName;
+      if (!outputFileName) {
+        outputFileName = `${originalName}_shifted.pdf`;
+      } else if (!/\.pdf$/i.test(outputFileName)) {
+        outputFileName += ".pdf";
+      }
 
-    let selectedPagesSet = null;
-    if (shiftPages === "selection") {
-      const selectionInput = document.getElementById("pageSelectionInput");
-      const rangeStr = selectionInput ? selectionInput.value.trim() : "";
-      if (!rangeStr) {
-        Toast.show("Please enter page numbers for selection (e.g. 1-3,5,8).", "error");
+      const pdfBytes = await readFileAsArrayBuffer(pdfFile);
+      const data = new Uint8Array(pdfBytes);
+      const pdfDoc = await PDFLib.PDFDocument.load(data);
+      const pages = pdfDoc.getPages();
+
+      let selectedPagesSet = null;
+      if (shiftPages === "selection") {
+        const selectionInput = document.getElementById("pageSelectionInput");
+        const rangeStr = selectionInput ? selectionInput.value.trim() : "";
+        if (!rangeStr) {
+          Toast.show("Please enter page numbers for selection (e.g. 1-3,5,8).", "error");
+          return;
+        }
+        selectedPagesSet = parsePageRange(rangeStr, pages.length);
+        if (selectedPagesSet.size === 0) {
+          Toast.show(`No valid pages selected for range (1-${pages.length}).`, "error");
+          return;
+        }
+      }
+
+      for (let i = 0; i < pages.length; i++) {
+        const pageNum = i + 1;
+        const isOddPage = pageNum % 2 !== 0;
+
+        if (shiftPages === "odd" && !isOddPage) continue;
+        if (shiftPages === "even" && isOddPage) continue;
+        if (shiftPages === "selection" && !selectedPagesSet.has(pageNum)) continue;
+
+        const page = pages[i];
+        const rotation = page.getRotation().angle;
+        const rotationRadians = rotation * (Math.PI / 180);
+
+        // Adjust shift values based on rotation angle
+        const adjustedShiftX =
+          shiftXPt * Math.cos(rotationRadians) - shiftYPt * Math.sin(rotationRadians);
+        const adjustedShiftY =
+          shiftXPt * Math.sin(rotationRadians) + shiftYPt * Math.cos(rotationRadians);
+
+        page.translateContent(adjustedShiftX, adjustedShiftY);
+      }
+
+      const modifiedPDFData = await pdfDoc.save();
+      const blob = new Blob([modifiedPDFData], { type: "application/pdf" });
+      triggerDownload(blob, outputFileName);
+      Toast.show("PDF shifted successfully!", "success");
+    } else {
+      // Multiple PDFs: Process all files and save as ZIP
+      let zipFileName = customOutputName || "shifted_pdfs.zip";
+      if (!/\.zip$/i.test(zipFileName)) {
+        if (zipFileName.toLowerCase().endsWith(".pdf")) {
+          zipFileName = zipFileName.slice(0, -4) + ".zip";
+        } else {
+          zipFileName += ".zip";
+        }
+      }
+
+      if (typeof JSZip === "undefined") {
+        Toast.show("ZIP library not loaded. Please refresh the page.", "error");
         return;
       }
-      selectedPagesSet = parsePageRange(rangeStr, pages.length);
-      if (selectedPagesSet.size === 0) {
-        Toast.show(`No valid pages selected for range (1-${pages.length}).`, "error");
-        return;
+
+      const zip = new JSZip();
+      Toast.show(`Processing ${files.length} PDF files...`, "info");
+
+      for (let fIdx = 0; fIdx < files.length; fIdx++) {
+        const pdfFile = files[fIdx];
+        const originalName = pdfFile.name.replace(/\.pdf$/i, "");
+        const outputItemName = `${originalName}_shifted.pdf`;
+
+        const pdfBytes = await readFileAsArrayBuffer(pdfFile);
+        const data = new Uint8Array(pdfBytes);
+        const pdfDoc = await PDFLib.PDFDocument.load(data);
+        const pages = pdfDoc.getPages();
+
+        let selectedPagesSet = null;
+        if (shiftPages === "selection") {
+          const selectionInput = document.getElementById("pageSelectionInput");
+          const rangeStr = selectionInput ? selectionInput.value.trim() : "";
+          if (rangeStr) {
+            selectedPagesSet = parsePageRange(rangeStr, pages.length);
+          }
+        }
+
+        for (let i = 0; i < pages.length; i++) {
+          const pageNum = i + 1;
+          const isOddPage = pageNum % 2 !== 0;
+
+          if (shiftPages === "odd" && !isOddPage) continue;
+          if (shiftPages === "even" && isOddPage) continue;
+          if (shiftPages === "selection" && selectedPagesSet && !selectedPagesSet.has(pageNum)) continue;
+
+          const page = pages[i];
+          const rotation = page.getRotation().angle;
+          const rotationRadians = rotation * (Math.PI / 180);
+
+          const adjustedShiftX =
+            shiftXPt * Math.cos(rotationRadians) - shiftYPt * Math.sin(rotationRadians);
+          const adjustedShiftY =
+            shiftXPt * Math.sin(rotationRadians) + shiftYPt * Math.cos(rotationRadians);
+
+          page.translateContent(adjustedShiftX, adjustedShiftY);
+        }
+
+        const modifiedPDFData = await pdfDoc.save();
+        zip.file(outputItemName, modifiedPDFData);
       }
+
+      const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
+      triggerDownload(zipBlob, zipFileName);
+      Toast.show(`${files.length} PDFs shifted and saved to ZIP!`, "success");
     }
-
-    for (let i = 0; i < pages.length; i++) {
-      const pageNum = i + 1;
-      const isOddPage = pageNum % 2 !== 0;
-
-      if (shiftPages === "odd" && !isOddPage) continue;
-      if (shiftPages === "even" && isOddPage) continue;
-      if (shiftPages === "selection" && !selectedPagesSet.has(pageNum)) continue;
-
-      const page = pages[i];
-      const rotation = page.getRotation().angle;
-      const rotationRadians = rotation * (Math.PI / 180);
-
-      // Adjust shift values based on rotation angle
-      const adjustedShiftX =
-        shiftXPt * Math.cos(rotationRadians) - shiftYPt * Math.sin(rotationRadians);
-      const adjustedShiftY =
-        shiftXPt * Math.sin(rotationRadians) + shiftYPt * Math.cos(rotationRadians);
-
-      page.translateContent(adjustedShiftX, adjustedShiftY);
-    }
-
-    const modifiedPDFData = await pdfDoc.save();
-    const blob = new Blob([modifiedPDFData], { type: "application/pdf" });
-    triggerDownload(blob, outputFileName);
-    Toast.show("PDF shifted successfully!", "success");
   } catch (error) {
-    console.error("Failed to process PDF:", error);
-    Toast.show("An error occurred while processing the PDF.", "error");
+    console.error("Failed to process PDF(s):", error);
+    Toast.show("An error occurred while processing the PDF(s).", "error");
   }
 }
 
@@ -287,11 +357,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // File Upload Selection Handler
+  // File Upload Selection Handler (Supports Multiple PDFs)
   if (pdfFile) {
     pdfFile.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) {
+      const files = Array.from(e.target.files || []);
+      if (files.length === 1) {
+        const file = files[0];
         if (fileCount) {
           fileCount.textContent = `${file.name} (${formatBytes(file.size)})`;
           fileCount.classList.add("text-theme-dark", "font-bold");
@@ -300,6 +371,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (outputFileName) {
           const originalName = file.name.replace(/\.pdf$/i, "");
           outputFileName.value = `${originalName}_shifted.pdf`;
+        }
+      } else if (files.length > 1) {
+        const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+        if (fileCount) {
+          fileCount.textContent = `${files.length} PDFs selected (${formatBytes(totalBytes)})`;
+          fileCount.classList.add("text-theme-dark", "font-bold");
+          fileCount.classList.remove("text-theme-muted");
+        }
+        if (outputFileName) {
+          outputFileName.value = "shifted_pdfs.zip";
         }
       } else {
         if (fileCount) {

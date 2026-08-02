@@ -8,7 +8,7 @@ async function getEngine() {
       type: "progress",
       current: 0,
       total: 100,
-      text: "[PROGRESS] Initializing PyMuPDF WASM engine..."
+      text: "Sharpening blade..."
     });
     
     pymupdfInstance = new PyMuPDF({
@@ -63,7 +63,7 @@ self.onmessage = async (e) => {
       type: "progress",
       current: 5,
       total: 100,
-      text: "[PROGRESS] Opening PDF document in WASM..."
+      text: "Sharpening blade..."
     });
 
     const doc = await engine.open(new Blob([pdfBuffer]));
@@ -77,7 +77,7 @@ self.onmessage = async (e) => {
       type: "progress",
       current: 10,
       total: 100,
-      text: `[PROGRESS] Discovering image objects across ${pages.length} page(s)...`
+      text: `Lining up cuts across ${pages.length} page(s)...`
     });
 
     // --- STEP 2: DISCOVER IMAGES & PRIMARY XREF DEDUPLICATION ---
@@ -120,7 +120,7 @@ self.onmessage = async (e) => {
         type: "progress",
         current: progressPct,
         total: 100,
-        text: `[PROGRESS] Scanned page ${i + 1}/${pages.length}...`
+        text: `Lining up cuts across ${pages.length} page(s)...`
       });
     }
 
@@ -131,7 +131,7 @@ self.onmessage = async (e) => {
       type: "progress",
       current: 40,
       total: 100,
-      text: `[PROGRESS] Found ${totalXrefs} unique xref object(s). Extracting byte streams...`
+      text: `Slicing images (${totalXrefs} found)...`
     });
 
     // --- STEP 3 & 4: EXTRACTION & SECONDARY HASH DEDUPLICATION ---
