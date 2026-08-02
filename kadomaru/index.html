@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Card Clicker Game</title>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Bungee&family=Fredoka+One&family=Poppins:wght@400;500;700&display=swap");
+
+      /* --- NEW THEME: Playful & Vibrant --- */
+
+      /* --- Dark Mode: "Lava Lamp" --- */
+      :root {
+        --font-primary: "Fredoka One", cursive;
+        --font-secondary: "Poppins", sans-serif;
+
+        /* Backgrounds */
+        --bg-primary: #1c1c2e; /* Deep Indigo */
+        --bg-secondary: #2a2a45; /* Dark Purple-Blue */
+        --bg-tertiary: #3c3c62; /* Muted Purple */
+
+        /* Text */
+        --text-primary: #f0f0ff; /* Light Lavender */
+        --text-secondary: #c0c0e0; /* Soft Violet */
+        --text-accent: #ff6b6b; /* Vibrant Coral - for titles/highlights */
+
+        /* Borders & Dividers */
+        --border-color: #50507a; /* Medium Purple */
+        --border-highlight: #ff9f43; /* Bright Orange - for active/focus */
+
+        /* UI Elements (Buttons, Cards - base) */
+        --ui-primary-bg: #ff9f43; /* Bright Orange */
+        --ui-primary-text: #1c1c2e; /* Deep Indigo (for contrast on bright buttons) */
+        --ui-primary-hover-bg: #ffbd73; /* Lighter Orange */
+        --ui-primary-shadow: rgba(255, 159, 67, 0.4);
+
+        --ui-secondary-bg: #4834d4; /* Electric Purple */
+        --ui-secondary-text: #f0f0ff;
+        --ui-secondary-hover-bg: #6755e0; /* Lighter Electric Purple */
+        --ui-secondary-shadow: rgba(72, 52, 212, 0.4);
+
+        /* Game Specific */
+        --card-bg-color: #4834d4; /* Electric Purple */
+        --card-shadow: rgba(0, 0, 0, 0.6);
+        --special-card-glow: rgba(255, 215, 0, 0.8); /* Gold glow */
+        --boss-card-glow: rgba(255, 70, 70, 0.9); /* Intense Red glow */
+
+        /* Feedback Colors */
+        --game-over-text: #ff6b6b; /* Vibrant Coral */
+        --level-up-color: #54f054; /* Bright Green */
+        --particle-color: #ffda77; /* Light Gold */
+        --bonus-particle-color: #ff6b6b; /* Vibrant Coral */
+
+        /* Toggles */
+        --switch-bg-off: #3c3c62; /* Muted Purple */
+        --switch-bg-on: var(--ui-primary-bg); /* Bright Orange */
+        --switch-slider-color: #f0f0ff;
+
+        /* Social Icons */
+        --social-icon-color: #c0c0e0; /* Soft Violet */
+        --social-icon-hover: var(--ui-primary-bg); /* Bright Orange */
+      }
+
+      /* --- Light Mode: "Citrus Splash" --- */
+      body.light-mode {
+        /* Backgrounds */
+        --bg-primary: #fef9e7; /* Pale Yellow */
+        --bg-secondary: #ffffff; /* White */
+        --bg-tertiary: #fdebd0; /* Light Peach */
+
+        /* Text */
+        --text-primary: #3d2c24; /* Dark Brown */
+        --text-secondary: #7a5c4f; /* Medium Brown */
+        --text-accent: #fa8231; /* Bright Orange - for titles/highlights */
+
+        /* Borders & Dividers */
+        --border-color: #f5cba7; /* Peach */
+        --border-highlight: #20bf6b; /* Vibrant Green - for active/focus */
+
+        /* UI Elements (Buttons, Cards - base) */
+        --ui-primary-bg: #fa8231; /* Bright Orange */
+        --ui-primary-text: #ffffff;
+        --ui-primary-hover-bg: #fc9850; /* Lighter Bright Orange */
+        --ui-secondary-hover-bg: #26de7a; /* Lighter Vibrant Green */
+        --ui-secondary-shadow: rgba(32, 191, 107, 0.35);
+
+        /* Game Specific */
+        --card-bg-color: #54a0ff; /* Bright Blue */
+        --card-shadow: rgba(100, 100, 100, 0.25);
+        --special-card-glow: rgba(255, 193, 7, 0.7); /* Sunny Yellow glow */
+        --boss-card-glow: rgba(239, 83, 80, 0.8); /* Bright Red glow */
+
+        /* Feedback Colors */
+        --game-over-text: #e74c3c; /* Strong Red */
+        --level-up-color: #16a085; /* Strong Teal */
+        --particle-color: #f7b731; /* Golden Yellow */
+        --bonus-particle-color: #e74c3c; /* Strong Red */
+
+        /* Toggles */
+        --switch-bg-off: #f5cba7; /* Peach */
+        --switch-bg-on: var(--ui-secondary-bg); /* Vibrant Green */
+        --switch-slider-color: #ffffff;
+
+        /* Social Icons */
+        --social-icon-color: #7a5c4f; /* Medium Brown */
+        --social-icon-hover: var(--ui-primary-bg); /* Bright Orange */
+      }
+
+      body {
+        font-family: var(--font-secondary);
+        background-color: #ECF0DD;
+        min-height: 100vh;
+        color: var(--text-primary);
+        overflow-y: auto;
+        margin: 0;
+        padding: 1.5rem 1rem;
+        box-sizing: border-box;
+      }
+
+      .page-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      .pnp-game-card {
+        width: 100%;
+        background: var(--bg-primary);
+        border: 3px solid #1C111F;
+        border-radius: 16px;
+        box-shadow: 6px 6px 0 #1C111F, 10px 10px 0 #DF2CD4;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        box-sizing: border-box;
+      }
+
+      /* Brand Footer Card */
+      .brand-footer {
+        width: 100%;
+        background: #FFFFFF;
+        border: 3px solid #1C111F;
+        border-radius: 14px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 5px 5px 0 #1C111F;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        text-align: center;
+        color: #1C111F;
+        box-sizing: border-box;
+      }
+      @media (min-width: 550px) {
+        .brand-footer {
+          flex-direction: row;
+          text-align: left;
+        }
+      }
+      .footer-brand-link {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        text-decoration: none;
+        color: #1C111F;
+        transition: transform 0.2s ease;
+      }
+      .footer-brand-link:hover {
+        transform: scale(1.02);
+      }
+      .footer-logo {
+        width: 44px;
+        height: 44px;
+        object-fit: contain;
+      }
+      .footer-title {
+        font-family: 'Bungee', cursive, sans-serif;
+        font-size: 1.2rem;
+        line-height: 1.1;
+        color: #1C111F;
+        text-shadow: 2px 2px 0px #DF2CD4;
+      }
+      .footer-tagline {
+        font-size: 0.85rem;
+        color: #554B59;
+        font-family: 'Averia Serif Libre', serif;
+      }
+      .social-links {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .social-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: 2px solid #1C111F;
+        border-radius: 8px;
+        text-decoration: none;
+        box-shadow: 3px 3px 0 #1C111F;
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      .icon-discord { background: #5865F2; color: white; }
+      .icon-discord:hover { transform: translate(-2px, -2px); background: #4752C4; box-shadow: 5px 5px 0 #1C111F, -2px -2px 0 #DF2CD4; }
+      .icon-makerworld { background: #00AE42; color: white; }
+      .icon-makerworld:hover { transform: translate(-2px, -2px); background: #008F36; box-shadow: 5px 5px 0 #1C111F, -2px -2px 0 #F7E517; }
+      .icon-bmc { background: #F7E517; color: #1C111F; }
+      .icon-bmc:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 #1C111F, -2px -2px 0 #3DDDB2; }
+      .icon-email { background: #3DDDB2; color: #1C111F; }
+      .icon-email:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 #1C111F, -2px -2px 0 #DF2CD4; }
+
+      #game-title {
+        font-family: var(--font-primary);
+        font-size: 3.5rem; /* Slightly larger */
+        font-weight: normal; /* Fredoka One is already bold */
+        color: var(--text-accent);
+        margin-bottom: 25px;
+        text-shadow: 2px 2px 0px var(--bg-secondary),
+          /* Base shadow */ 4px 4px 0px rgba(0, 0, 0, 0.1); /* Softer outer shadow */
+        text-align: center;
+        transition: color 0.3s ease, text-shadow 0.3s ease;
+        flex-shrink: 0;
+        cursor: default; /* For triple click */
+      }
+      /* Dev input visibility logic will be handled by JS and Tailwind class */
+      #dev-start-level-container.hidden-by-default {
+        display: none; /* Initially hidden */
+      }
+      #dev-start-level-container.visible-by-toggle {
+        display: flex !important; /* Force display when toggled */
+        /* Add some styling to make it look like a debug tool */
+        background-color: var(--bg-tertiary);
+        padding: 8px;
+        border-radius: 6px;
+        margin-top: 10px;
+      }
+      #dev-start-level-container label {
+        color: var(--text-secondary);
+      }
+      #dev-start-level-container input {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+      }
+
+      #main-game-area {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-grow: 1;
+        width: 100%;
+        max-width: 1200px;
+        justify-content: center;
+        gap: 20px;
+        min-height: 0;
+      }
+
+      #game-container {
+        position: relative;
+        width: 100%;
+        max-width: 1000px;
+        height: 600px;
+        min-height: 500px;
+        background-color: var(--bg-secondary);
+        border-radius: 16px; /* More rounded */
+        box-shadow: 0 0 0 3px var(--border-color),
+          inset 0 0 15px rgba(0, 0, 0, 0.1), 0 10px 25px var(--card-shadow); /* More stylized border & shadow */
+        overflow: hidden;
+        border: none; /* Removed simple border, using box-shadow for effect */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: background-color 0.4s ease, box-shadow 0.4s ease;
+      }
+
+      #game-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(0, 0, 0, 0.75); /* Slightly darker overlay */
+        z-index: 100;
+        border-radius: 16px; /* Match parent */
+        text-align: center;
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(0.95);
+        transition: opacity 0.3s ease, transform 0.3s ease,
+          visibility 0s linear 0.3s;
+      }
+      #game-overlay.active {
+        /* New class to control visibility */
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+        transition: opacity 0.3s ease, transform 0.3s ease,
+          visibility 0s linear 0s;
+      }
+
+      .game-button {
+        padding: 0.6rem 1.2rem; /* Slightly larger padding */
+        font-family: var(--font-secondary);
+        font-size: 1.1rem;
+        font-weight: 500; /* Poppins medium */
+        background-image: linear-gradient(
+          to bottom right,
+          var(--ui-primary-bg),
+          var(--ui-primary-hover-bg)
+        );
+        color: var(--ui-primary-text);
+        border: none;
+        border-radius: 25px; /* Pill-shaped */
+        cursor: pointer;
+        transition: background-image 0.3s ease,
+          transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+          box-shadow 0.3s ease;
+        box-shadow: 0 4px 12px var(--ui-primary-shadow),
+          0 1px 3px rgba(0, 0, 0, 0.1);
+        margin: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      #game-overlay-start-button {
+        /* This specific button may use secondary colors for distinction */
+        padding: 0.8rem 2rem;
+        font-size: 1.4rem;
+        background-image: linear-gradient(
+          to bottom right,
+          var(--ui-secondary-bg),
+          var(--ui-secondary-hover-bg)
+        );
+        color: var(--ui-secondary-text);
+        box-shadow: 0 5px 15px var(--ui-secondary-shadow),
+          0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .game-button:hover {
+        transform: translateY(-3px) scale(1.03);
+        box-shadow: 0 7px 18px var(--ui-primary-shadow),
+          0 3px 6px rgba(0, 0, 0, 0.15);
+      }
+      #game-overlay-start-button:hover {
+        box-shadow: 0 7px 18px var(--ui-secondary-shadow),
+          0 3px 6px rgba(0, 0, 0, 0.15);
+      }
+
+      .game-button:active {
+        transform: translateY(-1px) scale(0.98);
+        box-shadow: 0 2px 8px var(--ui-primary-shadow),
+          0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+      #game-overlay-start-button:active {
+        box-shadow: 0 2px 8px var(--ui-secondary-shadow),
+          0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+
+      /* --- Game Stats Styling --- */
+      #game-stats-wrapper {
+        /* New wrapper for mobile toggle */
+        width: 90vw;
+        max-width: 1200px;
+        flex-shrink: 0;
+      }
+      #toggle-stats-button {
+        display: none; /* Hidden by default, shown on mobile */
+        width: 100%;
+        margin-bottom: 10px;
+        background-image: linear-gradient(
+          to bottom right,
+          var(--bg-tertiary),
+          var(--bg-secondary)
+        );
+        color: var(--text-primary);
+        box-shadow: 0 4px 10px var(--card-shadow);
+      }
+
+      #game-stats {
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Better vertical alignment */
+        align-items: center;
+        width: 100%; /* Takes full width of its wrapper */
+        background-color: var(--bg-secondary);
+        padding: 20px 25px;
+        border-radius: 12px; /* Softer rounding */
+        box-shadow: 0 6px 15px var(--card-shadow);
+        border: 1px solid var(--border-color);
+        gap: 15px;
+        font-size: 1.2rem; /* Slightly smaller for better fit */
+        font-weight: 500; /* Poppins medium */
+        transition: background-color 0.4s ease, border-color 0.4s ease,
+          box-shadow 0.4s ease, color 0.4s ease, max-height 0.5s ease-in-out,
+          opacity 0.5s ease-in-out, padding 0.5s ease-in-out,
+          margin-bottom 0.5s ease-in-out; /* For mobile collapse */
+        overflow: hidden; /* For mobile collapse animation */
+      }
+      #game-stats.collapsed {
+        /* For mobile */
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        margin-bottom: 0;
+        opacity: 0;
+        border: none;
+        box-shadow: none;
+        overflow: hidden;
+      }
+
+      .stats-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 10px 20px; /* More horizontal gap */
+      }
+      .stats-row > div {
+        /* Better spacing for items in a row */
+        margin: 5px;
+      }
+
+      #hearts-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px; /* Slightly more gap */
+        font-size: 1.6rem; /* Larger hearts */
+        line-height: 1;
+        flex-shrink: 1;
+      }
+
+      .card {
+        position: absolute;
+        width: 10vw;
+        height: calc(10vw * 7 / 5);
+        min-width: 80px;
+        min-height: calc(80px * 7 / 5);
+        max-width: 150px;
+        max-height: calc(150px * 7 / 5);
+        background-color: var(--card-bg-color);
+        background-size: cover;
+        background-position: center;
+        border: none;
+        box-shadow: 0 5px 10px var(--card-shadow); /* Softer shadow */
+        opacity: 1;
+        z-index: 10;
+        border-radius: 0px; /* Initial slight rounding */
+        transition: opacity 0.3s ease-out, transform 0.3s ease,
+          border-radius 0.2s ease, background-color 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+      /* Updated border radius classes to be more distinct */
+      .card.rounded-tl-xl {
+        border-top-left-radius: 1rem;
+      }
+      .card.rounded-tr-xl {
+        border-top-right-radius: 1rem;
+      }
+      .card.rounded-bl-xl {
+        border-bottom-left-radius: 1rem;
+      }
+      .card.rounded-br-xl {
+        border-bottom-right-radius: 1rem;
+      }
+
+      .card.hit-effect {
+        transform: scale(1.05);
+        transition: transform 0.1s ease-out;
+      }
+
+      .card.timed-fade-active {
+        opacity: 0;
+        transition: opacity calc(var(--card-lifetime-seconds) + 0.5s) linear,
+          transform 0.3s ease, border-radius 0.2s ease,
+          background-color 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .card.special-card {
+        box-shadow: 0 0 18px 7px var(--special-card-glow),
+          0 5px 10px var(--card-shadow); /* Enhanced glow */
+      }
+
+      .card.boss-card {
+        box-shadow: 0 0 25px 10px var(--boss-card-glow),
+          0 5px 10px var(--card-shadow); /* Enhanced glow */
+      }
+
+      .corner {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background-color: transparent; /* Keep transparent */
+        border: none;
+        cursor: pointer;
+        z-index: 15;
+      }
+      .corner.top-left {
+        top: -1px;
+        left: -1px;
+      }
+      .corner.top-right {
+        top: -1px;
+        right: -1px;
+      }
+      .corner.bottom-left {
+        bottom: -1px;
+        left: -1px;
+      }
+      .corner.bottom-right {
+        bottom: -1px;
+        right: -1px;
+      }
+
+      #game-message {
+        font-family: var(--font-primary);
+        font-size: 2.5rem; /* Larger message */
+        font-weight: normal;
+        color: var(--game-over-text);
+        margin-bottom: 25px;
+        display: none; /* Handled by JS */
+        line-height: 1.2;
+        transition: color 0.3s ease;
+      }
+
+      #stats-start-button-container {
+        display: none; /* Hidden by default, shown when needed by JS */
+      }
+
+      #level-display.level-up-animation {
+        transform: scale(1.25);
+        color: var(--level-up-color);
+        transition: all 0.3s ease-out;
+      }
+
+      .switch-container {
+        display: flex;
+        align-items: center;
+        gap: 10px; /* More gap */
+        font-size: 0.9rem;
+        font-weight: normal;
+        flex-shrink: 0;
+        color: var(--text-secondary);
+      }
+
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px; /* Wider switch */
+        height: 28px; /* Taller switch */
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--switch-bg-off);
+        transition: 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Bouncy transition */
+        border-radius: 28px; /* Match height */
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 20px; /* Larger knob */
+        width: 20px; /* Larger knob */
+        left: 4px;
+        bottom: 4px;
+        background-color: var(--switch-slider-color);
+        transition: 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Bouncy transition */
+        border-radius: 50%;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+
+      input:checked + .slider {
+        background-color: var(--switch-bg-on);
+      }
+      input:focus + .slider {
+        box-shadow: 0 0 2px var(--switch-bg-on);
+      }
+      input:checked + .slider:before {
+        transform: translateX(22px);
+      } /* Adjusted for wider switch */
+
+      .emoji-icon {
+        font-size: 1.8rem; /* Larger emojis */
+        line-height: 1;
+        color: var(
+          --text-secondary
+        ); /* Use secondary text color for inactive */
+        transition: color 0.3s ease, transform 0.2s ease;
+      }
+      /* Active emoji state */
+      #sound-toggle:checked ~ .sound-on-emoji,
+      body.light-mode .theme-toggle-icons .sun-emoji,
+      body:not(.light-mode) .theme-toggle-icons .moon-emoji {
+        color: var(--text-accent); /* More vibrant when active */
+        transform: scale(1.1);
+      }
+
+      #social-links-container {
+        display: flex; /* Will be flex by default, JS toggles it */
+        gap: 25px; /* More gap */
+        margin-top: 25px;
+        display: none; /* Hidden by default, shown by JS */
+      }
+
+      .social-link {
+        display: block;
+        color: var(--social-icon-color);
+        transition: color 0.2s ease, transform 0.2s ease;
+      }
+      .social-link:hover {
+        color: var(--social-icon-hover);
+        transform: translateY(-4px) scale(1.1); /* More pronounced hover */
+      }
+      .social-icon {
+        /* Basic SVG styling */
+        width: 36px;
+        height: 36px;
+        fill: currentColor;
+      }
+
+      .completion-particle {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+        transition: transform 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67),
+          opacity 0.8s ease-out; /* Adjusted easing */
+        z-index: 20;
+      }
+      .completion-particle.burst {
+        opacity: 0;
+        transform: translate(
+            calc(-50% + var(--particle-end-x, 0px)),
+            calc(-50% + var(--particle-end-y, 0px))
+          )
+          scale(0);
+      }
+
+      /* --- DESKTOP / WIDE SCREEN LAYOUT --- */
+      @media (min-width: 1024px) {
+        body {
+          flex-direction: column;
+          justify-content: center;
+          padding: 20px;
+        }
+        #game-title {
+          margin-bottom: 30px;
+        }
+
+        #main-game-area {
+          flex-direction: row;
+          justify-content: center;
+          align-items: stretch;
+          flex-grow: 1;
+          max-width: 100%;
+          gap: 30px;
+          min-height: 0;
+        }
+
+        #game-stats-wrapper {
+          /* Wrapper takes fixed width on desktop */
+          width: 320px; /* Slightly wider stats */
+          max-width: 320px;
+        }
+        #toggle-stats-button {
+          display: none !important;
+        } /* Ensure toggle button is hidden */
+
+        #game-stats {
+          width: 100%; /* Full width of its wrapper */
+          margin-bottom: 0;
+          height: auto; /* Stretches */
+          padding: 25px;
+          box-shadow: 0 8px 20px var(--card-shadow); /* More prominent shadow */
+          min-height: 0;
+          overflow-y: auto;
+          max-height: none !important; /* Override mobile collapse */
+          opacity: 1 !important; /* Override mobile collapse */
+        }
+
+        #game-container {
+          width: auto;
+          flex-grow: 1;
+          height: auto;
+          aspect-ratio: 4 / 3;
+          max-width: 900px;
+          min-height: 0;
+          overflow: hidden;
+        }
+
+        #game-stats {
+          font-size: 1.1rem;
+        }
+        .game-button {
+          font-size: 1rem;
+          padding: 0.7rem 1.4rem;
+        }
+        .emoji-icon {
+          font-size: 1.5rem;
+        } /* Adjusted emoji size for desktop */
+      }
+
+      /* --- Mobile Specific Adjustments --- */
+      @media (max-width: 1023px) {
+        /* Changed breakpoint to cover tablets too */
+        #toggle-stats-button {
+          display: block !important;
+        } /* Show toggle button */
+        /* Game stats starts collapsed on mobile/tablet */
+        #game-stats:not(.force-open) {
+          /* .force-open can be used by JS if needed on initial load */
+          max-height: 0;
+          padding-top: 0;
+          padding-bottom: 0;
+          margin-bottom: 0;
+          opacity: 0;
+          border: none;
+          box-shadow: none;
+          overflow: hidden;
+        }
+        #game-stats.expanded {
+          /* JS will toggle this class */
+          max-height: 1000px; /* Large enough to fit content */
+          opacity: 1;
+          padding: 15px 20px; /* Adjust padding for mobile expanded */
+          margin-bottom: 15px; /* Space below when expanded */
+          border: 1px solid var(--border-color);
+          box-shadow: 0 6px 15px var(--card-shadow);
+        }
+
+        #game-title {
+          font-size: 2.5rem;
+          margin-bottom: 20px;
+        }
+        #game-stats {
+          gap: 10px;
+          font-size: 1rem;
+        }
+        .stats-row {
+          gap: 5px;
+        }
+        .card {
+          width: 15vw;
+          height: calc(15vw * 7 / 5);
+          min-width: 70px;
+          min-height: calc(70px * 7 / 5);
+        }
+        .corner {
+          width: 25px;
+          height: 25px;
+        }
+        .game-button {
+          padding: 0.5rem 1.1rem;
+          font-size: 1rem;
+        } /* Adjusted mobile button */
+        #game-message {
+          font-size: 1.8rem;
+        }
+        .switch-container {
+          font-size: 0.8rem;
+        }
+        #social-links-container {
+          gap: 20px;
+        }
+        .social-icon {
+          width: 32px;
+          height: 32px;
+        }
+      }
+      @media (max-width: 480px) {
+        /* Smaller mobile screens */
+        #game-title {
+          font-size: 2rem;
+        }
+        .game-button {
+          padding: 0.4rem 1rem;
+          font-size: 0.9rem;
+        }
+        #game-overlay-start-button {
+          font-size: 1.2rem;
+          padding: 0.6rem 1.5rem;
+        }
+        .emoji-icon {
+          font-size: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <div class="pnp-game-card">
+        <h1 id="game-title">Card Game</h1>
+    <div id="main-game-area">
+      <div id="game-stats-wrapper">
+        <button id="toggle-stats-button" class="game-button">Show Stats</button>
+        <div id="game-stats" class="rounded-lg">
+          <div
+            class="stats-row hidden-by-default"
+            id="dev-start-level-container"
+          >
+            <label for="start-level-input" class="text-sm font-semibold"
+              >Start Lvl:</label
+            >
+            <input
+              type="number"
+              id="start-level-input"
+              value="1"
+              min="1"
+              class="w-16 p-1 rounded text-center"
+            />
+          </div>
+          <div class="stats-row">
+            <button id="upload-button" class="game-button">Load cards</button>
+            <input
+              type="file"
+              id="image-upload"
+              accept="image/*"
+              multiple
+              class="hidden"
+            />
+          </div>
+
+          <div class="stats-row">
+            <div id="score-display">Score: 0</div>
+            <div id="high-score-display">High Score: 0</div>
+          </div>
+          <div class="stats-row" id="stats-start-button-container">
+            <button id="stats-start-button" class="game-button">
+              Play Again
+            </button>
+            <button id="continue-game-button" class="game-button hidden">
+              Continue
+            </button>
+          </div>
+
+          <div class="stats-row">
+            <div id="hearts-container"></div>
+          </div>
+
+          <div class="stats-row">
+            <div id="level-display">Level: 1</div>
+          </div>
+
+          <div class="stats-row">
+            <div class="switch-container">
+              <span class="emoji-icon sound-on-emoji">🔊</span>
+              <span class="emoji-icon sound-off-emoji">🔇</span>
+              <label class="switch">
+                <input type="checkbox" id="sound-toggle" />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="switch-container">
+              <div class="theme-toggle-icons">
+                <span class="emoji-icon moon-emoji">🌙</span>
+                <span class="emoji-icon sun-emoji">☀️</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="theme-toggle" />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="game-container">
+        <div id="game-overlay">
+          <div id="game-message"></div>
+          <div id="social-links-container">
+            <a href="#" class="social-link" aria-label="Social Link 1">
+              <svg
+                class="social-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </a>
+            <a href="#" class="social-link" aria-label="Social Link 2">
+              <svg
+                class="social-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </a>
+            <a href="#" class="social-link" aria-label="Social Link 3">
+              <svg
+                class="social-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </a>
+          <button id="game-overlay-start-button" class="game-button">
+            Start Game
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Full Width Brand Footer Card -->
+<footer class="brand-footer">
+  <a href="../" class="footer-brand-link" title="Back to PNP Buddy Home">
+    <img src="../assets/logo.svg" alt="PNP Buddy Logo" class="footer-logo" />
+    <div>
+      <h2 class="footer-title">PNP BUDDY</h2>
+      <p class="footer-tagline">Your digital Print & Play companion</p>
+    </div>
+  </a>
+
+  <div class="social-links">
+    <a href="https://discord.com/invite/mc94J7ebCZ" target="_blank" rel="noopener" class="social-icon icon-discord" title="Discord Community" aria-label="Discord">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+    </a>
+    <a href="https://makerworld.com/en/@pnpbuddy" target="_blank" rel="noopener" class="social-icon icon-makerworld" title="MakerWorld Profile" aria-label="MakerWorld">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    </a>
+    <a href="https://buymeacoffee.com/pnpbuddy" target="_blank" rel="noopener" class="social-icon icon-bmc" title="Buy Me a Dice" aria-label="Buy Me a Dice">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" ry="3"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/></svg>
+    </a>
+    <a href="mailto:contact@pnpbuddy.com" class="social-icon icon-email" title="Email Us" aria-label="Email">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+    </a>
+  </div>
+</footer>
+
+    <script>
+      // --- Game State Variables ---
+      const RANDOM_CARD_COLORS = [
+        "#FF6B6B", // Red
+        "#4ECDC4", // Teal
+        "#45B7D1", // Light Blue
+        "#FFA07A", // Light Salmon
+        "#98FB98", // Pale Green
+        "#DA70D6", // Orchid
+        "#FFD700", // Gold
+        "#ADFF2F", // GreenYellow
+      ];
+
+      let score = 0;
+      let lives = 10;
+      let level = 1;
+      let gameActive = false;
+      let highScore = 0;
+      let soundEnabled = true;
+      let currentTheme = "dark";
+      let completionStreak = 0;
+      let specialCardSpawnedThisLevel = false;
+      let isBossLevel = false;
+
+      let gameInterval;
+      let cardSpawnInterval;
+      let bossMoveInterval;
+
+      const LEVEL_DURATION = 10000;
+      let currentSpawnDelay = 2000;
+      let cardLifetime = 5000;
+
+      const BOSS_CLICKS_PER_CORNER = 2;
+      const BOSS_COMPLETION_BONUS = 10;
+      const BOSS_EXPIRATION_PENALTY = 10;
+      const BOSS_LIFETIME_BASE = 15000;
+      const BOSS_LIFETIME_PER_LEVEL_BONUS = 1000;
+      const BOSS_INITIAL_VELOCITY = 1.2;
+      const BOSS_VELOCITY_PER_LEVEL_BONUS = 0.3;
+
+      let cardIdCounter = 0;
+      const activeCards = {};
+      let bossCardElement = null;
+      let bossCardVelocity = { x: 0, y: 0 };
+      let bossCardDirection = { x: 1, y: 1 };
+
+      const uploadedImages = [];
+
+      // --- DOM Elements ---
+      const gameTitleElement = document.getElementById("game-title");
+      const gameContainer = document.getElementById("game-container");
+      const gameOverlay = document.getElementById("game-overlay");
+      const gameOverlayStartButton = document.getElementById(
+        "game-overlay-start-button"
+      );
+      const statsStartButtonContainer = document.getElementById(
+        "stats-start-button-container"
+      );
+      const statsStartButton = document.getElementById("stats-start-button");
+      const uploadButton = document.getElementById("upload-button");
+      const imageUploadInput = document.getElementById("image-upload");
+      const scoreDisplay = document.getElementById("score-display");
+      const highScoreDisplay = document.getElementById("high-score-display");
+      const heartsContainer = document.getElementById("hearts-container");
+      const levelDisplay = document.getElementById("level-display");
+      const gameMessage = document.getElementById("game-message");
+      const soundToggle = document.getElementById("sound-toggle");
+      const themeToggle = document.getElementById("theme-toggle");
+      const soundOnEmoji = document.querySelector(".sound-on-emoji");
+      const soundOffEmoji = document.querySelector(".sound-off-emoji");
+      const moonEmoji = document.querySelector(".moon-emoji");
+      const sunEmoji = document.querySelector(".sun-emoji");
+      const socialLinksContainer = document.getElementById(
+        "social-links-container"
+      );
+      const continueGameButton = document.getElementById(
+        "continue-game-button"
+      );
+      const startLevelInput = document.getElementById("start-level-input");
+      const devStartLevelContainer = document.getElementById(
+        "dev-start-level-container"
+      );
+
+      // --- NEW DOM Elements for Mobile Stats Toggle ---
+      const gameStatsWrapper = document.getElementById("game-stats-wrapper");
+      const toggleStatsButton = document.getElementById("toggle-stats-button");
+      const gameStatsPanel = document.getElementById("game-stats");
+
+      const gameTitles = [
+        "Round Rush",
+        "Corner Cruncher",
+        "Clip the Corner",
+        "Snip Snap!",
+        "Trim & Tap!",
+        "Click, Click, Click!",
+        "Kadomaru Frenzy",
+        "Curve Cutter",
+        "Round 'Em Up!",
+        "Card Chopper",
+        "Edge Blitz",
+        "Angle Attack",
+      ];
+
+      let clickSynth,
+        completeSynth,
+        loseLifeSynth,
+        levelUpSynth,
+        gameOverSynth,
+        bossIntroSynth;
+
+      function initializeAudio() {
+        if (Tone.context.state !== "running") {
+          Tone.start()
+            .then(() => console.log("Audio context started."))
+            .catch((e) => console.error("Failed to start audio context:", e));
+        }
+        if (Tone.context.state === "suspended") {
+          Tone.context
+            .resume()
+            .then(() => console.log("Audio context resumed."))
+            .catch((e) => console.error("Failed to resume audio context:", e));
+        }
+        if (!clickSynth) {
+          clickSynth = new Tone.Synth({
+            oscillator: { type: "sine" },
+            envelope: {
+              attack: 0.01,
+              decay: 0.1,
+              sustain: 0.01,
+              release: 0.15,
+            },
+          }).toDestination();
+          completeSynth = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: "triangle" },
+            envelope: {
+              attack: 0.02,
+              decay: 0.15,
+              sustain: 0.05,
+              release: 0.25,
+            },
+          }).toDestination();
+          loseLifeSynth = new Tone.Synth({
+            oscillator: { type: "sawtooth" },
+            envelope: { attack: 0.01, decay: 0.2, sustain: 0.01, release: 0.3 },
+          }).toDestination();
+          levelUpSynth = new Tone.Synth({
+            oscillator: { type: "square" },
+            envelope: {
+              attack: 0.02,
+              decay: 0.1,
+              sustain: 0.05,
+              release: 0.15,
+            },
+          }).toDestination();
+          gameOverSynth = new Tone.Synth({
+            oscillator: { type: "fmsine", modulationIndex: 3, detune: -1200 },
+            envelope: { attack: 0.05, decay: 0.5, sustain: 0.1, release: 1 },
+          }).toDestination();
+          bossIntroSynth = new Tone.MembraneSynth({
+            pitchDecay: 0.05,
+            octaves: 8,
+            envelope: {
+              attack: 0.001,
+              decay: 0.4,
+              sustain: 0.01,
+              release: 1.4,
+              attackCurve: "exponential",
+            },
+          }).toDestination();
+        }
+        console.log("Audio initialized.");
+      }
+
+      function playSound(type) {
+        if (!soundEnabled || Tone.context.state !== "running") return;
+        try {
+          switch (type) {
+            case "click":
+              clickSynth.triggerAttackRelease("G5", "16n");
+              break;
+            case "complete":
+              completeSynth.triggerAttackRelease(["D4", "F#4", "A4"], "4n");
+              break;
+            case "loseLife":
+              loseLifeSynth.triggerAttackRelease("F#3", "4n");
+              break;
+            case "levelUp":
+              levelUpSynth.triggerAttackRelease("C5", "16n", Tone.now());
+              levelUpSynth.triggerAttackRelease("E5", "16n", Tone.now() + 0.1);
+              levelUpSynth.triggerAttackRelease("G5", "16n", Tone.now() + 0.2);
+              break;
+            case "gameOver":
+              gameOverSynth.triggerAttackRelease("C3", "2n");
+              break;
+            case "bossIntro":
+              bossIntroSynth.triggerAttackRelease("C2", "2n");
+              break;
+          }
+        } catch (e) {
+          console.error("Error playing sound:", e);
+        }
+      }
+
+      function loadSoundPreference() {
+        const storedSound = localStorage.getItem("soundEnabled");
+        soundEnabled = storedSound !== null ? storedSound === "true" : true;
+        soundToggle.checked = soundEnabled;
+        updateSoundEmojiVisibility();
+      }
+      function saveSoundPreference() {
+        localStorage.setItem("soundEnabled", soundEnabled);
+      }
+      function toggleSound() {
+        soundEnabled = soundToggle.checked;
+        saveSoundPreference();
+        updateSoundEmojiVisibility();
+      }
+      function updateSoundEmojiVisibility() {
+        soundOnEmoji.style.display = soundEnabled ? "inline-block" : "none";
+        soundOffEmoji.style.display = soundEnabled ? "none" : "inline-block";
+      }
+
+      function loadThemePreference() {
+        const storedTheme = localStorage.getItem("currentTheme");
+        currentTheme = storedTheme || "dark";
+        applyTheme(currentTheme);
+        themeToggle.checked = currentTheme === "light";
+        updateThemeEmojiVisibility();
+      }
+      function saveThemePreference() {
+        localStorage.setItem("currentTheme", currentTheme);
+      }
+      function applyTheme(theme) {
+        document.body.classList.toggle("light-mode", theme === "light");
+        updateThemeEmojiVisibility();
+      }
+      function toggleTheme() {
+        currentTheme = themeToggle.checked ? "light" : "dark";
+        applyTheme(currentTheme);
+        saveThemePreference(); // Corrected from saveSoundPreference
+      }
+      function updateThemeEmojiVisibility() {
+        moonEmoji.style.display =
+          currentTheme === "light" ? "none" : "inline-block";
+        sunEmoji.style.display =
+          currentTheme === "light" ? "inline-block" : "none";
+      }
+
+      function setRandomGameTitle() {
+        gameTitleElement.textContent =
+          gameTitles[Math.floor(Math.random() * gameTitles.length)];
+      }
+
+      function loadHighScore() {
+        highScore = parseInt(localStorage.getItem("highScore"), 10) || 0;
+        highScoreDisplay.textContent = `High Score: ${highScore}`;
+      }
+
+      function startGameFromLevel(startLevelOverride) {
+        initializeAudio();
+        setRandomGameTitle();
+
+        let initialLevel = startLevelOverride;
+        if (startLevelOverride === 1) {
+          const inputLevel = parseInt(startLevelInput.value, 10);
+          if (
+            !isNaN(inputLevel) &&
+            inputLevel >= 1 &&
+            devStartLevelContainer.classList.contains("visible-by-toggle")
+          ) {
+            // Only use if visible
+            initialLevel = inputLevel;
+          }
+        }
+        level = initialLevel;
+
+        if (startLevelOverride === 1) {
+          score = 0;
+          lives = 10;
+        }
+
+        completionStreak = 0;
+        specialCardSpawnedThisLevel = false;
+        isBossLevel = false;
+
+        clearInterval(gameInterval);
+        clearInterval(cardSpawnInterval);
+        clearInterval(bossMoveInterval);
+        clearGame(true);
+
+        updateDifficultyParameters();
+
+        scoreDisplay.textContent = `Score: ${score}`;
+        updateLivesDisplay();
+        levelDisplay.textContent = `Level: ${level}`;
+        gameOverlay.classList.remove("active"); // Hide overlay
+        gameMessage.style.display = "none";
+        // gameOverlayStartButton.style.display = "none"; // Managed by overlay class
+        statsStartButtonContainer.style.display = "none";
+        socialLinksContainer.style.display = "none";
+        continueGameButton.classList.add("hidden");
+
+        gameActive = true;
+        gameInterval = setInterval(levelUp, LEVEL_DURATION);
+        cardSpawnInterval = setInterval(spawnCard, currentSpawnDelay);
+        console.log(`Game Started from Level ${level}!`);
+      }
+
+      function updateDifficultyParameters() {
+        currentSpawnDelay = 2000;
+        cardLifetime = 5000;
+        for (let i = 1; i < level; i++) {
+          if (i % 3 !== 0) {
+            currentSpawnDelay = Math.max(400, currentSpawnDelay * 0.9);
+            cardLifetime = Math.max(1500, cardLifetime * 0.9);
+          }
+        }
+      }
+
+      function endGame() {
+        gameActive = false;
+        clearGame(true);
+        playSound("gameOver");
+
+        if (score > highScore) {
+          highScore = score;
+          localStorage.setItem("highScore", highScore);
+          loadHighScore();
+        }
+
+        gameMessage.textContent = `Game Over! Lvl ${level}, Score ${score}.`;
+        gameMessage.style.display = "block";
+        gameOverlay.classList.add("active"); // Show overlay
+        gameOverlayStartButton.style.display = "none"; // Start button in overlay is hidden initially
+        statsStartButton.classList.remove("hidden");
+        statsStartButtonContainer.style.display = "flex"; // Use flex for centering
+        statsStartButton.textContent = "Play Again";
+        socialLinksContainer.style.display = "flex"; // Use flex
+        continueGameButton.classList.add("hidden");
+        console.log("Game Over!");
+      }
+
+      function loseLife() {
+        if (!gameActive) return;
+        lives--;
+        completionStreak = 0;
+        updateLivesDisplay();
+        playSound("loseLife");
+        if (lives <= 0) endGame();
+      }
+
+      function updateLivesDisplay() {
+        heartsContainer.innerHTML = Array(lives).fill("❤️").join("");
+      }
+
+      function clearGame(skipPenalty = false) {
+        Object.keys(activeCards).forEach((cardId) => {
+          removeCard(cardId, false, skipPenalty);
+        });
+        clearInterval(gameInterval);
+        clearInterval(cardSpawnInterval);
+        clearInterval(bossMoveInterval);
+        bossCardElement = null;
+      }
+
+      function levelUp() {
+        if (!gameActive) return;
+
+        if (level === 10) {
+          gameActive = false;
+          clearGame(true);
+          gameMessage.textContent = "You've truly mastered the Kadomaru!";
+          gameMessage.style.display = "block";
+          gameOverlay.classList.add("active");
+          gameOverlayStartButton.style.display = "none";
+          socialLinksContainer.style.display = "none";
+          statsStartButtonContainer.style.display = "flex";
+          statsStartButton.classList.add("hidden");
+          continueGameButton.classList.remove("hidden");
+
+          const dummyElement = document.createElement("div");
+          dummyElement.style.cssText =
+            "position:absolute;left:50%;top:50%;width:1px;height:1px;";
+          gameContainer.appendChild(dummyElement);
+          createCompletionAnimation(dummyElement, true);
+          setTimeout(() => dummyElement.remove(), 1000);
+          level++;
+          return;
+        }
+
+        level++;
+        levelDisplay.textContent = `Level: ${level}`;
+        levelDisplay.classList.add("level-up-animation");
+        setTimeout(
+          () => levelDisplay.classList.remove("level-up-animation"),
+          500
+        );
+        playSound("levelUp");
+
+        if (level % 3 === 0) {
+          isBossLevel = true;
+          clearInterval(cardSpawnInterval);
+          clearInterval(gameInterval);
+          clearGame(true);
+          gameMessage.textContent = "BOSS LEVEL!";
+          gameMessage.style.display = "block";
+          gameOverlay.classList.add("active");
+          gameOverlayStartButton.style.display = "none";
+          socialLinksContainer.style.display = "none";
+          statsStartButtonContainer.style.display = "none";
+          continueGameButton.classList.add("hidden");
+          playSound("bossIntro");
+          setTimeout(() => {
+            gameOverlay.classList.remove("active");
+            spawnBossCard();
+          }, 2000);
+        } else {
+          isBossLevel = false;
+          specialCardSpawnedThisLevel = false;
+          currentSpawnDelay = Math.max(400, currentSpawnDelay * 0.9);
+          cardLifetime = Math.max(1500, cardLifetime * 0.9);
+          clearInterval(cardSpawnInterval);
+          cardSpawnInterval = setInterval(spawnCard, currentSpawnDelay);
+          clearInterval(gameInterval);
+          gameInterval = setInterval(levelUp, LEVEL_DURATION);
+        }
+      }
+
+      function spawnCard(isBoss = false) {
+        if (!gameActive) return;
+        const cardId = `card-${cardIdCounter++}`;
+        const cardElement = document.createElement("div");
+        cardElement.id = cardId;
+
+        let cardData = {
+          element: cardElement,
+          cornersClicked: [],
+          timeout: null,
+          isSpecial: false,
+          isBoss: isBoss,
+        };
+
+        if (isBoss) {
+          cardElement.className = "card boss-card";
+          cardData.cornersClicked = new Array(4).fill(0);
+          cardData.isSpecial = true;
+        } else {
+          cardElement.className = "card";
+          cardData.cornersClicked = [false, false, false, false];
+          if (
+            !isBossLevel &&
+            !specialCardSpawnedThisLevel &&
+            Math.random() < 0.3
+          ) {
+            cardData.isSpecial = true;
+            specialCardSpawnedThisLevel = true;
+            cardElement.classList.add("special-card");
+          }
+          cardElement.style.setProperty(
+            "--card-lifetime-seconds",
+            `${cardLifetime / 1000}s`
+          );
+          setTimeout(() => cardElement.classList.add("timed-fade-active"), 50);
+          cardData.timeout = setTimeout(
+            () => removeCard(cardId, false, false),
+            cardLifetime + 500
+          );
+        }
+
+        if (uploadedImages.length > 0) {
+          cardElement.style.backgroundImage = `url('${
+            uploadedImages[Math.floor(Math.random() * uploadedImages.length)]
+          }')`;
+          cardElement.style.backgroundColor = "transparent";
+        } else {
+          cardElement.style.backgroundImage = "none";
+          const randomColor =
+            RANDOM_CARD_COLORS[
+              Math.floor(Math.random() * RANDOM_CARD_COLORS.length)
+            ];
+          cardElement.style.backgroundColor = randomColor;
+          //   cardElement.style.backgroundColor = "var(--card-bg-color)";
+        }
+
+        const containerRect = gameContainer.getBoundingClientRect();
+        const cardApproxWidth = 150,
+          cardApproxHeight = (cardApproxWidth * 7) / 5;
+        let randomX = Math.max(
+          0,
+          Math.min(
+            Math.random() * (containerRect.width - cardApproxWidth),
+            containerRect.width - cardApproxWidth
+          )
+        );
+        let randomY = Math.max(
+          0,
+          Math.min(
+            Math.random() * (containerRect.height - cardApproxHeight),
+            containerRect.height - cardApproxHeight
+          )
+        );
+        cardElement.style.left = `${randomX}px`;
+        cardElement.style.top = `${randomY}px`;
+
+        ["top-left", "top-right", "bottom-left", "bottom-right"].forEach(
+          (pos, index) => {
+            const cornerElement = document.createElement("div");
+            cornerElement.className = `corner ${pos}`;
+            cornerElement.addEventListener("click", (event) => {
+              event.stopPropagation();
+              handleCornerClick(cardId, index, cornerElement);
+            });
+            cardElement.appendChild(cornerElement);
+          }
+        );
+
+        gameContainer.appendChild(cardElement);
+        activeCards[cardId] = cardData;
+        return cardId;
+      }
+
+      function spawnBossCard() {
+        const bossCardId = spawnCard(true);
+        const bossCard = activeCards[bossCardId];
+        if (bossCard) {
+          bossCardElement = bossCard.element;
+          const speedBonus =
+            (Math.floor(level / 3) - 1) * BOSS_VELOCITY_PER_LEVEL_BONUS;
+          bossCardVelocity = {
+            x: BOSS_INITIAL_VELOCITY + speedBonus,
+            y: BOSS_INITIAL_VELOCITY + speedBonus,
+          };
+          bossCardDirection = {
+            x: Math.random() > 0.5 ? 1 : -1,
+            y: Math.random() > 0.5 ? 1 : -1,
+          };
+          clearInterval(bossMoveInterval);
+          bossMoveInterval = setInterval(moveBossCard, 20);
+          const currentBossLifetime =
+            BOSS_LIFETIME_BASE +
+            (Math.floor(level / 3) - 1) * BOSS_LIFETIME_PER_LEVEL_BONUS;
+          bossCard.timeout = setTimeout(
+            () => removeCard(bossCardId, false, false),
+            currentBossLifetime
+          );
+        }
+      }
+
+      function moveBossCard() {
+        if (!bossCardElement || !gameActive) return;
+        const cardRect = bossCardElement.getBoundingClientRect();
+        const containerRect = gameContainer.getBoundingClientRect();
+        const currentLeft = parseFloat(getComputedStyle(bossCardElement).left);
+        const currentTop = parseFloat(getComputedStyle(bossCardElement).top);
+        let newX = currentLeft + bossCardVelocity.x * bossCardDirection.x;
+        let newY = currentTop + bossCardVelocity.y * bossCardDirection.y;
+
+        if (newX + cardRect.width > containerRect.width || newX < 0) {
+          bossCardDirection.x *= -1;
+          newX = Math.max(
+            0,
+            Math.min(newX, containerRect.width - cardRect.width)
+          );
+        }
+        if (newY + cardRect.height > containerRect.height || newY < 0) {
+          bossCardDirection.y *= -1;
+          newY = Math.max(
+            0,
+            Math.min(newY, containerRect.height - cardRect.height)
+          );
+        }
+        bossCardElement.style.left = `${newX}px`;
+        bossCardElement.style.top = `${newY}px`;
+      }
+
+      function createCompletionAnimation(element, isBigBurst = false) {
+        const numParticles = isBigBurst ? 30 : 15,
+          particleMinSize = isBigBurst ? 6 : 4;
+        const particleMaxSize = isBigBurst ? 15 : 10,
+          burstDistance = isBigBurst ? 100 : 60;
+        const elementRect = element.getBoundingClientRect(),
+          containerRect = gameContainer.getBoundingClientRect();
+        const centerX =
+          elementRect.left - containerRect.left + elementRect.width / 2;
+        const centerY =
+          elementRect.top - containerRect.top + elementRect.height / 2;
+
+        for (let i = 0; i < numParticles; i++) {
+          const particle = document.createElement("div");
+          particle.classList.add("completion-particle");
+          particle.style.backgroundColor = isBigBurst
+            ? "var(--bonus-particle-color)"
+            : "var(--particle-color)";
+          const size =
+            Math.random() * (particleMaxSize - particleMinSize) +
+            particleMinSize;
+          particle.style.width = `${size}px`;
+          particle.style.height = `${size}px`;
+          particle.style.left = `${centerX}px`;
+          particle.style.top = `${centerY}px`;
+          const angle = Math.random() * Math.PI * 2,
+            distance = Math.random() * burstDistance;
+          const deltaX = Math.cos(angle) * distance,
+            deltaY = Math.sin(angle) * distance;
+          particle.style.setProperty("--particle-end-x", `${deltaX}px`);
+          particle.style.setProperty("--particle-end-y", `${deltaY}px`);
+          gameContainer.appendChild(particle);
+          setTimeout(() => particle.classList.add("burst"), 10);
+          setTimeout(() => particle.remove(), 800);
+        }
+      }
+
+      function handleCornerClick(cardId, cornerIndex, cornerElement) {
+        if (!gameActive) return;
+        const card = activeCards[cardId];
+        if (!card) return;
+
+        let allCornersCompleted = false,
+          isBigBurst = false;
+        const borderClasses = [
+          "rounded-tl-xl",
+          "rounded-tr-xl",
+          "rounded-bl-xl",
+          "rounded-br-xl",
+        ]; // Updated class names
+
+        if (card.isBoss) {
+          if (card.cornersClicked[cornerIndex] < BOSS_CLICKS_PER_CORNER) {
+            card.cornersClicked[cornerIndex]++;
+            score++;
+            scoreDisplay.textContent = `Score: ${score}`;
+            playSound("click");
+            card.element.classList.add("hit-effect");
+            setTimeout(() => card.element.classList.remove("hit-effect"), 100);
+            if (card.cornersClicked[cornerIndex] === BOSS_CLICKS_PER_CORNER) {
+              card.element.classList.add(borderClasses[cornerIndex]);
+            }
+            allCornersCompleted = card.cornersClicked.every(
+              (count) => count === BOSS_CLICKS_PER_CORNER
+            );
+          }
+        } else {
+          if (!card.cornersClicked[cornerIndex]) {
+            card.cornersClicked[cornerIndex] = true;
+            score++;
+            scoreDisplay.textContent = `Score: ${score}`;
+            playSound("click");
+            card.element.classList.add("hit-effect");
+            setTimeout(() => card.element.classList.remove("hit-effect"), 100);
+            card.element.classList.add(borderClasses[cornerIndex]);
+            allCornersCompleted = card.cornersClicked.every(
+              (clicked) => clicked
+            );
+          }
+        }
+
+        if (allCornersCompleted) {
+          playSound("complete");
+          if (card.isBoss) {
+            score += BOSS_COMPLETION_BONUS;
+            scoreDisplay.textContent = `Score: ${score}`;
+            lives += Math.floor(level / 3);
+            updateLivesDisplay();
+            isBigBurst = true;
+            createCompletionAnimation(card.element, isBigBurst);
+            removeCard(cardId, true);
+          } else {
+            completionStreak++;
+            if (completionStreak % 4 === 0) {
+              score += 5;
+              scoreDisplay.textContent = `Score: ${score}`;
+              isBigBurst = true;
+            }
+            if (card.isSpecial) {
+              score += 3;
+              scoreDisplay.textContent = `Score: ${score}`;
+              isBigBurst = true;
+            }
+            createCompletionAnimation(card.element, isBigBurst);
+            removeCard(cardId, true);
+          }
+        }
+      }
+
+      function removeCard(
+        cardId,
+        completedByPlayer = false,
+        forceRemoveNoPenalty = false
+      ) {
+        const card = activeCards[cardId];
+        if (!card) return;
+        clearTimeout(card.timeout);
+
+        if (card.isBoss) {
+          clearInterval(bossMoveInterval);
+          bossCardElement = null;
+          if (!completedByPlayer && !forceRemoveNoPenalty) {
+            score -= BOSS_EXPIRATION_PENALTY;
+            lives--;
+            completionStreak = 0;
+            updateLivesDisplay();
+            playSound("loseLife");
+            if (lives <= 0) endGame();
+            else {
+              isBossLevel = false;
+              specialCardSpawnedThisLevel = false;
+              levelUp();
+            }
+          } else if (completedByPlayer) {
+            isBossLevel = false;
+            specialCardSpawnedThisLevel = false;
+            levelUp();
+          }
+          card.element.style.transition =
+            "opacity 0.2s ease-out, transform 0.3s ease";
+          card.element.style.opacity = "0";
+          card.element.addEventListener(
+            "transitionend",
+            () => card.element.remove(),
+            { once: true }
+          );
+        } else {
+          if (completedByPlayer) {
+            card.element.classList.remove("timed-fade-active");
+            card.element.style.transition =
+              "opacity 0.2s ease-out, transform 0.3s ease, border-radius 0.2s ease, background-color 0.3s ease, box-shadow 0.3s ease";
+            card.element.style.opacity = "0";
+            card.element.addEventListener(
+              "transitionend",
+              () => card.element.remove(),
+              { once: true }
+            );
+          } else if (!forceRemoveNoPenalty) {
+            if (card.isSpecial) {
+              score -= 6;
+              scoreDisplay.textContent = `Score: ${score}`;
+              completionStreak = 0;
+              playSound("loseLife");
+            } else {
+              loseLife();
+            }
+            if (card.element.parentNode) card.element.remove();
+          } else {
+            if (card.element.parentNode) card.element.remove();
+          }
+        }
+        delete activeCards[cardId];
+      }
+
+      // Event Listeners
+      gameOverlayStartButton.addEventListener("click", () =>
+        startGameFromLevel(1)
+      );
+      statsStartButton.addEventListener("click", () => startGameFromLevel(1));
+      continueGameButton.addEventListener("click", () =>
+        startGameFromLevel(level)
+      );
+
+      uploadButton.addEventListener("click", () => imageUploadInput.click());
+      imageUploadInput.addEventListener("change", (event) => {
+        const files = Array.from(event.target.files).slice(0, 10);
+        uploadedImages.length = 0;
+        if (files.length === 0) {
+          uploadButton.textContent = "Load cards";
+          return;
+        }
+        let loadedCount = 0;
+        uploadButton.textContent = `Loading ${files.length}...`;
+        files.forEach((file) => {
+          if (file.type.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              uploadedImages.push(e.target.result);
+              loadedCount++;
+              updateUploadButtonText(files.length, loadedCount);
+            };
+            reader.onerror = () => {
+              loadedCount++;
+              updateUploadButtonText(files.length, loadedCount);
+            };
+            reader.readAsDataURL(file);
+          } else {
+            loadedCount++;
+            updateUploadButtonText(files.length, loadedCount);
+          }
+        });
+        if (uploadedImages.length === 0 && files.length > 0)
+          uploadButton.textContent = "0 loaded (invalid)";
+      });
+      function updateUploadButtonText(total, loaded) {
+        if (loaded === total)
+          uploadButton.textContent = `${uploadedImages.length} cards loaded`;
+      }
+
+      soundToggle.addEventListener("change", toggleSound);
+      themeToggle.addEventListener("change", toggleTheme);
+
+      // --- NEW: Mobile Stats Toggle Logic ---
+      toggleStatsButton.addEventListener("click", () => {
+        const isCollapsed =
+          gameStatsPanel.classList.contains("collapsed") ||
+          !gameStatsPanel.classList.contains("expanded");
+        if (isCollapsed) {
+          gameStatsPanel.classList.remove("collapsed");
+          gameStatsPanel.classList.add("expanded");
+          toggleStatsButton.textContent = "Hide Stats";
+        } else {
+          gameStatsPanel.classList.add("collapsed");
+          gameStatsPanel.classList.remove("expanded");
+          toggleStatsButton.textContent = "Show Stats";
+        }
+      });
+
+      // --- NEW: Dev Start Level Toggle Logic ---
+      let titleClickCount = 0;
+      let titleClickTimer = null;
+      gameTitleElement.addEventListener("click", () => {
+        titleClickCount++;
+        if (titleClickTimer) clearTimeout(titleClickTimer);
+        titleClickTimer = setTimeout(() => {
+          titleClickCount = 0; // Reset count after 500ms if not triple clicked
+        }, 500);
+
+        if (titleClickCount === 3) {
+          clearTimeout(titleClickTimer);
+          titleClickCount = 0;
+          devStartLevelContainer.classList.toggle("hidden-by-default");
+          devStartLevelContainer.classList.toggle("visible-by-toggle");
+          // If stats panel is collapsed on mobile, expand it to show the dev input
+          if (
+            window.innerWidth < 1024 &&
+            devStartLevelContainer.classList.contains("visible-by-toggle")
+          ) {
+            if (
+              gameStatsPanel.classList.contains("collapsed") ||
+              !gameStatsPanel.classList.contains("expanded")
+            ) {
+              gameStatsPanel.classList.remove("collapsed");
+              gameStatsPanel.classList.add("expanded");
+              toggleStatsButton.textContent = "Hide Stats";
+            }
+          }
+        }
+      });
+
+      // Initial setup
+      window.onload = () => {
+        updateLivesDisplay();
+        setRandomGameTitle();
+        uploadButton.textContent = "Load cards";
+        loadHighScore();
+        loadSoundPreference();
+        loadThemePreference();
+
+        // Initialize mobile stats panel state
+        if (window.innerWidth < 1024) {
+          gameStatsPanel.classList.add("collapsed");
+          toggleStatsButton.textContent = "Show Stats";
+        } else {
+          gameStatsPanel.classList.remove("collapsed"); // Ensure it's open on desktop
+          gameStatsPanel.classList.remove("expanded"); // Not needed for desktop
+        }
+        //Ensure dev input starts hidden
+        devStartLevelContainer.classList.add("hidden-by-default");
+        devStartLevelContainer.classList.remove("visible-by-toggle");
+
+        // Set initial overlay state (for start button)
+        gameOverlay.classList.add("active");
+        gameOverlayStartButton.style.display = "block"; // Show start button on initial load
+        statsStartButtonContainer.style.display = "none"; // Hide play again from stats
+        socialLinksContainer.style.display = "none"; // Hide socials
+
+        console.log("Window loaded. New design active!");
+      };
+    </script>
+  </body>
+</html>
