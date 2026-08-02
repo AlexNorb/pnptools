@@ -1,0 +1,68 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - Bento_toolkit
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build bentopdf
+        run: |
+          cd bentopdf-src
+          npm ci || npm install
+          npm run build
+        env:
+          BASE_URL: /pdftoolkit/
+          SIMPLE_MODE: "true"
+          VITE_BRAND_NAME: "PNP BUDDY"
+          VITE_BRAND_LOGO: "images/pnp-logo.svg"
+          VITE_FOOTER_TEXT: "© 2026 PNP BUDDY. All rights reserved."
+          VITE_DEFAULT_LANGUAGE: "en"
+
+      - name: Prepare site dist directory
+        run: |
+          mkdir site-dist
+          # Copy static files to root of site-dist (excluding source repo files and build temporary dirs)
+          rsync -av --exclude='.git*' --exclude='bentopdf-src' --exclude='site-dist' --exclude='.github' ./ site-dist/
+          # Copy built bentopdf into pdftoolkit folder
+          mkdir -p site-dist/pdftoolkit
+          cp -r bentopdf-src/dist/* site-dist/pdftoolkit/ || cp -r bentopdf-src/build/* site-dist/pdftoolkit/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'site-dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

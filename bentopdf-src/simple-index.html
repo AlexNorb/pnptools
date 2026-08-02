@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta Tags -->
+    <title>PDF Tools</title>
+    <meta name="title" content="PDF Tools" />
+    <meta
+      name="description"
+      content="Free online PDF tools - Merge, split, compress, convert PDFs. 100% browser-based, no signup required, unlimited files."
+    />
+
+    <!-- Mobile Web App -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="PDF Tools" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/images/favicon-192x192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/images/favicon-512x512.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/images/apple-touch-icon.png"
+    />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+
+    <link href="src/css/styles.css" rel="stylesheet" />
+  </head>
+
+  <body class="antialiased">
+    <div id="app" class="min-h-screen container mx-auto p-4 md:p-8">
+      <!-- Root Landing Page Header Card -->
+      <header class="header-card">
+        <div class="header-intro">
+          <div class="mascot-wrapper">
+            <img src="{{baseUrl}}{{#if brandLogo}}{{brandLogo}}{{else}}images/pnp-logo.svg{{/if}}" alt="{{#if brandName}}{{brandName}}{{else}}PNP BUDDY{{/if}} Logo" class="mascot-img" />
+          </div>
+          <div class="header-text">
+            <h1 class="header-title">{{#if brandName}}{{brandName}}{{else}}PNP BUDDY{{/if}}</h1>
+            <p class="header-subtitle">Your digital Print & Play companion</p>
+          </div>
+        </div>
+        
+        <div class="social-links">
+          <a href="https://discord.com/invite/mc94J7ebCZ" target="_blank" rel="noopener" class="social-icon icon-discord" title="Discord Community">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+          </a>
+          <a href="https://makerworld.com/en/@pnpbuddy" target="_blank" rel="noopener" class="social-icon icon-makerworld" title="MakerWorld Profile">
+            <svg width="22" height="22" viewBox="0 0 28 28" fill="currentColor"><path d="M27.2867 2.68142L20.8492 0.160571L20.4386 0L20.0257 0.160571L13.9977 2.51861L7.96978 0.160571L7.56139 0L7.15188 0.160571L0.713275 2.68142L0 2.96102V25.0401L0.713275 25.3186L7.15188 27.8394L7.56139 28L7.97091 27.8394L14 25.4814L20.028 27.8394L20.4386 28L20.8492 27.8394L27.2867 25.3186L28 25.0401V2.96102L27.2867 2.68142ZM20.4386 1.20372L26.8772 3.7257V12.8356L20.4386 10.3158V1.20372ZM14.4095 13.8787L20.4386 11.5207L26.4677 13.8787L26.7748 13.9989L26.4677 14.119L20.4386 16.4771L14.4095 14.119L14.1024 13.9989L14.4095 13.8787ZM7.56139 1.20372L14 3.7257V12.8356L7.56139 10.3147V1.20372ZM1.53343 13.8787L7.56139 11.5207L13.5905 13.8787L13.8976 13.9989L13.5905 14.119L7.56139 16.4771L1.53343 14.119L1.22629 13.9989L1.53343 13.8787ZM1.12504 24.2732V15.1588L7.56365 17.6785V26.7895L1.12504 24.2732ZM14.0022 24.2732V15.1588L20.4409 17.6785V26.7895L14.0022 24.2732Z" fill="currentColor"/></svg>
+          </a>
+          <a href="https://buymeacoffee.com/pnpbuddy" target="_blank" rel="noopener" class="social-icon icon-bmc" title="Buy Me a Dice">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" ry="3"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/></svg>
+          </a>
+          <a href="mailto:contact@pnpbuddy.com" class="social-icon icon-email" title="Contact Email">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+          </a>
+        </div>
+      </header>
+
+      <div id="grid-view">
+        <div class="mb-8 max-w-lg mx-auto">
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+              <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
+            </span>
+            <input
+              type="text"
+              id="search-bar"
+              class="w-full pl-10 pr-4 py-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Search for a tool (e.g., 'split', 'organize'...)"
+              data-i18n-placeholder="tools.searchPlaceholder"
+            />
+            <span
+              class="absolute inset-y-0 right-0 flex items-center rounded-lg pr-2 gap-2"
+            >
+              <kbd
+                id="shortcut"
+                class="bg-gray-800 px-2.5 py-1.5 rounded-md text-xs font-semibold text-gray-300 border border-gray-700 shadow-sm"
+              ></kbd>
+              <button
+                id="open-shortcuts-btn"
+                class="p-1 hover:bg-gray-600 rounded-md text-gray-400 hover:text-white transition-colors"
+                title="Keyboard Shortcuts"
+              >
+                <i data-lucide="settings" class="w-4 h-4"></i>
+              </button>
+            </span>
+          </div>
+        </div>
+
+        <div
+          id="tool-grid"
+          class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6"
+        ></div>
+      </div>
+
+      <div
+        id="tool-interface"
+        class="hidden w-full max-w-4xl mx-auto bg-gray-800 rounded-xl shadow-2xl p-6 md:p-8 border border-gray-700"
+      >
+        <button
+          id="back-to-grid"
+          class="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 mb-6 font-semibold"
+        >
+          <i data-lucide="arrow-left" class="cursor-pointer"></i>
+          <span class="cursor-pointer" data-i18n="tools.backToTools">
+            Back to Tools
+          </span>
+        </button>
+        <div id="tool-content"></div>
+      </div>
+
+      <div
+        id="loader-modal"
+        class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+      >
+        <div
+          class="bg-gray-800 p-8 rounded-lg flex flex-col items-center gap-4 border border-gray-700 shadow-xl"
+        >
+          <div class="solid-spinner"></div>
+          <p
+            id="loader-text"
+            class="text-white text-lg font-medium"
+            data-i18n="loader.processing"
+          >
+            Processing...
+          </p>
+        </div>
+      </div>
+
+      <div
+        id="alert-modal"
+        class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+      >
+        <div
+          class="bg-gray-800 max-w-sm w-full p-6 rounded-lg border border-gray-700 shadow-xl text-center"
+        >
+          <h3 id="alert-title" class="text-xl font-bold text-white mb-2">
+            Alert
+          </h3>
+          <p id="alert-message" class="text-gray-300 mb-6 whitespace-pre-line">
+            This is an alert message.
+          </p>
+          <button
+            id="alert-ok"
+            class="btn bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-indigo-700"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+
+      <div
+        id="preview-modal"
+        class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40 p-4"
+      >
+        <div
+          class="bg-white text-black rounded-lg shadow-xl w-full max-w-4xl h-[90vh] flex flex-col"
+        >
+          <div class="p-4 border-b flex justify-between items-center">
+            <h3 class="text-xl font-bold">Document Preview</h3>
+            <div class="flex gap-4">
+              <button
+                id="preview-download-btn"
+                class="btn bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-indigo-700"
+              >
+                Download as PDF
+              </button>
+              <button
+                id="preview-close-btn"
+                class="btn bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-gray-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+          <div id="preview-content" class="p-8 overflow-y-auto flex-grow"></div>
+        </div>
+      </div>
+
+      <!-- Shortcuts Modal -->
+      {{> settings-modal }}
+
+      <!-- Warning Modal -->
+      {{> warning-modal }}
+
+      <div id="signature-ghost" class="hidden"></div>
+
+      <!-- Scroll to Top Button -->
+      <button
+        id="scroll-to-top-btn"
+        class="fixed bottom-12 right-8 bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 translate-y-10 invisible z-40"
+        aria-label="Scroll to top"
+      >
+        <i data-lucide="arrow-up" class="w-6 h-6"></i>
+      </button>
+    </div>
+
+    <!-- Simple mode footer -->
+    <footer
+      class="mt-16 border-t-2 border-gray-700 py-8"
+      data-simple-footer="true"
+    >
+      <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <div class="flex items-center mb-2">
+              <img
+                src="{{baseUrl}}{{#if brandLogo}}{{brandLogo}}{{else}}images/favicon.svg{{/if}}"
+                alt="{{#if brandName}}{{brandName}}{{else}}Bento PDF{{/if}} Logo"
+                class="h-8 w-8 mr-2"
+              />
+              <span class="text-white font-bold text-lg"
+                >{{#if brandName}}{{brandName}}{{else}}BentoPDF{{/if}}</span
+              >
+            </div>
+            <p class="text-gray-400 text-sm">
+              {{#if footerText}}{{footerText}}{{else}}&copy; 2026 BentoPDF. All
+              rights reserved.{{/if}}
+            </p>
+            <p class="text-gray-500 text-xs mt-2">
+              <span data-i18n="footer.version">Version</span>
+              <span id="app-version">{{appVersion}}</span>
+            </p>
+          </div>
+          <div id="simple-mode-lang-switcher" class="flex-shrink-0"></div>
+        </div>
+      </div>
+    </footer>
+
+    <script type="module" src="src/js/utils/lucide-init.ts"></script>
+    <script type="module" src="src/js/utils/simple-mode-footer.ts"></script>
+    <script type="module" src="src/js/main.ts"></script>
+    <script type="module" src="src/js/sw-register.ts"></script>
+  </body>
+</html>
