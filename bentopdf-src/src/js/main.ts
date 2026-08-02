@@ -541,9 +541,10 @@ const init = async () => {
   const githubStarsElements = [
     document.getElementById('github-stars-desktop'),
     document.getElementById('github-stars-mobile'),
+    document.getElementById('github-stars-footer'),
   ];
 
-  if (githubStarsElements.some((el) => el) && !__SIMPLE_MODE__) {
+  if (githubStarsElements.some((el) => el)) {
     fetch('https://api.github.com/repos/alam00000/bentopdf')
       .then((response) => response.json())
       .then((data) => {
