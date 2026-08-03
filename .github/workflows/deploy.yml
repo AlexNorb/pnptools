@@ -31,7 +31,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Build bentopdf
         run: |
@@ -39,6 +39,7 @@ jobs:
           npm ci || npm install
           npm run build
         env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
           BASE_URL: "./"
           SIMPLE_MODE: "true"
           VITE_BRAND_NAME: "PNP BUDDY"
