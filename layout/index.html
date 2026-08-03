@@ -18,6 +18,22 @@
     href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,400&family=Bungee&family=Inter:wght@400;500;600;700&display=swap"
     rel="stylesheet" />
 
+  <!-- Beam Analytics -->
+  <script
+    src="https://beamanalytics.b-cdn.net/beam.min.js"
+    data-token="251d0fd2-4c71-428b-a98c-d288098f0a61"
+    async
+  ></script>
+  <script>
+    function onHashChange() {
+      const hash = window.location.hash;
+      if (window.beam) {
+        window.beam(`/custom-events/hashchange/${hash}`);
+      }
+    }
+    window.addEventListener('hashchange', onHashChange, false);
+  </script>
+
   <!-- Tailwind v4 CDN & Configuration -->
   <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
   <style type="text/tailwindcss">

@@ -96,6 +96,22 @@
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
 
     <link href="src/css/styles.css" rel="stylesheet" />
+
+    <!-- Beam Analytics -->
+    <script
+      src="https://beamanalytics.b-cdn.net/beam.min.js"
+      data-token="251d0fd2-4c71-428b-a98c-d288098f0a61"
+      async
+    ></script>
+    <script>
+      function onHashChange() {
+        const hash = window.location.hash;
+        if (window.beam) {
+          window.beam(`/custom-events/hashchange/${hash}`);
+        }
+      }
+      window.addEventListener('hashchange', onHashChange, false);
+    </script>
   </head>
 
   <body class="antialiased">
