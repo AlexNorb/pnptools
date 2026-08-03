@@ -190,12 +190,18 @@ function processFileForLanguage(
   let title = null;
   let description = null;
 
+  const brandName = process.env.VITE_BRAND_NAME || 'PNP Buddy';
   if (tools[translationKey]) {
-    title =
+    const rawTitle =
       tools[translationKey].pageTitle ||
-      (tools[translationKey].name
-        ? `${tools[translationKey].name} - BentoPDF`
-        : null);
+      (tools[translationKey].name ? `${tools[translationKey].name}` : null);
+    if (rawTitle) {
+      const cleanTitle = rawTitle
+        .replace(/\s*[-|]\s*BentoPDF$/i, '')
+        .replace(/\s*[-|]\s*Bento\s*PDF$/i, '')
+        .replace(/\s*[-|]\s*PNP\s*Buddy$/i, '');
+      title = `${cleanTitle} | ${brandName}`;
+    }
     description = tools[translationKey].subtitle;
   }
 
