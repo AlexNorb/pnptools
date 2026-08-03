@@ -3,16 +3,18 @@
   <header class="header-card">
     <div class="header-intro">
       <div class="mascot-wrapper">
-        <img
-          id="nav-logo"
-          src="{{baseUrl}}{{#if brandLogo}}{{brandLogo}}{{else}}images/pnp-logo.svg{{/if}}"
-          alt="{{#if brandName}}{{brandName}}{{else}}PNP BUDDY{{/if}} Logo"
-          class="mascot-img"
-        />
+        <a href="../" title="Back to PNP BUDDY Home">
+          <img
+            id="nav-logo"
+            src="{{baseUrl}}{{#if brandLogo}}{{brandLogo}}{{else}}images/pnp-logo.svg{{/if}}"
+            alt="{{#if brandName}}{{brandName}}{{else}}PNP BUDDY{{/if}} Logo"
+            class="mascot-img cursor-pointer"
+          />
+        </a>
       </div>
       <div class="header-text">
         <h1 class="header-title">
-          <a href="{{baseUrl}}" class="no-underline text-inherit"
+          <a href="../" class="no-underline text-inherit"
             >{{#if brandName}}{{brandName}}{{else}}PNP BUDDY{{/if}}</a
           >
         </h1>
