@@ -13,9 +13,12 @@ const SITE_URL = (process.env.SITE_URL || 'https://www.bentopdf.com').replace(
 );
 const EXCLUDED_PAGES = new Set(['404', 'wasm-settings']);
 
-const languages = fs.readdirSync(LOCALES_DIR).filter((file) => {
-  return fs.statSync(path.join(LOCALES_DIR, file)).isDirectory();
-});
+const languages =
+  process.env.ENGLISH_ONLY === 'true'
+    ? ['en']
+    : fs.readdirSync(LOCALES_DIR).filter((file) => {
+        return fs.statSync(path.join(LOCALES_DIR, file)).isDirectory();
+      });
 
 const PRIORITY_MAP = {
   index: 1.0,

@@ -39,6 +39,7 @@ jobs:
           npm ci || npm install
           npm run build
         env:
+          ENGLISH_ONLY: "true"
           NODE_OPTIONS: "--max-old-space-size=4096"
           BASE_URL: "./"
           SIMPLE_MODE: "true"

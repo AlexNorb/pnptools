@@ -14,9 +14,12 @@ const SITE_URL = (process.env.SITE_URL || 'https://www.bentopdf.com').replace(
 );
 const BASE_PATH = (process.env.BASE_URL || '/').replace(/\/$/, '');
 
-const languages = fs.readdirSync(LOCALES_DIR).filter((file) => {
-  return fs.statSync(path.join(LOCALES_DIR, file)).isDirectory();
-});
+const languages =
+  process.env.ENGLISH_ONLY === 'true'
+    ? ['en']
+    : fs.readdirSync(LOCALES_DIR).filter((file) => {
+        return fs.statSync(path.join(LOCALES_DIR, file)).isDirectory();
+      });
 
 const toCamelCase = (str) => {
   return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
