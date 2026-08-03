@@ -59,7 +59,6 @@ const ENGLISH_TOOLS = loadEnglishTools();
 // TODO@ALAM: Let users build only a single language
 function buildUrl(langPrefix, pagePath) {
   const parts = [SITE_URL];
-  if (BASE_PATH && BASE_PATH !== '') parts.push(BASE_PATH.replace(/^\//, ''));
   if (langPrefix) parts.push(langPrefix);
   if (pagePath) parts.push(pagePath.replace(/^\//, ''));
   return parts.filter(Boolean).join('/').replace(/\/+$/, '') || SITE_URL;
