@@ -41,7 +41,8 @@ jobs:
         env:
           ENGLISH_ONLY: "true"
           NODE_OPTIONS: "--max-old-space-size=4096"
-          BASE_URL: "/pnptools/pdftoolkit/"
+          BASE_URL: "/pdftoolkit/"
+          SITE_URL: "https://pnpbuddy.com"
           SIMPLE_MODE: "true"
           VITE_BRAND_NAME: "PNP BUDDY"
           VITE_BRAND_LOGO: "images/pnp-logo.svg"
