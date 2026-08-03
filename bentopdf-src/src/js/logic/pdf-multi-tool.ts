@@ -637,7 +637,7 @@ function createPageElement(
 
   const card = document.createElement('div');
   card.className =
-    'bg-gray-800 rounded-lg border-2 border-gray-700 p-2 relative group cursor-move';
+    'page-thumbnail-card bg-white rounded-xl border-3 border-theme-dark p-2 relative group cursor-move shadow-[4px_4px_0_var(--color-theme-dark)] transition-all';
   card.dataset.pageIndex = index.toString();
   card.dataset.pageId = pageData.id; // Set ID for reconciliation
 
@@ -651,12 +651,12 @@ function createPageElement(
   }
 
   if (selectedPages.has(index)) {
-    card.classList.add('border-indigo-500', 'ring-2', 'ring-indigo-500');
+    card.classList.add('border-theme-pink', 'ring-3', 'ring-theme-pink');
   }
 
   const preview = document.createElement('div');
   preview.className =
-    'bg-white rounded mb-2 overflow-hidden w-full flex items-center justify-center relative h-36 sm:h-64';
+    'bg-gray-100 rounded mb-2 overflow-hidden w-full flex items-center justify-center relative h-36 sm:h-64 border border-gray-200';
 
   if (canvas) {
     const previewCanvas = canvas;
@@ -669,44 +669,44 @@ function createPageElement(
     // Show loading placeholder if canvas is null
     const loading = document.createElement('div');
     loading.className =
-      'flex flex-col items-center justify-center text-gray-400';
+      'flex flex-col items-center justify-center text-gray-500';
     const loadingIcon = document.createElement('i');
     loadingIcon.dataset.lucide = 'loader';
-    loadingIcon.className = 'w-8 h-8 animate-spin mb-2';
+    loadingIcon.className = 'w-8 h-8 animate-spin mb-2 text-theme-dark';
     const loadingLabel = document.createElement('span');
-    loadingLabel.className = 'text-xs';
+    loadingLabel.className = 'text-xs text-theme-dark font-medium';
     loadingLabel.textContent = t('common.loading');
     loading.append(loadingIcon, loadingLabel);
     preview.appendChild(loading);
-    preview.classList.add('bg-gray-700'); // Darker background for loading
+    preview.classList.add('bg-gray-100');
   }
 
   // Page info
   const info = document.createElement('div');
-  info.className = 'text-xs text-gray-400 text-center mb-2';
+  info.className = 'text-xs text-theme-dark font-display font-semibold text-center mb-2';
   info.textContent = `${t('common.page')} ${index + 1}`;
 
   // Actions toolbar
   const actions = document.createElement('div');
   actions.className =
-    'flex items-center justify-center gap-1 sm:opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-2 left-0 right-0';
+    'flex items-center justify-center gap-1 sm:opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-2 left-0 right-0 z-20';
 
   const actionsInner = document.createElement('div');
   actionsInner.className =
-    'flex items-center gap-1 bg-gray-900/90 rounded px-2 py-1';
+    'flex items-center gap-1 bg-white border-2 border-theme-dark shadow-[3px_3px_0_var(--color-theme-dark)] rounded-lg px-2 py-1';
   actions.appendChild(actionsInner);
 
   // Select checkbox
   const selectBtn = document.createElement('button');
   selectBtn.className =
-    'absolute top-2 right-2 p-1 rounded bg-gray-900/70 hover:bg-gray-800 z-10';
+    'absolute top-2 right-2 p-1.5 rounded-lg bg-white border-2 border-theme-dark shadow-[2px_2px_0_var(--color-theme-dark)] z-10 hover:bg-theme-yellow transition-all';
   const selectIcon = document.createElement('i');
   if (selectedPages.has(index)) {
     selectIcon.dataset.lucide = 'check-square';
-    selectIcon.className = 'w-4 h-4 text-indigo-400';
+    selectIcon.className = 'w-4 h-4 text-theme-pink font-bold';
   } else {
     selectIcon.dataset.lucide = 'square';
-    selectIcon.className = 'w-4 h-4 text-gray-200';
+    selectIcon.className = 'w-4 h-4 text-theme-dark';
   }
   selectBtn.appendChild(selectIcon);
   selectBtn.onclick = (e) => {
@@ -716,17 +716,17 @@ function createPageElement(
 
   // Rotate button
   const rotateBtn = document.createElement('button');
-  rotateBtn.className = 'p-1 rounded hover:bg-gray-700';
+  rotateBtn.className = 'p-1 rounded hover:bg-theme-yellow transition-colors';
   rotateBtn.innerHTML =
-    '<i data-lucide="rotate-cw" class="w-4 h-4 text-gray-300"></i>';
+    '<i data-lucide="rotate-cw" class="w-4 h-4 text-theme-dark"></i>';
   rotateBtn.onclick = (e) => {
     e.stopPropagation();
     rotatePage(index, 90);
   };
   const rotateLeftBtn = document.createElement('button');
-  rotateLeftBtn.className = 'p-1 rounded hover:bg-gray-700';
+  rotateLeftBtn.className = 'p-1 rounded hover:bg-theme-yellow transition-colors';
   rotateLeftBtn.innerHTML =
-    '<i data-lucide="rotate-ccw" class="w-4 h-4 text-gray-300"></i>';
+    '<i data-lucide="rotate-ccw" class="w-4 h-4 text-theme-dark"></i>';
   rotateLeftBtn.onclick = (e) => {
     e.stopPropagation();
     rotatePage(index, -90);
@@ -734,9 +734,9 @@ function createPageElement(
 
   // Duplicate button
   const duplicateBtn = document.createElement('button');
-  duplicateBtn.className = 'p-1 rounded hover:bg-gray-700';
+  duplicateBtn.className = 'p-1 rounded hover:bg-theme-yellow transition-colors';
   duplicateBtn.innerHTML =
-    '<i data-lucide="copy" class="w-4 h-4 text-gray-300"></i>';
+    '<i data-lucide="copy" class="w-4 h-4 text-theme-dark"></i>';
   duplicateBtn.title = t('multiTool.actions.duplicatePage');
   duplicateBtn.onclick = (e) => {
     e.stopPropagation();
@@ -746,9 +746,9 @@ function createPageElement(
 
   // Delete button
   const deleteBtn = document.createElement('button');
-  deleteBtn.className = 'p-1 rounded hover:bg-gray-700';
+  deleteBtn.className = 'p-1 rounded hover:bg-theme-pink hover:text-white transition-colors';
   deleteBtn.innerHTML =
-    '<i data-lucide="trash-2" class="w-4 h-4 text-red-400"></i>';
+    '<i data-lucide="trash-2" class="w-4 h-4 text-theme-pink"></i>';
   deleteBtn.title = t('multiTool.actions.deletePage');
   deleteBtn.onclick = (e) => {
     e.stopPropagation();
@@ -758,9 +758,9 @@ function createPageElement(
 
   // Insert PDF button
   const insertBtn = document.createElement('button');
-  insertBtn.className = 'p-1 rounded hover:bg-gray-700';
+  insertBtn.className = 'p-1 rounded hover:bg-theme-yellow transition-colors';
   insertBtn.innerHTML =
-    '<i data-lucide="file-plus" class="w-4 h-4 text-gray-300"></i>';
+    '<i data-lucide="file-plus" class="w-4 h-4 text-theme-dark"></i>';
   insertBtn.title = t('multiTool.actions.insertPdf');
   insertBtn.onclick = (e) => {
     e.stopPropagation();
@@ -770,9 +770,9 @@ function createPageElement(
 
   // Split button
   const splitBtn = document.createElement('button');
-  splitBtn.className = 'p-1 rounded hover:bg-gray-700';
+  splitBtn.className = 'p-1 rounded hover:bg-theme-yellow transition-colors';
   splitBtn.innerHTML =
-    '<i data-lucide="scissors" class="w-4 h-4 text-gray-300"></i>';
+    '<i data-lucide="scissors" class="w-4 h-4 text-theme-dark"></i>';
   splitBtn.title = t('multiTool.actions.toggleSplit');
   splitBtn.onclick = (e) => {
     e.stopPropagation();

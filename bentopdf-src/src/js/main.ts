@@ -580,10 +580,10 @@ const init = async () => {
 
   if (shortcutsTabBtn && preferencesTabBtn) {
     shortcutsTabBtn.addEventListener('click', () => {
-      shortcutsTabBtn.classList.add('bg-indigo-600', 'text-white');
-      shortcutsTabBtn.classList.remove('text-gray-300');
-      preferencesTabBtn.classList.remove('bg-indigo-600', 'text-white');
-      preferencesTabBtn.classList.add('text-gray-300');
+      shortcutsTabBtn.className =
+        'flex-1 py-2.5 px-4 text-sm font-bold rounded-lg border-2 border-theme-dark bg-theme-yellow text-theme-dark shadow-[2px_2px_0_var(--color-theme-dark)] transition-all';
+      preferencesTabBtn.className =
+        'flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg border-2 border-theme-dark bg-white text-theme-dark hover:bg-theme-yellow transition-all';
       shortcutsTabContent?.classList.remove('hidden');
       preferencesTabContent?.classList.add('hidden');
       shortcutsTabFooter?.classList.remove('hidden');
@@ -592,10 +592,10 @@ const init = async () => {
     });
 
     preferencesTabBtn.addEventListener('click', () => {
-      preferencesTabBtn.classList.add('bg-indigo-600', 'text-white');
-      preferencesTabBtn.classList.remove('text-gray-300');
-      shortcutsTabBtn.classList.remove('bg-indigo-600', 'text-white');
-      shortcutsTabBtn.classList.add('text-gray-300');
+      preferencesTabBtn.className =
+        'flex-1 py-2.5 px-4 text-sm font-bold rounded-lg border-2 border-theme-dark bg-theme-yellow text-theme-dark shadow-[2px_2px_0_var(--color-theme-dark)] transition-all';
+      shortcutsTabBtn.className =
+        'flex-1 py-2.5 px-4 text-sm font-semibold rounded-lg border-2 border-theme-dark bg-white text-theme-dark hover:bg-theme-yellow transition-all';
       preferencesTabContent?.classList.remove('hidden');
       shortcutsTabContent?.classList.add('hidden');
       preferencesTabFooter?.classList.remove('hidden');

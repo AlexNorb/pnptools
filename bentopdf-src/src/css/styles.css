@@ -216,29 +216,170 @@ html, body {
   box-shadow: 5px 5px 0 var(--color-theme-dark, #1C111F), -2px -2px 0 var(--color-theme-indigo, #4E63C5);
 }
 
-/* --- PNP BUDDY GLOBAL LIGHT MODE & BRAND OVERRIDES --- */
+/* --- GLOBAL LIGHT MODE BRUTALISM CATCH-ALL FOR ALL TOOLS --- */
 
-/* Make inner page wrappers transparent so html/body gradient shows through */
+/* 1. Page Body & Container Wrappers */
 #uploader, #app, main, section, .bg-gray-900:not(body) {
   background: transparent !important;
   background-color: transparent !important;
 }
 
-.bg-gray-800, .bg-gray-700 {
+/* 2. Containers, Modals, Cards & Sidebars */
+.bg-gray-900, .bg-gray-800, .bg-gray-700, [role="dialog"], .modal-content,
+#password-modal > div, #password-batch-modal > div, #loading-overlay > div, #modal > div {
   background-color: #ffffff !important;
   color: var(--color-theme-dark, #1C111F) !important;
 }
 
-.border-gray-700, .border-gray-600 {
+.border-gray-800, .border-gray-700, .border-gray-600, .border-gray-500 {
   border-color: var(--color-theme-dark, #1C111F) !important;
 }
 
-/* Structural cards on tool pages (e.g. #tool-uploader, FAQ items, related tools cards, feature cards) */
-#tool-uploader, details, .bg-gray-800.rounded-xl, .bg-gray-800.rounded-lg, .bg-gray-800.p-4, .bg-gray-800.p-5, #file-mode-panel > div, #page-mode-panel > div {
+/* 3. Typography & Text Overrides */
+.text-white, .text-gray-100, .text-gray-200, .text-gray-300, .text-gray-400, .text-gray-500 {
+  color: var(--color-theme-dark, #1C111F) !important;
+}
+
+/* 4. PDF Workflow Workspace, Canvas & Nodes */
+#rete-container {
+  background-color: #ffffff !important;
+  background-image: radial-gradient(circle, rgba(28, 17, 31, 0.15) 1px, transparent 1px) !important;
+}
+
+#toolbox-sidebar, .wf-card {
+  background-color: #ffffff !important;
+  border: 3px solid var(--color-theme-dark, #1C111F) !important;
+  box-shadow: 4px 4px 0 var(--color-theme-dark, #1C111F) !important;
+  color: var(--color-theme-dark, #1C111F) !important;
+  border-radius: 12px !important;
+}
+
+.wf-title, .wf-card h3, .wf-card span, .wf-cat {
+  color: var(--color-theme-dark, #1C111F) !important;
+}
+
+.wf-desc, .wf-card p {
+  color: var(--color-theme-muted, #554B59) !important;
+}
+
+.wf-divider {
+  background: var(--color-theme-dark, #1C111F) !important;
+}
+
+/* 5. PDF Multi-tool, Toolbars & Workspace */
+.toolbar-container {
+  background-color: #ffffff !important;
+  border-bottom: 3px solid var(--color-theme-dark, #1C111F) !important;
+  box-shadow: 0 4px 0 rgba(28, 17, 31, 0.1) !important;
+}
+
+.toolbar-container > div {
+  background-color: var(--color-theme-bg, #ECF0DD) !important;
+  border: 2px solid var(--color-theme-dark, #1C111F) !important;
+}
+
+#upload-area {
+  background-color: #ffffff !important;
+  border: 3px dashed var(--color-theme-dark, #1C111F) !important;
+  box-shadow: 4px 4px 0 var(--color-theme-dark, #1C111F) !important;
+  border-radius: 14px !important;
+}
+
+#upload-area:hover {
+  background-color: var(--color-theme-bg, #ECF0DD) !important;
+  border-color: var(--color-theme-pink, #DF2CD4) !important;
+}
+
+#pages-container, #main-scroll-container {
+  background: transparent !important;
+}
+
+/* 6. Primary Action Buttons (bg-indigo-600) -> PNP Yellow (#F7E517) */
+.bg-indigo-600, .bg-indigo-500, button.bg-indigo-600, button.bg-indigo-500 {
+  background-color: var(--color-theme-yellow, #F7E517) !important;
+  color: var(--color-theme-dark, #1C111F) !important;
+  border: 2px solid var(--color-theme-dark, #1C111F) !important;
+  box-shadow: 2px 2px 0 var(--color-theme-dark, #1C111F) !important;
+  font-weight: 700 !important;
+}
+
+.bg-indigo-600:hover, .bg-indigo-500:hover, button.bg-indigo-600:hover, button.bg-indigo-500:hover {
+  background-color: var(--color-theme-teal, #3DDDB2) !important;
+  color: var(--color-theme-dark, #1C111F) !important;
+}
+
+/* 7. Secondary Toolbar & Control Buttons (bg-gray-700, bg-gray-600) */
+.toolbar-container button:not(#upload-pdfs-btn):not(#export-pdf-btn):not(#bulk-download-btn):not(#bulk-delete-btn),
+#close-tool-btn, #add-blank-page-btn, #undo-btn, #redo-btn, #reset-btn, #select-all-btn, #deselect-all-btn, #bulk-rotate-left-btn, #bulk-rotate-btn, #bulk-duplicate-btn, #bulk-split-btn,
+.bg-gray-700, .bg-gray-600, button.bg-gray-700, button.bg-gray-600 {
+  background-color: #ffffff !important;
+  color: var(--color-theme-dark, #1C111F) !important;
+  border: 2px solid var(--color-theme-dark, #1C111F) !important;
+  border-radius: 8px !important;
+  box-shadow: 2px 2px 0 var(--color-theme-dark, #1C111F) !important;
+  font-family: var(--font-ui), sans-serif !important;
+  font-weight: 600 !important;
+}
+
+.toolbar-container button:not(#upload-pdfs-btn):not(#export-pdf-btn):not(#bulk-download-btn):not(#bulk-delete-btn):hover,
+#close-tool-btn:hover, #add-blank-page-btn:hover, #undo-btn:hover, #redo-btn:hover, #reset-btn:hover, #select-all-btn:hover, #deselect-all-btn:hover, #bulk-rotate-left-btn:hover, #bulk-rotate-btn:hover, #bulk-duplicate-btn:hover, #bulk-split-btn:hover,
+.bg-gray-700:hover, .bg-gray-600:hover, button.bg-gray-700:hover, button.bg-gray-600:hover {
+  background-color: var(--color-theme-yellow, #F7E517) !important;
+  color: var(--color-theme-dark, #1C111F) !important;
+}
+
+/* 8. Structural cards on tool pages (e.g. #tool-uploader, FAQ items, related tools cards, feature cards) */
+#tool-uploader, details, .bg-gray-800.rounded-xl, .bg-gray-800.rounded-lg, .bg-gray-800.p-4, .bg-gray-800.p-5, #file-mode-panel > div, #page-mode-panel > div, #loading-overlay > div, #modal > div {
   border: 3px solid var(--color-theme-dark, #1C111F) !important;
   box-shadow: 5px 5px 0 var(--color-theme-dark, #1C111F) !important;
   border-radius: 14px !important;
   background-color: #ffffff !important;
+}
+
+/* 9. Page Thumbnail Cards & Checkboxes (Multi-Tool) */
+.page-thumbnail-card {
+  background-color: #ffffff !important;
+  border: 3px solid var(--color-theme-dark, #1C111F) !important;
+  box-shadow: 4px 4px 0 var(--color-theme-dark, #1C111F) !important;
+  color: var(--color-theme-dark, #1C111F) !important;
+}
+
+.page-thumbnail-card.border-theme-pink {
+  border-color: var(--color-theme-pink, #DF2CD4) !important;
+  box-shadow: 4px 4px 0 var(--color-theme-pink, #DF2CD4) !important;
+}
+
+/* Fallback override for any dynamic dark elements on thumbnail cards */
+.page-thumbnail-card button {
+  color: var(--color-theme-dark, #1C111F) !important;
+}
+
+.page-thumbnail-card button svg {
+  color: currentColor !important;
+}
+
+/* 10. Form Inputs, Select Dropdowns & Textareas */
+input[type="text"], input[type="password"], input[type="number"], select, textarea {
+  background-color: #ffffff !important;
+  color: var(--color-theme-dark, #1C111F) !important;
+  border: 2px solid var(--color-theme-dark, #1C111F) !important;
+  border-radius: 8px !important;
+}
+
+/* 11. Settings Preference Toggle Switches */
+.setting-toggle-track {
+  background-color: #E2E8F0 !important;
+  border: 2px solid var(--color-theme-dark, #1C111F) !important;
+}
+
+input:checked + .setting-toggle-track {
+  background-color: var(--color-theme-pink, #DF2CD4) !important;
+}
+
+*:focus-visible, input:focus, select:focus, textarea:focus {
+  outline: none !important;
+  border-color: var(--color-theme-pink, #DF2CD4) !important;
+  box-shadow: 0 0 0 2px var(--color-theme-pink, #DF2CD4) !important;
 }
 
 /* Typography on tool pages */
