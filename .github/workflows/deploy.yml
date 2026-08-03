@@ -41,7 +41,7 @@ jobs:
         env:
           ENGLISH_ONLY: "true"
           NODE_OPTIONS: "--max-old-space-size=4096"
-          BASE_URL: "./"
+          BASE_URL: "/"
           SIMPLE_MODE: "true"
           VITE_BRAND_NAME: "PNP BUDDY"
           VITE_BRAND_LOGO: "images/pnp-logo.svg"
