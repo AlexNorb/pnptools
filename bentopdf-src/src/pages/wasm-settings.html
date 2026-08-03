@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta Tags -->
+    <title>
+      Advanced Features Settings - Configure WASM Modules | BentoPDF
+    </title>
+    <meta
+      name="title"
+      content="Advanced Features Settings - Configure WASM Modules | BentoPDF"
+    />
+    <meta
+      name="description"
+      content="Configure advanced PDF processing modules for BentoPDF. Enable features like PDF/A conversion, document extraction, and more."
+    />
+    <meta
+      name="keywords"
+      content="wasm settings, pdf processing, advanced features"
+    />
+    <meta name="author" content="BentoPDF" />
+    <meta name="robots" content="noindex, nofollow" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://www.bentopdf.com/wasm-settings" />
+
+    <!-- Mobile Web App -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="WASM Settings" />
+
+    <link href="/src/css/styles.css" rel="stylesheet" />
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/images/favicon-192x192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/images/favicon-512x512.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/images/apple-touch-icon.png"
+    />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+  </head>
+
+  <body class="antialiased text-theme-dark">
+    {{> navbar }}
+
+    <div
+      id="uploader"
+      class="min-h-screen flex flex-col items-center justify-start py-12 p-4 bg-transparent"
+    >
+      <div
+        id="tool-uploader"
+        class="bg-white rounded-2xl shadow-[8px_8px_0_var(--color-theme-dark)] px-4 py-8 md:p-8 max-w-2xl w-full text-theme-dark border-3 border-theme-dark"
+      >
+        <button
+          id="back-to-tools"
+          class="flex items-center gap-2 text-theme-dark hover:bg-theme-yellow px-3 py-1.5 rounded-lg border-2 border-theme-dark mb-6 font-bold text-sm transition-all"
+        >
+          <i data-lucide="arrow-left" class="w-4 h-4 cursor-pointer"></i>
+          <span class="cursor-pointer" data-i18n="tools.backToTools">
+            Back to Tools
+          </span>
+        </button>
+
+        <h1
+          class="text-2xl sm:text-3xl font-bold text-theme-dark font-display mb-2"
+          data-i18n="tools:wasmSettings.title"
+        >
+          Advanced Features Settings
+        </h1>
+        <p
+          class="text-theme-muted mb-6 text-sm sm:text-base font-medium"
+          data-i18n="tools:wasmSettings.description"
+        >
+          Configure external processing modules to enable advanced PDF features.
+          These modules are optional and licensed separately.
+        </p>
+
+        <!-- Info Banner -->
+        <div
+          class="bg-emerald-50 border-2 border-theme-dark rounded-xl p-4 mb-6 shadow-[3px_3px_0_var(--color-theme-dark)]"
+        >
+          <div class="flex items-start gap-3">
+            <i
+              data-lucide="check-circle"
+              class="w-5 h-5 text-emerald-700 flex-shrink-0 mt-0.5"
+            ></i>
+            <div>
+              <p class="text-emerald-950 text-sm font-medium">
+                <strong class="font-bold text-emerald-950" data-i18n="tools:wasmSettings.preconfiguredTitle"
+                  >Pre-configured and ready to use.</strong
+                >
+                <span data-i18n="tools:wasmSettings.preconfiguredDescription"
+                  >Advanced processing modules are loaded automatically from
+                  CDN. You can override the URLs below if you need to use a
+                  custom source (e.g., for air-gapped or self-hosted
+                  deployments).</span
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- PyMuPDF Section -->
+        <div class="space-y-6">
+          <div class="bg-gray-50 rounded-xl p-5 border-2 border-theme-dark shadow-[3px_3px_0_var(--color-theme-dark)]">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h3 class="font-bold text-lg text-theme-dark font-display">PyMuPDF</h3>
+                <p
+                  class="text-xs text-theme-muted font-medium"
+                  data-i18n="tools:wasmSettings.pymupdfSubtitle"
+                >
+                  Document Processing Engine
+                </p>
+              </div>
+              <span
+                id="pymupdf-status"
+                class="text-xs font-bold px-2.5 py-1 rounded-full border border-theme-dark bg-white text-theme-dark shadow-[1px_1px_0_var(--color-theme-dark)]"
+                data-i18n="tools:wasmSettings.status.notConfigured"
+              >
+                Not Configured
+              </span>
+            </div>
+            <p
+              class="text-xs sm:text-sm text-theme-muted mb-3 font-medium"
+              data-i18n="tools:wasmSettings.pymupdfFeatures"
+            >
+              Enables: PDF to Text, Markdown, SVG, DOCX, Excel • Extract
+              Images/Tables • Format Conversion
+            </p>
+            <div class="flex gap-2">
+              <input
+                type="text"
+                id="pymupdf-url"
+                placeholder="https://your-cdn.com/pymupdf-wasm/"
+                class="flex-1 bg-white border-2 border-theme-dark text-theme-dark rounded-xl p-2.5 text-sm font-medium focus:ring-2 focus:ring-theme-pink"
+              />
+              <button
+                id="pymupdf-test"
+                class="px-4 py-2.5 bg-theme-yellow hover:bg-theme-teal text-theme-dark border-2 border-theme-dark rounded-xl text-sm font-bold shadow-[2px_2px_0_var(--color-theme-dark)] transition-all"
+                data-i18n="tools:wasmSettings.testButton"
+              >
+                Test
+              </button>
+            </div>
+            <div class="flex items-center gap-2 mt-3">
+              <span
+                class="text-xs font-semibold text-theme-dark"
+                data-i18n="tools:wasmSettings.recommendedLabel"
+                >Recommended:</span
+              >
+              <code
+                class="text-xs font-mono text-theme-dark bg-white border border-theme-dark px-2.5 py-1 rounded-lg flex-1 truncate shadow-[1px_1px_0_var(--color-theme-dark)]"
+                >https://cdn.jsdelivr.net/npm/@bentopdf/pymupdf-wasm@0.11.16/</code
+              >
+              <button
+                data-copy="https://cdn.jsdelivr.net/npm/@bentopdf/pymupdf-wasm@0.11.16/"
+                class="copy-btn p-1.5 bg-white hover:bg-theme-yellow border-2 border-theme-dark rounded-lg text-theme-dark shadow-[1px_1px_0_var(--color-theme-dark)] transition-all"
+                title="Copy to clipboard"
+                data-i18n-title="tools:wasmSettings.copyTitle"
+              >
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Ghostscript Section -->
+          <div class="bg-gray-50 rounded-xl p-5 border-2 border-theme-dark shadow-[3px_3px_0_var(--color-theme-dark)]">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h3 class="font-bold text-lg text-theme-dark font-display">Ghostscript</h3>
+                <p
+                  class="text-xs text-theme-muted font-medium"
+                  data-i18n="tools:wasmSettings.ghostscriptSubtitle"
+                >
+                  PDF/A Conversion Engine
+                </p>
+              </div>
+              <span
+                id="ghostscript-status"
+                class="text-xs font-bold px-2.5 py-1 rounded-full border border-theme-dark bg-white text-theme-dark shadow-[1px_1px_0_var(--color-theme-dark)]"
+                data-i18n="tools:wasmSettings.status.notConfigured"
+              >
+                Not Configured
+              </span>
+            </div>
+            <p
+              class="text-xs sm:text-sm text-theme-muted mb-3 font-medium"
+              data-i18n="tools:wasmSettings.ghostscriptFeatures"
+            >
+              Enables: PDF/A-1b, PDF/A-2b, PDF/A-3b Conversion • Font to Outline
+            </p>
+            <div class="flex gap-2">
+              <input
+                type="text"
+                id="ghostscript-url"
+                placeholder="https://your-cdn.com/ghostscript-wasm/"
+                class="flex-1 bg-white border-2 border-theme-dark text-theme-dark rounded-xl p-2.5 text-sm font-medium focus:ring-2 focus:ring-theme-pink"
+              />
+              <button
+                id="ghostscript-test"
+                class="px-4 py-2.5 bg-theme-yellow hover:bg-theme-teal text-theme-dark border-2 border-theme-dark rounded-xl text-sm font-bold shadow-[2px_2px_0_var(--color-theme-dark)] transition-all"
+                data-i18n="tools:wasmSettings.testButton"
+              >
+                Test
+              </button>
+            </div>
+            <div class="flex items-center gap-2 mt-3">
+              <span
+                class="text-xs font-semibold text-theme-dark"
+                data-i18n="tools:wasmSettings.recommendedLabel"
+                >Recommended:</span
+              >
+              <code
+                class="text-xs font-mono text-theme-dark bg-white border border-theme-dark px-2.5 py-1 rounded-lg flex-1 truncate shadow-[1px_1px_0_var(--color-theme-dark)]"
+                >https://cdn.jsdelivr.net/npm/@bentopdf/gs-wasm@0.1.1/assets/</code
+              >
+              <button
+                data-copy="https://cdn.jsdelivr.net/npm/@bentopdf/gs-wasm@0.1.1/assets/"
+                class="copy-btn p-1.5 bg-white hover:bg-theme-yellow border-2 border-theme-dark rounded-lg text-theme-dark shadow-[1px_1px_0_var(--color-theme-dark)] transition-all"
+                title="Copy to clipboard"
+                data-i18n-title="tools:wasmSettings.copyTitle"
+              >
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- CPDF Section -->
+          <div class="bg-gray-50 rounded-xl p-5 border-2 border-theme-dark shadow-[3px_3px_0_var(--color-theme-dark)]">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h3 class="font-bold text-lg text-theme-dark font-display">CoherentPDF</h3>
+                <p
+                  class="text-xs text-theme-muted font-medium"
+                  data-i18n="tools:wasmSettings.cpdfSubtitle"
+                >
+                  Bookmarks & Metadata Engine
+                </p>
+              </div>
+              <span
+                id="cpdf-status"
+                class="text-xs font-bold px-2.5 py-1 rounded-full border border-theme-dark bg-white text-theme-dark shadow-[1px_1px_0_var(--color-theme-dark)]"
+                data-i18n="tools:wasmSettings.status.notConfigured"
+              >
+                Not Configured
+              </span>
+            </div>
+            <p
+              class="text-xs sm:text-sm text-theme-muted mb-3 font-medium"
+              data-i18n="tools:wasmSettings.cpdfFeatures"
+            >
+              Enables: Split by Bookmarks • Edit Bookmarks • PDF Metadata
+            </p>
+            <div class="flex gap-2">
+              <input
+                type="text"
+                id="cpdf-url"
+                placeholder="https://your-cdn.com/cpdf/"
+                class="flex-1 bg-white border-2 border-theme-dark text-theme-dark rounded-xl p-2.5 text-sm font-medium focus:ring-2 focus:ring-theme-pink"
+              />
+              <button
+                id="cpdf-test"
+                class="px-4 py-2.5 bg-theme-yellow hover:bg-theme-teal text-theme-dark border-2 border-theme-dark rounded-xl text-sm font-bold shadow-[2px_2px_0_var(--color-theme-dark)] transition-all"
+                data-i18n="tools:wasmSettings.testButton"
+              >
+                Test
+              </button>
+            </div>
+            <div class="flex items-center gap-2 mt-3">
+              <span
+                class="text-xs font-semibold text-theme-dark"
+                data-i18n="tools:wasmSettings.recommendedLabel"
+                >Recommended:</span
+              >
+              <code
+                class="text-xs font-mono text-theme-dark bg-white border border-theme-dark px-2.5 py-1 rounded-lg flex-1 truncate shadow-[1px_1px_0_var(--color-theme-dark)]"
+                >https://cdn.jsdelivr.net/npm/coherentpdf@2.5.5/dist/</code
+              >
+              <button
+                data-copy="https://cdn.jsdelivr.net/npm/coherentpdf@2.5.5/dist/"
+                class="copy-btn p-1.5 bg-white hover:bg-theme-yellow border-2 border-theme-dark rounded-lg text-theme-dark shadow-[1px_1px_0_var(--color-theme-dark)] transition-all"
+                title="Copy to clipboard"
+                data-i18n-title="tools:wasmSettings.copyTitle"
+              >
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-3 mt-6">
+          <button
+            id="save-btn"
+            class="flex-1 py-3 px-6 bg-theme-yellow hover:bg-theme-teal text-theme-dark border-2 border-theme-dark rounded-xl font-bold text-sm sm:text-base shadow-[3px_3px_0_var(--color-theme-dark)] transition-all"
+            data-i18n="tools:wasmSettings.saveConfiguration"
+          >
+            Save Configuration
+          </button>
+          <button
+            id="clear-btn"
+            class="px-6 py-3 bg-red-100 hover:bg-red-200 text-red-800 rounded-xl font-bold text-sm sm:text-base border-2 border-red-700 shadow-[3px_3px_0_#991B1B] transition-all"
+            data-i18n="tools:wasmSettings.resetDefaults"
+          >
+            Reset to Defaults
+          </button>
+        </div>
+
+        <!-- License Notice -->
+        <div
+          class="mt-6 p-4 bg-gray-50 rounded-xl border-2 border-theme-dark shadow-[3px_3px_0_var(--color-theme-dark)]"
+        >
+          <p class="text-xs text-theme-muted font-medium">
+            <strong
+              class="text-theme-dark font-bold"
+              data-i18n="tools:wasmSettings.licenseTitle"
+              >License Notice:</strong
+            >
+            <span data-i18n="tools:wasmSettings.licenseDescription"
+              >The external modules (PyMuPDF, Ghostscript, CoherentPDF) are
+              licensed under AGPL-3.0 or similar copyleft licenses. By
+              configuring and using these modules, you agree to their respective
+              license terms. BentoPDF is compatible with any Ghostscript WASM
+              and PyMuPDF WASM implementation that follows the expected
+              interface.</span
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loader Modal -->
+    <div
+      id="loader-modal"
+      class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+    >
+      <div
+        class="bg-gray-800 p-8 rounded-lg flex flex-col items-center gap-4 border border-gray-700 shadow-xl"
+      >
+        <div class="solid-spinner"></div>
+        <p
+          id="loader-text"
+          class="text-white text-lg font-medium"
+          data-i18n="loader.processing"
+        >
+          Processing...
+        </p>
+      </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div
+      id="alert-modal"
+      class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-50 hidden"
+    >
+      <div
+        class="bg-gray-800 rounded-lg shadow-xl p-6 max-w-sm w-full border border-gray-700"
+      >
+        <h3
+          id="alert-title"
+          class="text-xl font-bold text-white mb-2"
+          data-i18n="alert.title"
+        >
+          Alert
+        </h3>
+        <p id="alert-message" class="text-gray-300 mb-6"></p>
+        <button
+          id="alert-ok"
+          class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
+          data-i18n="common.ok"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+
+    {{> footer }}
+    <script type="module" src="/src/js/utils/lucide-init.ts"></script>
+    <script type="module" src="/src/js/utils/full-width.ts"></script>
+    <script type="module" src="/src/js/utils/simple-mode-footer.ts"></script>
+    <script type="module" src="/src/js/logic/wasm-settings-page.ts"></script>
+    <script type="module" src="/src/js/mobileMenu.ts"></script>
+    <script type="module" src="/src/js/main.ts"></script>
+  </body>
+</html>
