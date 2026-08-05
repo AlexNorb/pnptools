@@ -71,6 +71,13 @@
 - [x] 7.3 Build responsive live preview canvas / viewer container in the layout UI with Show/Hide toggle
 - [x] 7.4 Debounce settings changes to update sheet preview live on setting tweaks
 
+## Phase 8 — Configurable Preset System & Setting Locks `COMPLETED`
+
+- [x] 8.1 Custom Preset Modal UI with permission lock toggles (Layout mode, Paper size, Card size, Grid size, Crosshair, Borders, Fold preference)
+- [x] 8.2 Save complete V2 snapshot across both Double-Sided and Foldable modes with permission locks
+- [x] 8.3 Preset Editing capability (Edit icon button for user presets)
+- [x] 8.4 Visual disabling for input fields, segmented control buttons, and card size save/delete buttons based on selection state
+
 ## Ideas & Future Requests
 
 - Add more presets for specific print services (manual — owner adds via presets.json)
@@ -78,6 +85,7 @@
 - [ ] **Reactive State Store Refactoring (Proxy-based)**: Refactor `LayoutToolUI` form state from DOM-to-DOM sync listeners to a centralized Vanilla JS `Proxy` state store. Unifies shared fields (`imageWidth`, `imageHeight`, `bleed`, `borderWidth`, etc.) between Grid and Foldable modes to streamline unit conversions (`mm` $\leftrightarrow$ `in`), preset application, and event dispatching.
 - [ ] Future Evaluation: Consider incorporating conceptual features from Martin's Formatter (saved for reference in [`docs/reference/martins-formatter/`](docs/reference/martins-formatter/)):
   - **Back Nudge (Printer Drift Compensation)**: $\pm X / \pm Y$ back page offset calibration for consumer duplex printers.
+
 
 ## Next Session — Layout & Preset Refactoring `COMPLETED`
 
