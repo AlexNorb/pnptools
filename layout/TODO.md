@@ -75,6 +75,7 @@
 
 - Add more presets for specific print services (manual — owner adds via presets.json)
 - Export/import user presets as JSON file
+- [ ] **Reactive State Store Refactoring (Proxy-based)**: Refactor `LayoutToolUI` form state from DOM-to-DOM sync listeners to a centralized Vanilla JS `Proxy` state store. Unifies shared fields (`imageWidth`, `imageHeight`, `bleed`, `borderWidth`, etc.) between Grid and Foldable modes to streamline unit conversions (`mm` $\leftrightarrow$ `in`), preset application, and event dispatching.
 - [ ] Future Evaluation: Consider incorporating conceptual features from Martin's Formatter (saved for reference in [`docs/reference/martins-formatter/`](docs/reference/martins-formatter/)):
   - **Back Nudge (Printer Drift Compensation)**: $\pm X / \pm Y$ back page offset calibration for consumer duplex printers.
 
