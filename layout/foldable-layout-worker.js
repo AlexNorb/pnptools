@@ -768,6 +768,10 @@ if (typeof importScripts === "function") {
       yInnerFront,
       xInnerBack,
       yInnerBack,
+      xFront,
+      yFront,
+      xBack,
+      yBack,
       xOuterFront,
       yOuterFront,
       xOuterBack,
@@ -795,6 +799,9 @@ if (typeof importScripts === "function") {
       withDefault(options.innerBorderHeight, 0)
     );
     const cornerRadius = withDefault(parseFloat(options.cornerRadius), 0);
+    const frontBorderCheckbox = withDefault(options.frontBorderCheckbox, false);
+    const backBorderCheckbox = withDefault(options.backBorderCheckbox, false);
+
     const borderColorFront = toPdfColor(
       withDefault(options.borderColorFront, "#000000")
     );
@@ -899,6 +906,10 @@ if (typeof importScripts === "function") {
         yInnerFront,
         xInnerBack,
         yInnerBack,
+        xFront,
+        yFront,
+        xBack,
+        yBack,
         xOuterFront,
         yOuterFront,
         xOuterBack,
@@ -923,43 +934,47 @@ if (typeof importScripts === "function") {
       });
 
       page.drawImage(frontImage, {
-        x: xInnerFront,
-        y: yInnerFront,
-        width: cardWidthDoc - 2 * innerBorderWidthDoc,
-        height: cardHeightDoc - 2 * innerBorderHeightDoc,
+        x: frontBorderCheckbox ? xInnerFront : xFront,
+        y: frontBorderCheckbox ? yInnerFront : yFront,
+        width: frontBorderCheckbox ? cardWidthDoc - 2 * innerBorderWidthDoc : cardWidthDoc,
+        height: frontBorderCheckbox ? cardHeightDoc - 2 * innerBorderHeightDoc : cardHeightDoc,
         rotate: angleFront,
       });
 
       page.drawImage(backImage, {
-        x: xInnerBack,
-        y: yInnerBack,
-        width: cardWidthDoc - 2 * innerBorderWidthDoc,
-        height: cardHeightDoc - 2 * innerBorderHeightDoc,
+        x: backBorderCheckbox ? xInnerBack : xBack,
+        y: backBorderCheckbox ? yInnerBack : yBack,
+        width: backBorderCheckbox ? cardWidthDoc - 2 * innerBorderWidthDoc : cardWidthDoc,
+        height: backBorderCheckbox ? cardHeightDoc - 2 * innerBorderHeightDoc : cardHeightDoc,
         rotate: angleBack,
       });
 
-      if (outerBorder > 0 || innerBorderWidth > 0 || innerBorderHeight > 0) {
-        drawCardBorder(page, {
-          x: xOuterFront,
-          y: yOuterFront,
-          width: cardWidthDoc + 2 * outerBorderDoc,
-          height: cardHeightDoc + 2 * outerBorderDoc,
-          borderColor: borderColorFront,
-          borderWidth: 2 * innerBorderWidthDoc,
-          cornerRadius: cornerRadiusDoc,
-          rotate: angleFront,
-        });
+      if ((outerBorder > 0 || innerBorderWidth > 0 || innerBorderHeight > 0)) {
+        if (frontBorderCheckbox) {
+          drawCardBorder(page, {
+            x: xOuterFront,
+            y: yOuterFront,
+            width: cardWidthDoc + 2 * outerBorderDoc,
+            height: cardHeightDoc + 2 * outerBorderDoc,
+            borderColor: borderColorFront,
+            borderWidth: 2 * innerBorderWidthDoc,
+            cornerRadius: cornerRadiusDoc,
+            rotate: angleFront,
+          });
+        }
 
-        drawCardBorder(page, {
-          x: xOuterBack,
-          y: yOuterBack,
-          width: cardWidthDoc + 2 * outerBorderDoc,
-          height: cardHeightDoc + 2 * outerBorderDoc,
-          borderColor: borderColorBack,
-          borderWidth: 2 * innerBorderWidthDoc,
-          cornerRadius: cornerRadiusDoc,
-          rotate: angleBack,
-        });
+        if (backBorderCheckbox) {
+          drawCardBorder(page, {
+            x: xOuterBack,
+            y: yOuterBack,
+            width: cardWidthDoc + 2 * outerBorderDoc,
+            height: cardHeightDoc + 2 * outerBorderDoc,
+            borderColor: borderColorBack,
+            borderWidth: 2 * innerBorderWidthDoc,
+            cornerRadius: cornerRadiusDoc,
+            rotate: angleBack,
+          });
+        }
       }
 
       count++;

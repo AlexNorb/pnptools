@@ -1,113 +1,58 @@
 {
-  "preset1": {
-    "name": "Standard card 63x88mm",
+  "preset_buttonshy": {
+    "name": "Buttonshy",
     "settings": {
-      "pageSize": "A4",
-      "pageOrientation": "portrait",
-      "cardSize": "Poker",
-      "rows": 3,
-      "columns": 3,
-      "imageWidth": 63,
-      "imageHeight": 88,
-      "bleed": 0,
-      "frontBorderCheckbox": false,
-      "backBorderCheckbox": false,
-      "borderWidth": 3
-    }
-  },
-  "preset2": {
-    "name": "Mini European 44x68mm",
-    "settings": {
-      "pageSize": "A4",
-      "pageOrientation": "portrait",
-      "cardSize": "Custom",
-      "rows": 4,
-      "columns": 4,
-      "imageWidth": 44,
-      "imageHeight": 68,
-      "bleed": 0,
-      "frontBorderCheckbox": false,
-      "backBorderCheckbox": false,
-      "borderWidth": 0
-    }
-  },
-  "preset3": {
-    "name": "Buttonshy 63x88mm with bleed",
-    "settings": {
-      "pageSize": "Letter",
+      "_version": 2,
+      "layoutMode": "doubleSided",
       "pageOrientation": "landscape",
-      "cardSize": "Poker",
-      "rows": 2,
-      "columns": 3,
-      "imageWidth": 63,
-      "imageHeight": 88,
-      "bleed": 3,
-      "frontBorderCheckbox": false,
-      "backBorderCheckbox": false,
-      "borderWidth": 0,
-      "frontCheckbox": false,
-      "backCheckbox": false
-    },
-    "disabled": {
-      "pageSize": ["A4", "Letter"]
-    }
-  },
-  "preset4": {
-    "name": "European Standard 59x91mm (Dominion)",
-    "settings": {
-      "pageSize": "A4",
-      "pageOrientation": "portrait",
-      "cardSize": "Custom",
-      "rows": 2,
-      "columns": 4,
-      "imageWidth": 59,
-      "imageHeight": 91,
-      "bleed": 0,
-      "frontBorderCheckbox": false,
-      "backBorderCheckbox": false,
-      "borderWidth": 0
-    }
-  },
-  "template": {
-    "hidden": true,
-    "name": "TEMPLATE (Copy to create new presets)",
-    "settings": {
-      "pageSize": "A4",
-      "pageOrientation": "portrait",
-      "cardSize": "Poker",
-      "rows": 3,
-      "columns": 3,
-      "imageWidth": 63,
-      "imageHeight": 88,
-      "bleed": 0,
-      "frontCheckbox": true,
-      "backCheckbox": false,
-      "crosswidth": 0.1,
-      "crosssize": 3,
-      "crosshaircolor": "#000000",
-      "frontBorderCheckbox": false,
-      "backBorderCheckbox": false,
-      "borderWidth": 3,
-      "borderColor": "#ffffff",
-      "cornerRadius": "0"
-    },
-    "disabled": {
-      "pageSize": [],
-      "rows": false,
-      "columns": false,
-      "imageWidth": false,
-      "imageHeight": false,
-      "bleed": false,
-      "frontCheckbox": false,
-      "backCheckbox": false,
-      "crosswidth": false,
-      "crosssize": false,
-      "crosshaircolor": false,
-      "frontBorderCheckbox": false,
-      "backBorderCheckbox": false,
-      "borderWidth": false,
-      "borderColor": false,
-      "cornerRadius": false
+      "grid": {
+        "autoGrid": false,
+        "rows": 2,
+        "columns": 3,
+        "pageSize": "Letter",
+        "pageWidth": 279.4,
+        "pageHeight": 215.9,
+        "cardSize": "Custom",
+        "imageWidth": 64,
+        "imageHeight": 89,
+        "bleed": 3,
+        "borderWidth": 3,
+        "crosshaircolor": "#000000",
+        "borderColor": "#000000",
+        "frontCheckbox": true,
+        "backCheckbox": true,
+        "frontBorderCheckbox": false,
+        "backBorderCheckbox": false,
+        "crosswidth": 0.1,
+        "crosssize": 4,
+        "cornerRadius": 5
+      },
+      "foldable": {
+        "foldable_pageSize": "Letter",
+        "foldable_pageWidth": 215.9,
+        "foldable_pageHeight": 279.4,
+        "foldable_cardSize": "Custom",
+        "foldable_cardWidth": 64,
+        "foldable_cardHeight": 89,
+        "foldable_printerMargin": 5,
+        "foldable_foldingMargin": 3,
+        "foldable_cardMargin": 0,
+        "foldable_cutMargin": 3,
+        "foldable_innerBorder": 3,
+        "foldable_borderColorFront": "#000000",
+        "foldable_borderColorBack": "#000000",
+        "foldable_foldLinePreference": "auto",
+        "foldable_cornerRadius": 5
+      },
+      "disabled": {
+        "layoutMode": true,
+        "pageSize": false,
+        "cardSize": true,
+        "gridSize": true,
+        "crosshair": false,
+        "borders": true,
+        "foldPreference": true
+      }
     }
   }
 }

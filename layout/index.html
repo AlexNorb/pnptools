@@ -294,6 +294,15 @@
         box-shadow: 3px 3px 0 var(--color-theme-dark);
       }
 
+      .btn-secondary:disabled,
+      button:disabled {
+        opacity: 0.4 !important;
+        cursor: not-allowed !important;
+        pointer-events: none !important;
+        box-shadow: none !important;
+        transform: none !important;
+      }
+
       .btn-indigo-action {
         @apply bg-theme-indigo text-white font-ui font-bold px-3 text-xs rounded-lg transition-all duration-200 inline-flex items-center justify-center cursor-pointer;
         border: 1.5px solid var(--color-theme-dark);
@@ -510,13 +519,13 @@
         <div
           class="flex w-full p-0 bg-white border-2 border-theme-dark rounded-xl shadow-[2px_2px_0_var(--color-theme-dark)] gap-1 h-[2.5rem] items-center">
           <label
-            class="segmented-option cursor-pointer font-bold flex-1 h-full rounded-[10px] text-xs sm:text-sm transition-all flex items-center justify-center gap-2">
+            class="segmented-option btn-mode-toggle cursor-pointer font-bold flex-1 h-full rounded-[10px] text-xs sm:text-sm transition-all flex items-center justify-center gap-2">
             <input type="radio" id="doubleSided" name="layoutMode" value="doubleSided" checked class="hidden" />
             <i class="fa-solid fa-table-cells text-base"></i>
             <span>Double-Sided (Grid)</span>
           </label>
           <label
-            class="segmented-option cursor-pointer font-bold flex-1 h-full rounded-[10px] text-xs sm:text-sm transition-all flex items-center justify-center gap-2">
+            class="segmented-option btn-mode-toggle cursor-pointer font-bold flex-1 h-full rounded-[10px] text-xs sm:text-sm transition-all flex items-center justify-center gap-2">
             <input type="radio" id="foldable" name="layoutMode" value="foldable" class="hidden" />
             <i class="fa-solid fa-map text-base"></i>
             <span>One-Sided (Fold)</span>
@@ -571,6 +580,10 @@
           <button id="savePresetButton" title="Save Preset" aria-label="Save Preset"
             class="btn-secondary w-[2rem] p-0 text-sm">
             <i class="fa-solid fa-floppy-disk text-theme-indigo"></i>
+          </button>
+          <button id="editPresetButton" title="Edit Preset" aria-label="Edit Preset"
+            class="btn-secondary w-[2rem] p-0 text-sm text-theme-dark border-theme-dark" style="display: none;">
+            <i class="fa-solid fa-pen-to-square"></i>
           </button>
           <button id="deletePresetButton" title="Delete Preset" aria-label="Delete Preset"
             class="btn-secondary w-[2rem] p-0 text-sm text-theme-pink border-theme-pink">
@@ -794,7 +807,7 @@
                     </div>
                     <div class="flex flex-col items-center">
                       <label class="text-xs font-bold text-theme-muted opacity-0 select-none text-center">&nbsp;</label>
-                      <input type="color" id="borderColor" value="#ffffff" class="mt-1" />
+                      <input type="color" id="borderColor" value="#000000" class="mt-1" />
                     </div>
                   </div>
 
@@ -829,7 +842,7 @@
                     </div>
                     <div class="flex flex-col items-center">
                       <label for="borderWidth" class="text-xs font-bold text-theme-muted text-center">Width</label>
-                      <input type="number" id="borderWidth" value="3" class="w-12" />
+                      <input type="number" id="borderWidth" value="0" class="w-12" />
                     </div>
                   </div>
                 </div>
@@ -992,14 +1005,22 @@
                   style="flex-grow: 9999; flex-basis: max-content;">
                   <div class=" flex flex-wrap items-center gap-3 shrink-0">
                     <div class="flex flex-col items-center">
-                      <label for="foldable_borderColorFront"
-                        class="text-xs font-bold text-theme-muted text-center">Front</label>
-                      <input type="color" id="foldable_borderColorFront" value="#000000" class="mt-1" />
+                      <label for="foldable_frontBorderCheckbox"
+                        class="text-xs font-bold text-theme-muted cursor-pointer text-center">Front</label>
+                      <input type="checkbox" id="foldable_frontBorderCheckbox" class="accent-theme-pink cursor-pointer mt-1" />
                     </div>
                     <div class="flex flex-col items-center">
-                      <label for="foldable_borderColorBack"
-                        class="text-xs font-bold text-theme-muted text-center">Back</label>
-                      <input type="color" id="foldable_borderColorBack" value="#000000" class="mt-1" />
+                      <label for="foldable_backBorderCheckbox"
+                        class="text-xs font-bold text-theme-muted cursor-pointer text-center">Back</label>
+                      <input type="checkbox" id="foldable_backBorderCheckbox" class="accent-theme-pink cursor-pointer mt-1" />
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label class="text-xs font-bold text-theme-muted text-center opacity-0">&nbsp;</label>
+                      <input type="color" id="foldable_borderColorFront" value="#000000" class="mt-1" title="Front Border Color" />
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label class="text-xs font-bold text-theme-muted text-center opacity-0">&nbsp;</label>
+                      <input type="color" id="foldable_borderColorBack" value="#000000" class="mt-1" title="Back Border Color" />
                     </div>
                   </div>
 
