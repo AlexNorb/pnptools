@@ -1234,35 +1234,37 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         } else {
           // --- V1 preset: legacy grid-only ---
-          if (settings.pageOrientation && this.elements.pageOrientation) {
-            this.elements.pageOrientation.value = settings.pageOrientation;
+          const els = this.elements || LayoutToolUI.elements;
+          const uiHelper = (this.ui || LayoutToolUI.ui || this);
+          if (settings.pageOrientation && els.pageOrientation) {
+            els.pageOrientation.value = settings.pageOrientation;
           }
           if (settings.pageSize) {
             let pSize = settings.pageSize;
             if (pSize.includes("Landscape")) {
-              if (this.elements.pageOrientation) this.elements.pageOrientation.value = "landscape";
+              if (els.pageOrientation) els.pageOrientation.value = "landscape";
               pSize = pSize.replace(" Landscape", "");
             } else if (pSize.includes("Portrait")) {
-              if (this.elements.pageOrientation) this.elements.pageOrientation.value = "portrait";
+              if (els.pageOrientation) els.pageOrientation.value = "portrait";
               pSize = pSize.replace(" Portrait", "");
             }
-            this.elements.pageSize.value = pSize;
-            this.ui.updatePageSizeInputs(
-              this.elements.pageSize,
-              this.elements.pageWidth,
-              this.elements.pageHeight,
-              this.elements.pageOrientation
+            els.pageSize.value = pSize;
+            uiHelper.updatePageSizeInputs(
+              els.pageSize,
+              els.pageWidth,
+              els.pageHeight,
+              els.pageOrientation
             );
           }
           if (settings.cardSize) {
-            this.elements.cardSize.value = settings.cardSize;
-            this.ui.updateCardSizeInputs(
-              this.elements.cardSize,
-              this.elements.imageWidth,
-              this.elements.imageHeight
+            els.cardSize.value = settings.cardSize;
+            uiHelper.updateCardSizeInputs(
+              els.cardSize,
+              els.imageWidth,
+              els.imageHeight
             );
             if (settings.cardSize !== "Custom") {
-              const dims = this.ui.getCardSizeDimensions(settings.cardSize);
+              const dims = uiHelper.getCardSizeDimensions(settings.cardSize);
               if (dims) {
                 LayoutToolUI.state.rawValuesInMM.imageWidth = dims.width;
                 LayoutToolUI.state.rawValuesInMM.imageHeight = dims.height;
