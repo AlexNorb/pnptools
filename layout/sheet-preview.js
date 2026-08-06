@@ -228,7 +228,7 @@ class SheetPreview {
 
     try {
       const page = await this.pdfDoc.getPage(pageNum);
-      const viewport = page.getViewport({ scale: 1.5 }); // 1.5x resolution for crisp text/borders
+      const viewport = page.getViewport({ scale: 2.0 }); // 2.0x resolution for 130% larger preview zoom
 
       canvasEl.width = viewport.width;
       canvasEl.height = viewport.height;
