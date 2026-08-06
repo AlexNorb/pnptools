@@ -1005,14 +1005,22 @@
                   style="flex-grow: 9999; flex-basis: max-content;">
                   <div class=" flex flex-wrap items-center gap-3 shrink-0">
                     <div class="flex flex-col items-center">
-                      <label for="foldable_borderColorFront"
-                        class="text-xs font-bold text-theme-muted text-center">Front</label>
-                      <input type="color" id="foldable_borderColorFront" value="#000000" class="mt-1" />
+                      <label for="foldable_frontBorderCheckbox"
+                        class="text-xs font-bold text-theme-muted cursor-pointer text-center">Front</label>
+                      <input type="checkbox" id="foldable_frontBorderCheckbox" class="accent-theme-pink cursor-pointer mt-1" />
                     </div>
                     <div class="flex flex-col items-center">
-                      <label for="foldable_borderColorBack"
-                        class="text-xs font-bold text-theme-muted text-center">Back</label>
-                      <input type="color" id="foldable_borderColorBack" value="#000000" class="mt-1" />
+                      <label for="foldable_backBorderCheckbox"
+                        class="text-xs font-bold text-theme-muted cursor-pointer text-center">Back</label>
+                      <input type="checkbox" id="foldable_backBorderCheckbox" class="accent-theme-pink cursor-pointer mt-1" />
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label class="text-xs font-bold text-theme-muted text-center opacity-0">&nbsp;</label>
+                      <input type="color" id="foldable_borderColorFront" value="#000000" class="mt-1" title="Front Border Color" />
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <label class="text-xs font-bold text-theme-muted text-center opacity-0">&nbsp;</label>
+                      <input type="color" id="foldable_borderColorBack" value="#000000" class="mt-1" title="Back Border Color" />
                     </div>
                   </div>
 

@@ -67,6 +67,8 @@ document.addEventListener("DOMContentLoaded", () => {
       foldable_cardMargin: document.getElementById("foldable_cardMargin"),
       foldable_cutMargin: document.getElementById("foldable_cutMargin"),
       foldable_innerBorder: document.getElementById("foldable_innerBorder"),
+      foldable_frontBorderCheckbox: document.getElementById("foldable_frontBorderCheckbox"),
+      foldable_backBorderCheckbox: document.getElementById("foldable_backBorderCheckbox"),
       foldable_borderColorFront: document.getElementById(
         "foldable_borderColorFront"
       ),
@@ -206,6 +208,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
           const settings = this.ui.getRawAllSettings();
           settings.disabled = disabledLocks || {};
+
+          console.log("=== PRESET JSON EXPORT ===");
+          console.log(JSON.stringify({
+            name: cleanName,
+            settings: settings
+          }, null, 2));
 
           const newKey = this.storage.saveUserPreset(cleanName, settings);
           this.ui.loadPresets();
@@ -490,6 +498,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
       addSyncListener("borderWidth", "foldable_innerBorder");
       addSyncListener("foldable_innerBorder", "borderWidth");
+
+      if (this.elements.frontBorderCheckbox && this.elements.foldable_frontBorderCheckbox) {
+        this.elements.frontBorderCheckbox.addEventListener("change", () => {
+          this.elements.foldable_frontBorderCheckbox.checked = this.elements.frontBorderCheckbox.checked;
+        });
+        this.elements.foldable_frontBorderCheckbox.addEventListener("change", () => {
+          this.elements.frontBorderCheckbox.checked = this.elements.foldable_frontBorderCheckbox.checked;
+        });
+      }
+
+      if (this.elements.backBorderCheckbox && this.elements.foldable_backBorderCheckbox) {
+        this.elements.backBorderCheckbox.addEventListener("change", () => {
+          this.elements.foldable_backBorderCheckbox.checked = this.elements.backBorderCheckbox.checked;
+        });
+        this.elements.foldable_backBorderCheckbox.addEventListener("change", () => {
+          this.elements.backBorderCheckbox.checked = this.elements.backBorderCheckbox.checked;
+        });
+      }
 
       if (this.elements.cornerRadius && this.elements.foldable_cornerRadius) {
         this.elements.cornerRadius.addEventListener("change", () => {
@@ -1276,7 +1302,7 @@ document.addEventListener("DOMContentLoaded", () => {
           cardSize: ["cardSize", "foldable_cardSize", "imageWidth", "imageHeight", "foldable_cardWidth", "foldable_cardHeight"],
           gridSize: ["rows", "columns", "autoGrid"],
           crosshair: ["crosswidth", "crosssize", "crosshaircolor", "frontCheckbox", "backCheckbox"],
-          borders: ["borderWidth", "borderColor", "frontBorderCheckbox", "backBorderCheckbox", "cornerRadius", "bleed", "foldable_innerBorder", "foldable_borderColorFront", "foldable_borderColorBack", "foldable_cornerRadius", "foldable_cutMargin"],
+          borders: ["borderWidth", "borderColor", "frontBorderCheckbox", "backBorderCheckbox", "cornerRadius", "bleed", "foldable_innerBorder", "foldable_borderColorFront", "foldable_borderColorBack", "foldable_frontBorderCheckbox", "foldable_backBorderCheckbox", "foldable_cornerRadius", "foldable_cutMargin"],
           foldPreference: ["foldable_printerMargin", "foldable_foldingMargin", "foldable_cardMargin", "foldable_foldLinePreference"]
         };
 
@@ -1403,6 +1429,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       getRawGridSettings() {
         const gridElementIds = [
+          "autoGrid",
           "rows",
           "columns",
           "pageSize",
@@ -1440,6 +1467,8 @@ document.addEventListener("DOMContentLoaded", () => {
           "foldable_cardMargin",
           "foldable_cutMargin",
           "foldable_innerBorder",
+          "foldable_frontBorderCheckbox",
+          "foldable_backBorderCheckbox",
           "foldable_borderColorFront",
           "foldable_borderColorBack",
           "foldable_foldLinePreference",
@@ -1482,7 +1511,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             if (element.type === "checkbox" || element.type === "radio") {
-              element.checked = value;
+              if (element.checked !== value) {
+                element.checked = value;
+                element.dispatchEvent(new Event("change"));
+              }
             } else {
               element.value = value;
             }
@@ -1770,6 +1802,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "foldable_cardMargin",
         "foldable_cutMargin",
         "foldable_innerBorder",
+        "foldable_frontBorderCheckbox",
+        "foldable_backBorderCheckbox",
         "foldable_borderColorFront",
         "foldable_borderColorBack",
         "foldable_foldLinePreference",
