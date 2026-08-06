@@ -141,10 +141,11 @@ function drawCardBorder(page, options) {
   page.drawRectangle(rectOptions);
 
   if (cornerRadius > 0) {
+    const effectiveRadius = cornerRadius + borderWidth / 2;
     page.drawRectangle({
       ...rectOptions,
-      rx: cornerRadius,
-      ry: cornerRadius,
+      rx: effectiveRadius,
+      ry: effectiveRadius,
     });
   }
 }
