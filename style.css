@@ -51,11 +51,10 @@ body {
 
 /* Header Card */
 .header-card {
-  background: var(--card-bg);
-  border: 3px solid var(--border-dark);
-  border-radius: 16px;
-  padding: clamp(0.75rem, 2.5vw, 1.25rem) clamp(0.85rem, 3.5vw, 2rem);
-  box-shadow: 6px 6px 0 var(--border-dark), 9px 9px 0 var(--accent-indigo);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0.5rem 0;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -68,7 +67,8 @@ body {
   display: flex;
   align-items: center;
   gap: clamp(0.6rem, 2vw, 1.25rem);
-  flex: 1 1 auto;
+  flex: 1 1 0px;
+  min-width: 200px;
 }
 
 .mascot-wrapper {
@@ -95,6 +95,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
+  flex: 1 1 0px;
+  min-width: 0;
 }
 
 .header-title {
