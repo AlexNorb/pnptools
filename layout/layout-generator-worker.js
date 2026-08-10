@@ -83,6 +83,9 @@ async function createPDF(frontImages, backImages, settings, config, previewOptio
 
   const { PDFDocument } = PDFLib;
   const pdfDoc = await PDFDocument.create();
+  pdfDoc.setProducer("pnpbuddy.com non-commercial use only");
+  pdfDoc.setCreator("");
+  let watermarkAdded = false;
   let page;
 
   const embedder = new ImageEmbedder(pdfDoc);
@@ -128,6 +131,14 @@ async function createPDF(frontImages, backImages, settings, config, previewOptio
       break;
     }
     page = pdfDoc.addPage([pageWidth, pageHeight]);
+    
+    if (!watermarkAdded) {
+      const { rgb } = PDFLib;
+      page.drawText('Made using pnpbuddy.com - NOT approved for commercial use', {
+        x: -200, y: -200, size: 4, color: rgb(1,1,1), opacity: 0
+      });
+      watermarkAdded = true;
+    }
 
     let x = (pageWidth - ptSettings.columns * ptSettings.imageWidth) / 2;
     let y = (pageHeight + ptSettings.rows * ptSettings.imageHeight) / 2;

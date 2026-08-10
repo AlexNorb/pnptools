@@ -856,12 +856,11 @@ if (typeof importScripts === "function") {
     const url = "https://pnpbuddy.com";
     const now = new Date();
     const pdfDoc = await PDFLib.PDFDocument.create();
-    pdfDoc.setTitle(title);
-    pdfDoc.setAuthor(url);
-    pdfDoc.setProducer(url);
-    pdfDoc.setCreator(`pnpbuddy.com (${url})`);
+    pdfDoc.setProducer("pnpbuddy.com non-commercial use only");
+    pdfDoc.setCreator("");
     pdfDoc.setCreationDate(now);
     pdfDoc.setModificationDate(now);
+    let watermarkAdded = false;
 
     const embedder = new ImageEmbedder(pdfDoc);
 
@@ -897,6 +896,14 @@ if (typeof importScripts === "function") {
           break;
         }
         page = pdfDoc.addPage([pageWidth, pageHeight]);
+        
+        if (!watermarkAdded) {
+          const { rgb } = PDFLib;
+          page.drawText('Made using pnpbuddy.com - NOT approved for commercial use', {
+            x: -200, y: -200, size: 4, color: rgb(1,1,1), opacity: 0
+          });
+          watermarkAdded = true;
+        }
       }
 
       const {

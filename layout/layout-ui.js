@@ -1373,7 +1373,8 @@ document.addEventListener("DOMContentLoaded", () => {
             settings[id] = element.checked;
           } else if (
             element.type === "number" ||
-            element.tagName.toLowerCase() === "select"
+            element.tagName.toLowerCase() === "select" ||
+            dimensionIds.has(id)
           ) {
             if (dimensionIds.has(id)) {
               if (LayoutToolUI.state.rawValuesInMM[id] !== undefined) {
@@ -1414,7 +1415,7 @@ document.addEventListener("DOMContentLoaded", () => {
               continue;
             }
             let val = element.value;
-            if (element.type === "number") {
+            if (element.type === "number" || dimensionIds.has(element.id)) {
                 val = val.replace(",", ".");
                 let parsed = isNaN(val) || val.trim() === "" ? val : parseFloat(val);
                 if (isInch && dimensionIds.has(key) && typeof parsed === 'number') {
@@ -1505,6 +1506,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (element.type === "file") continue;
 
             if (dimensionIds.has(key) && typeof value === 'number') {
+              LayoutToolUI.state.rawValuesInMM[key] = value;
               if (LayoutToolUI.config.currentUnit === 'in') {
                 value = parseFloat((value / 25.4).toFixed(2));
               } else {
